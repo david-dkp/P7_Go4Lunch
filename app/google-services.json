@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "151174498533-m150j991dcfpipu220r0v3foui4qdqfr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "fr.feepin.go4lunch",
+            "certificate_hash": "3a556da5407a42f2855010a9360e0592f0c77ebe"
+          }
+        },
+        {
           "client_id": "151174498533-3cdo3prp6s5fhpef1npi5saj0n9begti.apps.googleusercontent.com",
           "client_type": 3
         }
