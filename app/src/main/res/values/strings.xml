@@ -3,4 +3,7 @@
     <string name="desc_restaurant_photo">Photo of the restaurant</string>
     <string name="desc_person">Persons</string>
     <string name="desc_star">Star</string>
+    <string name="title_map_view">Map View</string>
+    <string name="title_list_view">List View</string>
+    <string name="title_workmates">Workmates</string>
 </resources>
