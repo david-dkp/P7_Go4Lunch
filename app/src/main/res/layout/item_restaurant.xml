@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/item_restaurant_height"
+    android:paddingHorizontal="@dimen/item_restaurant_padding"
+    >
+
+    <TextView
+        android:id="@+id/tvRestaurantDistance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/item_restaurant_distance_marginRight"
+        android:textAppearance="?attr/textAppearanceBody1"
+        android:textColor="@android:color/darker_gray"
+        app:layout_constraintRight_toLeftOf="@id/ivRestaurantPhoto"
+        app:layout_constraintTop_toTopOf="@id/ivRestaurantPhoto"
+        tools:text="100m"
+        />
+
+    <ImageView
+        android:id="@+id/ivPerson"
+        android:layout_width="@dimen/item_restaurant_person_size"
+        android:layout_height="@dimen/item_restaurant_person_size"
+        android:contentDescription="@string/desc_person"
+        android:src="@drawable/ic_person"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/tvPersonCount"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?attr/colorOnSurface"
+        />
+
+    <TextView
+        android:id="@+id/tvPersonCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/item_restaurant_rating_marginRight"
+        android:textAppearance="?attr/textAppearanceBody2"
+        app:layout_constraintBottom_toBottomOf="@id/ivPerson"
+        app:layout_constraintRight_toLeftOf="@id/ivRestaurantPhoto"
+        tools:text="(3)"
+        />
+
+    <LinearLayout
+        android:id="@+id/linearLayoutRating"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/item_restaurant_star_size"
+        android:layout_marginEnd="@dimen/item_restaurant_rating_marginRight"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="@id/ivRestaurantPhoto"
+        app:layout_constraintRight_toLeftOf="@id/ivRestaurantPhoto"
+        />
+
+    <ImageView
+        android:id="@+id/ivRestaurantPhoto"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginVertical="@dimen/item_restaurant_img_margin"
+        android:contentDescription="@string/desc_restaurant_photo"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@color/green"
+        />
+
+    <TextView
+        app:layout_constraintVertical_chainStyle="spread_inside"
+        app:layout_constraintBottom_toTopOf="@id/tvTypeAddress"
+        app:layout_constraintRight_toLeftOf="@id/tvRestaurantDistance"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="@id/ivRestaurantPhoto"
+        android:id="@+id/tvRestaurantName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="Le Zinc"
+        android:textAppearance="?attr/textAppearanceBody1" />
+
+    <TextView
+        app:layout_constraintBottom_toTopOf="@id/tvClosingInfo"
+        android:id="@+id/tvTypeAddress"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvRestaurantName"
+        app:layout_constraintRight_toLeftOf="@id/ivPerson"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearancePopupMenuHeader"
+        tools:text="French - 12 rue du Faubourg Poissonnière" />
+
+    <TextView
+        app:layout_constraintTop_toBottomOf="@id/tvTypeAddress"
+        app:layout_constraintBottom_toBottomOf="@id/ivRestaurantPhoto"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/linearLayoutRating"
+        android:id="@+id/tvClosingInfo"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearancePopupMenuHeader"
+        tools:text="Open until 7pm"
+        android:textStyle="italic" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="item_restaurant_height">110dp</dimen>
+    <dimen name="item_restaurant_padding">10dp</dimen>
+    <dimen name="item_restaurant_img_margin">13dp</dimen>
+    <dimen name="item_restaurant_person_size">28dp</dimen>
+    <dimen name="item_restaurant_star_size">20dp</dimen>
+    <dimen name="item_restaurant_rating_marginRight">10dp</dimen>
+    <dimen name="item_restaurant_distance_marginRight">25dp</dimen>
+</resources>
