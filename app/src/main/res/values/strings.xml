@@ -6,4 +6,5 @@
     <string name="title_map_view">Map View</string>
     <string name="title_list_view">List View</string>
     <string name="title_workmates">Workmates</string>
+    <string name="desc_workmate_photo">Workmate\'s profile picture</string>
 </resources>
