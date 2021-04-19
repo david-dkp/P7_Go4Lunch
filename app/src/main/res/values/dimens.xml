@@ -7,6 +7,16 @@
     <dimen name="item_restaurant_star_size">20dp</dimen>
     <dimen name="item_restaurant_rating_marginRight">10dp</dimen>
     <dimen name="item_restaurant_distance_marginRight">25dp</dimen>
+
+
     <dimen name="item_workmate_height">100dp</dimen>
     <dimen name="item_workmate_photo_margin">15dp</dimen>
+
+
+    <dimen name="header_nav_height">220dp</dimen>
+    <dimen name="header_nav_title_marginTop">30dp</dimen>
+    <dimen name="header_nav_user_photo_size">60dp</dimen>
+    <dimen name="header_nav_user_photo_margin">17dp</dimen>
+    <dimen name="header_nav_user_email_marginLeft">10dp</dimen>
+    <dimen name="header_nav_user_name_marginLeft">15</dimen>
 </resources>
