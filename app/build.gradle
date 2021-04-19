@@ -1,7 +1,6 @@
 plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'
-    id 'androidx.navigation.safeargs'
 }
 
 android {
@@ -27,6 +26,10 @@ android {
         // Inject the Maps API key into the manifest
         manifestPlaceholders = [ mapsApiKey : properties.getProperty("MAPS_API_KEY", "") ]
         buildConfigField("String", "MAPS_API_KEY", "\"${properties.getProperty("MAPS_API_KEY", "")}\"")
+    }
+
+    buildFeatures {
+        viewBinding true
     }
 
     buildTypes {
@@ -75,9 +78,4 @@ dependencies {
     def glide_version = "4.12.0"
     implementation "com.github.bumptech.glide:glide:$glide_version"
     annotationProcessor "com.github.bumptech.glide:compiler:$glide_version"
-
-    //Navigation Component
-    def nav_version = "2.3.5"
-    implementation "androidx.navigation:navigation-fragment:$nav_version"
-    implementation "androidx.navigation:navigation-ui:$nav_version"
 }
