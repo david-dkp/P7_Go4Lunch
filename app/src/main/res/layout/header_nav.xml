@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/header_nav_height"
+    >
+
+    <ImageView
+        android:id="@+id/ivHeader"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/desc_header_image"
+        tools:scaleType="centerCrop"
+        tools:src="@color/black"
+        />
+
+    <TextView
+        android:id="@+id/tvHeaderTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/header_nav_title_marginTop"
+        android:text="@string/app_name"
+        android:textAppearance="?attr/textAppearanceHeadline4"
+        android:textColor="?attr/colorSurface"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <ImageView
+        android:id="@+id/ivUserPhoto"
+        android:layout_width="@dimen/header_nav_user_photo_size"
+        android:layout_height="@dimen/header_nav_user_photo_size"
+        android:layout_marginStart="@dimen/header_nav_user_photo_margin"
+        android:layout_marginBottom="@dimen/header_nav_user_photo_margin"
+        android:contentDescription="@string/desc_user_photo"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        tools:scaleType="centerCrop"
+        tools:src="@raw/dinner"
+        />
+
+    <TextView
+        android:id="@+id/tvUserName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/header_nav_user_name_marginLeft"
+        android:textAppearance="?attr/textAppearanceBody1"
+        android:textColor="?attr/colorSurface"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/tvUserEmail"
+        app:layout_constraintLeft_toRightOf="@id/ivUserPhoto"
+        app:layout_constraintTop_toTopOf="@id/ivUserPhoto"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="John SMITH"
+        />
+
+    <TextView
+        android:id="@+id/tvUserEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/header_nav_user_email_marginLeft"
+        android:textColor="?attr/colorSurface"
+        app:layout_constraintBottom_toBottomOf="@id/ivUserPhoto"
+        app:layout_constraintLeft_toRightOf="@id/ivUserPhoto"
+        app:layout_constraintTop_toBottomOf="@id/tvUserName"
+        tools:text="jsmith.1337@gmail.com"
+        android:textAppearance="?attr/textAppearanceBody2"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
