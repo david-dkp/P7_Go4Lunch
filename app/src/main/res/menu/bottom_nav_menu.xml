@@ -2,19 +2,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/map_view_fragment"
+        android:id="@+id/itemMapViewFragment"
         android:title="@string/title_map_view"
         android:icon="@drawable/ic_map"
         />
 
     <item
-        android:id="@+id/list_view_fragment"
+        android:id="@+id/itemListViewFragment"
         android:title="@string/title_list_view"
         android:icon="@drawable/ic_map"
         />
 
     <item
-        android:id="@+id/workmates_fragment"
+        android:id="@+id/itemWorkmatesFragment"
         android:title="@string/title_workmates"
         android:icon="@drawable/ic_map"
         />

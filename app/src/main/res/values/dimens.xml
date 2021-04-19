@@ -18,5 +18,5 @@
     <dimen name="header_nav_user_photo_size">60dp</dimen>
     <dimen name="header_nav_user_photo_margin">17dp</dimen>
     <dimen name="header_nav_user_email_marginLeft">10dp</dimen>
-    <dimen name="header_nav_user_name_marginLeft">15</dimen>
+    <dimen name="header_nav_user_name_marginLeft">15dp</dimen>
 </resources>
