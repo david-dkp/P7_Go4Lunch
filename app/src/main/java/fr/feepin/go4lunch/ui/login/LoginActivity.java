@@ -28,11 +28,10 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import fr.feepin.go4lunch.MainActivity;
 import fr.feepin.go4lunch.R;
@@ -41,6 +40,7 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static final List<String> FACEBOOK_PERMISSIONS = Arrays.asList("public_profile", "email");
     private static final int RC_SIGN_IN_GOOGLE = 1;
     private static final String TAG = "LoginActivity";
 
@@ -90,7 +90,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         binding.btnFacebook.setOnClickListener(v -> {
-            LoginManager.getInstance().logInWithReadPermissions(this, Collections.singletonList("public_profile"));
+            LoginManager.getInstance().logInWithReadPermissions(this, FACEBOOK_PERMISSIONS);
         });
     }
 
