@@ -1,18 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fitsSystemWindows="true"
     >
 
-    <TextView
+    <ImageView
+        android:id="@+id/ivLoginBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/desc_login_background"
+        tools:src="@color/green"
+        />
+
+    <ImageView
+        android:id="@+id/ivLogo"
+        android:layout_width="@dimen/login_logo_size"
+        android:layout_height="@dimen/login_logo_size"
+        android:layout_marginTop="@dimen/login_logo_margin_top"
+        android:contentDescription="@string/desc_app_logo"
+        android:src="@drawable/ic_soup"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/tvAppName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:includeFontPadding="false"
+        android:text="@string/app_name"
+        android:textAppearance="?attr/textAppearanceHeadline2"
+        android:textColor="?attr/colorOnPrimary"
+        android:textSize="@dimen/login_app_name_text_size"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivLogo"
+        />
+
+    <TextView
+        android:id="@+id/tvAppDescription"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:includeFontPadding="false"
+        android:singleLine="true"
+        android:text="@string/app_description"
+        android:textAlignment="center"
+        android:textColor="?attr/colorOnPrimary"
+        android:textSize="@dimen/login_app_description_text_size"
+        android:textStyle="italic"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintLeft_toLeftOf="@id/tvAppName"
+        app:layout_constraintRight_toRightOf="@id/tvAppName"
+        app:layout_constraintTop_toBottomOf="@id/tvAppName"
+        />
+
+    <Button
+        android:id="@+id/btnFacebook"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/login_button_height"
+        android:layout_marginHorizontal="@dimen/login_button_marginHorizontal"
+        android:layout_marginBottom="10dp"
+        android:text="@string/sign_in_facebook"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        app:backgroundTint="@color/blue"
+        app:layout_constraintBottom_toTopOf="@id/btnGoogle"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvAppDescription"
+        app:layout_constraintVertical_chainStyle="packed"
+        />
+
+    <Button
+        android:id="@+id/btnGoogle"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/login_button_height"
+        android:layout_marginHorizontal="@dimen/login_button_marginHorizontal"
+        android:text="@string/sign_in_google"
+        android:textAlignment="center"
+        android:textAllCaps="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Login"
+        app:layout_constraintTop_toBottomOf="@id/btnFacebook"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

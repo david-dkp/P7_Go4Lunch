@@ -15,4 +15,10 @@
     <string name="title_logout">Logout</string>
     <string name="desc_open_drawer">Open navigation drawer</string>
     <string name="desc_close_drawer">Close navigation drawer</string>
+    <string name="desc_login_background">Login background where people eat.</string>
+    <string name="desc_app_logo">App\'s logo representing a soup.</string>
+    <string name="app_description">Find a nice restaurant and invite your co-workers for lunch!</string>
+    <string name="sign_in_facebook">Sign in with Facebook</string>
+    <string name="sign_in_google">Sign in with Google</string>
+    <string name="desc_facebook_logo">Facebook logo</string>
 </resources>
