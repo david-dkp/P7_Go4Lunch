@@ -90,6 +90,18 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
         }
+        int titleId;
+
+        if (currentBotNavFragment == mapViewFragment) {
+            titleId = R.string.title_map_view;
+        }else if (currentBotNavFragment == listViewFragment) {
+            titleId = R.string.title_list_view;
+        }else {
+            titleId = R.string.title_workmates;
+        }
+
+        getSupportActionBar().setTitle(titleId);
+
     }
 
     private void setupToolbar() {
