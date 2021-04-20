@@ -10,8 +10,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.firebase.auth.FirebaseAuth;
+
 import fr.feepin.go4lunch.databinding.ActivityMainBinding;
 import fr.feepin.go4lunch.ui.list.ListViewFragment;
+import fr.feepin.go4lunch.ui.login.LoginActivity;
 import fr.feepin.go4lunch.ui.map.MapViewFragment;
 import fr.feepin.go4lunch.ui.restaurant.RestaurantActivity;
 import fr.feepin.go4lunch.ui.settings.SettingsActivity;
@@ -28,11 +34,15 @@ public class MainActivity extends AppCompatActivity{
     private Fragment currentBotNavFragment;
     private Fragment currentShowingFragment;
 
+    private FirebaseAuth firebaseAuth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        firebaseAuth = FirebaseAuth.getInstance();
 
         mapViewFragment = new MapViewFragment();
         listViewFragment = new ListViewFragment();
@@ -47,6 +57,19 @@ public class MainActivity extends AppCompatActivity{
         setSupportActionBar(binding.toolbar);
         setupBottomNavigation();
         setupDrawerLayout();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        checkSignIn();
+    }
+
+    private void checkSignIn() {
+        if (firebaseAuth.getCurrentUser() == null) {
+            LoginActivity.navigate(this);
+            finish();
+        }
     }
 
     private void setupBottomNavigation() {

@@ -21,4 +21,6 @@
     <string name="sign_in_facebook">Sign in with Facebook</string>
     <string name="sign_in_google">Sign in with Google</string>
     <string name="desc_facebook_logo">Facebook logo</string>
+
+    <string name="facebook_app_id">821515008451438</string> <string name="fb_login_protocol_scheme">fb821515008451438</string>
 </resources>
