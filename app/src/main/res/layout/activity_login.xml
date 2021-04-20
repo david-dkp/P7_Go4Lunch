@@ -8,11 +8,11 @@
     >
 
     <ImageView
-        android:scaleType="center"
         android:id="@+id/ivLoginBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@string/desc_login_background"
+        android:scaleType="centerCrop"
         tools:src="@color/green"
         />
 

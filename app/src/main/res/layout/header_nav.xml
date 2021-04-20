@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@string/desc_header_image"
-        tools:scaleType="centerCrop"
+        android:scaleType="centerCrop"
         tools:src="@color/black"
         />
 
@@ -36,9 +36,9 @@
         android:layout_marginStart="@dimen/header_nav_user_photo_margin"
         android:layout_marginBottom="@dimen/header_nav_user_photo_margin"
         android:contentDescription="@string/desc_user_photo"
+        android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        tools:scaleType="centerCrop"
         tools:src="@raw/dinner"
         />
 
@@ -62,12 +62,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/header_nav_user_email_marginLeft"
+        android:textAppearance="?attr/textAppearanceBody2"
         android:textColor="?attr/colorSurface"
         app:layout_constraintBottom_toBottomOf="@id/ivUserPhoto"
         app:layout_constraintLeft_toRightOf="@id/ivUserPhoto"
         app:layout_constraintTop_toBottomOf="@id/tvUserName"
         tools:text="jsmith.1337@gmail.com"
-        android:textAppearance="?attr/textAppearanceBody2"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
