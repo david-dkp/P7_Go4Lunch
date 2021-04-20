@@ -116,6 +116,8 @@ public class MainActivity extends AppCompatActivity{
                     SettingsActivity.navigate(this);
                     break;
                 case R.id.itemLogout:
+                    firebaseAuth.signOut();
+                    checkSignIn();
                     break;
             }
 
