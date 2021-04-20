@@ -60,7 +60,7 @@ public class LoginActivity extends AppCompatActivity {
 
         Glide.with(this)
                 .load(R.raw.dinner)
-                .transform(new BlurTransformation(20))
+                .transform(new BlurTransformation(getResources().getInteger(R.integer.blur_radius)))
                 .into(binding.ivLoginBackground);
 
         firebaseAuth = FirebaseAuth.getInstance();
@@ -142,6 +142,8 @@ public class LoginActivity extends AppCompatActivity {
                         finish();
                     } else {
                         Log.w(TAG, "signInWithCredential: failure", task.getException());
+                        Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -157,9 +159,9 @@ public class LoginActivity extends AppCompatActivity {
 
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                Log.d(TAG, "Authenticating with google : "+account.getId());
+                Log.d(TAG, "Authenticating with google : " + account.getId());
                 firebaseAuthWithGoogle(account.getIdToken());
-            }catch (ApiException apiException) {
+            } catch (ApiException apiException) {
                 Log.w(TAG, "Google sign in failed", apiException);
             }
         }
