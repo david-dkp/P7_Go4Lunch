@@ -1,97 +1,136 @@
 package fr.feepin.go4lunch;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.firebase.auth.FirebaseAuth;
+import com.bumptech.glide.Glide;
 
 import fr.feepin.go4lunch.databinding.ActivityMainBinding;
+import fr.feepin.go4lunch.databinding.HeaderNavBinding;
+import fr.feepin.go4lunch.ui.MainViewModel;
 import fr.feepin.go4lunch.ui.list.ListViewFragment;
 import fr.feepin.go4lunch.ui.login.LoginActivity;
 import fr.feepin.go4lunch.ui.map.MapViewFragment;
 import fr.feepin.go4lunch.ui.restaurant.RestaurantActivity;
 import fr.feepin.go4lunch.ui.settings.SettingsActivity;
 import fr.feepin.go4lunch.ui.workmates.WorkmatesFragment;
+import jp.wasabeef.glide.transformations.BlurTransformation;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
+    private HeaderNavBinding headerNavBinding;
 
     private MapViewFragment mapViewFragment;
     private ListViewFragment listViewFragment;
     private WorkmatesFragment workmatesFragment;
 
     private Fragment currentBotNavFragment;
-    private Fragment currentShowingFragment;
 
-    private FirebaseAuth firebaseAuth;
+    private MainViewModel mainViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
+        headerNavBinding = HeaderNavBinding.bind(binding.navView.getHeaderView(0));
         setContentView(binding.getRoot());
 
-        firebaseAuth = FirebaseAuth.getInstance();
+        Glide.with(this)
+                .load(R.raw.dinner)
+                .transform(new BlurTransformation(getResources().getInteger(R.integer.blur_radius)))
+                .into(headerNavBinding.ivHeader);
 
-        mapViewFragment = new MapViewFragment();
-        listViewFragment = new ListViewFragment();
-        workmatesFragment = new WorkmatesFragment();
+        mainViewModel = new ViewModelProvider(this, new ViewModelProvider.NewInstanceFactory()).get(MainViewModel.class);
 
-        getSupportFragmentManager().beginTransaction().add(R.id.fragmentContainer, listViewFragment).hide(listViewFragment).commit();
-        getSupportFragmentManager().beginTransaction().add(R.id.fragmentContainer, workmatesFragment).hide(workmatesFragment).commit();
-        getSupportFragmentManager().beginTransaction().add(R.id.fragmentContainer, mapViewFragment).commit();
+        setupObservers();
 
-        currentBotNavFragment = mapViewFragment;
+        setupToolbar();
 
-        setSupportActionBar(binding.toolbar);
+        if (savedInstanceState == null) {
+            setupFragments();
+        }
         setupBottomNavigation();
         setupDrawerLayout();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        checkSignIn();
+    private void setupObservers() {
+        mainViewModel.getCurrentUser().observe(this, firebaseUser -> {
+            if (firebaseUser == null) {
+                LoginActivity.navigate(this);
+                finish();
+            } else {
+                Glide.with(this)
+                        .load(firebaseUser.getPhotoUrl())
+                        .circleCrop()
+                        .into(headerNavBinding.ivUserPhoto);
+
+                headerNavBinding.tvUserName.setText(firebaseUser.getDisplayName());
+                headerNavBinding.tvUserEmail.setText(firebaseUser.getEmail());
+            }
+        });
     }
 
-    private void checkSignIn() {
-        if (firebaseAuth.getCurrentUser() == null) {
-            LoginActivity.navigate(this);
-            finish();
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mapViewFragment = (MapViewFragment) getSupportFragmentManager().findFragmentByTag(MapViewFragment.TAG);
+        listViewFragment = (ListViewFragment) getSupportFragmentManager().findFragmentByTag(ListViewFragment.TAG);
+        workmatesFragment = (WorkmatesFragment) getSupportFragmentManager().findFragmentByTag(WorkmatesFragment.TAG);
+
+        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+            if (!fragment.isHidden()) {
+                currentBotNavFragment = fragment;
+                break;
+            }
         }
+    }
+
+    private void setupToolbar() {
+        setSupportActionBar(binding.toolbar);
+    }
+
+    private void setupFragments() {
+        mapViewFragment = new MapViewFragment();
+        listViewFragment = new ListViewFragment();
+        workmatesFragment = new WorkmatesFragment();
+
+        getSupportFragmentManager().beginTransaction().add(R.id.fragmentContainer, listViewFragment, ListViewFragment.TAG).hide(listViewFragment).commit();
+        getSupportFragmentManager().beginTransaction().add(R.id.fragmentContainer, workmatesFragment, WorkmatesFragment.TAG).hide(workmatesFragment).commit();
+        getSupportFragmentManager().beginTransaction().add(R.id.fragmentContainer, mapViewFragment, MapViewFragment.TAG).commit();
+
+        getSupportActionBar().setTitle(R.string.title_map_view);
+        currentBotNavFragment = mapViewFragment;
     }
 
     private void setupBottomNavigation() {
         binding.botNav.setOnNavigationItemSelectedListener((item -> {
 
-            switch(item.getItemId()) {
+            if (item.getItemId() == binding.botNav.getSelectedItemId()) return true;
+
+            Fragment selectedFragment = null;
+
+            switch (item.getItemId()) {
                 case R.id.itemMapViewFragment:
-                    getSupportFragmentManager().beginTransaction().hide(currentBotNavFragment).show(mapViewFragment).commit();
-                    currentBotNavFragment = mapViewFragment;
+                    selectedFragment = mapViewFragment;
                     break;
                 case R.id.itemListViewFragment:
-                    getSupportFragmentManager().beginTransaction().hide(currentBotNavFragment).show(listViewFragment).commit();
-                    currentBotNavFragment = listViewFragment;
+                    selectedFragment = listViewFragment;
                     break;
                 case R.id.itemWorkmatesFragment:
-                    getSupportFragmentManager().beginTransaction().hide(currentBotNavFragment).show(workmatesFragment).commit();
-                    currentBotNavFragment = workmatesFragment;
+                    selectedFragment = workmatesFragment;
                     break;
             }
 
-            currentShowingFragment = currentBotNavFragment;
-
+            getSupportActionBar().setTitle(item.getTitle());
+            getSupportFragmentManager().beginTransaction().hide(currentBotNavFragment).show(selectedFragment).commit();
+            currentBotNavFragment = selectedFragment;
             return true;
         }));
     }
@@ -108,7 +147,7 @@ public class MainActivity extends AppCompatActivity{
         toggle.syncState();
         binding.navView.setNavigationItemSelectedListener(item -> {
 
-            switch(item.getItemId()) {
+            switch (item.getItemId()) {
                 case R.id.itemYourLunch:
                     RestaurantActivity.navigate(this, 0);
                     break;
@@ -116,8 +155,7 @@ public class MainActivity extends AppCompatActivity{
                     SettingsActivity.navigate(this);
                     break;
                 case R.id.itemLogout:
-                    firebaseAuth.signOut();
-                    checkSignIn();
+                    mainViewModel.signOut();
                     break;
             }
 
