@@ -10,10 +10,11 @@ import androidx.lifecycle.ViewModelProvider;
 import android.os.Bundle;
 
 import com.bumptech.glide.Glide;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 
 import fr.feepin.go4lunch.databinding.ActivityMainBinding;
 import fr.feepin.go4lunch.databinding.HeaderNavBinding;
-import fr.feepin.go4lunch.ui.MainViewModel;
 import fr.feepin.go4lunch.ui.list.ListViewFragment;
 import fr.feepin.go4lunch.ui.login.LoginActivity;
 import fr.feepin.go4lunch.ui.map.MapViewFragment;
@@ -38,10 +39,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Places.initialize(this, BuildConfig.MAPS_API_KEY);
+
+        //Bindings
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         headerNavBinding = HeaderNavBinding.bind(binding.navView.getHeaderView(0));
         setContentView(binding.getRoot());
 
+        //Load header image
         Glide.with(this)
                 .load(R.raw.dinner)
                 .transform(new BlurTransformation(getResources().getInteger(R.integer.blur_radius)))
@@ -50,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
         mainViewModel = new ViewModelProvider(this, new ViewModelProvider.NewInstanceFactory()).get(MainViewModel.class);
 
         setupObservers();
-
         setupToolbar();
 
         if (savedInstanceState == null) {
@@ -170,6 +175,8 @@ public class MainActivity extends AppCompatActivity {
                     mainViewModel.signOut();
                     break;
             }
+
+            binding.getRoot().closeDrawer(GravityCompat.START);
 
             return true;
         });

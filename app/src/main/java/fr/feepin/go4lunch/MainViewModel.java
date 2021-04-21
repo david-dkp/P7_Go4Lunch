@@ -1,4 +1,4 @@
-package fr.feepin.go4lunch.ui;
+package fr.feepin.go4lunch;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
