@@ -41,7 +41,7 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 public class LoginActivity extends AppCompatActivity {
 
     private static final List<String> FACEBOOK_PERMISSIONS = Arrays.asList("public_profile", "email");
-    private static final int RC_SIGN_IN_GOOGLE = 1;
+    private static final int RC_SIGN_IN_GOOGLE = 2;
     private static final String TAG = "LoginActivity";
 
     private ActivityLoginBinding binding;
@@ -97,6 +97,7 @@ public class LoginActivity extends AppCompatActivity {
     private void setupGoogleSignIn() {
         GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
+                .requestProfile()
                 .requestEmail()
                 .build();
 
@@ -137,7 +138,7 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         Log.d(TAG, "signInWithCredential: success");
-                        Intent intent = new Intent(this, MainActivity.class);
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(intent);
                         finish();
                     } else {
@@ -154,7 +155,7 @@ public class LoginActivity extends AppCompatActivity {
 
         callbackManager.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == RC_SIGN_IN_GOOGLE) {
+        if (requestCode == RC_SIGN_IN_GOOGLE) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
 
             try {
@@ -171,6 +172,5 @@ public class LoginActivity extends AppCompatActivity {
     public static void navigate(Context context) {
         Intent intent = new Intent(context, LoginActivity.class);
         context.startActivity(intent);
-
     }
 }
