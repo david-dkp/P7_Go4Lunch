@@ -2,15 +2,15 @@ package fr.feepin.go4lunch.ui.map;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -25,12 +25,33 @@ import fr.feepin.go4lunch.utils.PermissionUtils;
 public class MapViewFragment extends Fragment {
 
     public static final String TAG = "MAP_VIEW_TAG";
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
 
     private FragmentMapViewBinding binding;
 
     private GoogleMap googleMap;
     private View locationButton;
+
+    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
+            new ActivityResultContracts.RequestPermission(),
+            isGranted -> {
+                if (isGranted) {
+                    enableMyLocation();
+                    locationButton.callOnClick();
+                } else {
+                    if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                        PermissionUtils.showRationalDialog(getActivity(), R.string.rational_location_permission, (dialog, which) -> {
+                            requestLocationPermission();
+                        });
+                    }
+                }
+            }
+    );
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+    }
 
     @Nullable
     @Override
@@ -64,27 +85,8 @@ public class MapViewFragment extends Fragment {
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) return;
-
-        if (PermissionUtils.isPermissionGranted(permissions, grantResults, Manifest.permission.ACCESS_FINE_LOCATION)) {
-            enableMyLocation();
-            locationButton.callOnClick();
-        } else {
-            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                PermissionUtils.showRationalDialog(getActivity(), R.string.rational_location_permission, (dialog, which) -> {
-                    requestLocationPermission();
-                });
-            }
-        }
-
-    }
-
     private void requestLocationPermission() {
-        requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
     }
 
     @Override
