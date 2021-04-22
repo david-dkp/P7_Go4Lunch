@@ -24,4 +24,10 @@
 
     <string name="facebook_app_id">821515008451438</string>
     <string name="fb_login_protocol_scheme">fb821515008451438</string>
+    <string name="desc_my_location">My current location.</string>
+
+    <string name="retry">Re-try</string>
+    <string name="cancel">Cancel</string>
+    <string name="rational_title">Permission denied</string>
+    <string name="rational_location_permission">This permission is required for us to localize you.</string>
 </resources>
