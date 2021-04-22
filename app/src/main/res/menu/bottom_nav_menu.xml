@@ -10,13 +10,13 @@
     <item
         android:id="@+id/itemListViewFragment"
         android:title="@string/title_list_view"
-        android:icon="@drawable/ic_map"
+        android:icon="@drawable/ic_list"
         />
 
     <item
         android:id="@+id/itemWorkmatesFragment"
         android:title="@string/title_workmates"
-        android:icon="@drawable/ic_map"
+        android:icon="@drawable/ic_people"
         />
 
 </menu>
