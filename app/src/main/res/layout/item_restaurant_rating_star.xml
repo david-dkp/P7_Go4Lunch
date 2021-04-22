@@ -4,5 +4,5 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="@dimen/item_restaurant_star_size"
     android:layout_height="@dimen/item_restaurant_star_size"
-    android:src="@drawable/ic_star"
+    android:src="@drawable/ic_rating_star"
     />
