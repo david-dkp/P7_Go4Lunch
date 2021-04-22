@@ -9,12 +9,12 @@
     <dimen name="item_restaurant_distance_marginRight">25dp</dimen>
 
 
-    <dimen name="item_workmate_height">100dp</dimen>
+    <dimen name="item_workmate_height">95dp</dimen>
     <dimen name="item_workmate_photo_margin">15dp</dimen>
 
 
     <dimen name="header_nav_height">220dp</dimen>
-    <dimen name="header_nav_title_marginTop">30dp</dimen>
+    <dimen name="header_nav_title_marginTop">40dp</dimen>
     <dimen name="header_nav_user_photo_size">60dp</dimen>
     <dimen name="header_nav_user_photo_margin">17dp</dimen>
     <dimen name="header_nav_user_email_marginLeft">10dp</dimen>
@@ -30,4 +30,8 @@
     <dimen name="drawer_app_logo_size">110dp</dimen>
     <dimen name="header_nav_marginBottom">20dp</dimen>
     <dimen name="drawer_item_horizontal_padding">20dp</dimen>
+    <dimen name="restaurant_fab_marginRight">20dp</dimen>
+    <dimen name="restaurant_restaurant_name_margin">13dp</dimen>
+    <dimen name="restaurant_options_drawablePadding">12dp</dimen>
+    <dimen name="restaurant_options_paddingVertical">15dp</dimen>
 </resources>

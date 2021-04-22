@@ -30,4 +30,8 @@
     <string name="cancel">Cancel</string>
     <string name="rational_title">Permission denied</string>
     <string name="rational_location_permission">This permission is required for us to localize you.</string>
+    <string name="desc_join_restaurant">Join that restaurant</string>
+    <string name="text_call">Call</string>
+    <string name="text_like">Like</string>
+    <string name="text_website">Website</string>
 </resources>
