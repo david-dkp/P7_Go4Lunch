@@ -18,7 +18,7 @@
     <dimen name="header_nav_user_photo_size">60dp</dimen>
     <dimen name="header_nav_user_photo_margin">17dp</dimen>
     <dimen name="header_nav_user_email_marginLeft">10dp</dimen>
-    <dimen name="header_nav_user_name_marginLeft">15dp</dimen>
+    <dimen name="header_nav_user_name_marginLeft">13dp</dimen>
     <dimen name="login_logo_size">200dp</dimen>
     <dimen name="login_app_name_text_size">75sp</dimen>
     <dimen name="login_logo_margin_top">60dp</dimen>
@@ -27,4 +27,7 @@
     <dimen name="login_button_marginHorizontal">50dp</dimen>
     <dimen name="login_button_logo_size">40dp</dimen>
     <dimen name="map_view_myLocation_margin">15dp</dimen>
+    <dimen name="drawer_app_logo_size">110dp</dimen>
+    <dimen name="header_nav_marginBottom">20dp</dimen>
+    <dimen name="drawer_item_horizontal_padding">20dp</dimen>
 </resources>
