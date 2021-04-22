@@ -1,24 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     >
+
+    <View
+        android:id="@+id/vStatusZone"
+        android:layout_width="match_parent"
+        android:layout_height="24dp"
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
-        app:layout_constraintTop_toTopOf="parent"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/vStatusZone"
+        app:navigationIconTint="?attr/colorOnPrimary"
+        />
 
-    <TextView
+    <ImageView
+        android:id="@+id/ivRestaurantPhoto"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/green"
+        android:contentDescription="@string/desc_restaurant_photo"
+        app:layout_constraintHeight_percent=".35"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabJoinRestaurant"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Restuarant"
+        android:layout_marginEnd="@dimen/restaurant_fab_marginRight"
+        android:contentDescription="@string/desc_join_restaurant"
+        android:src="@drawable/ic_check_circle"
+        app:layout_constraintBottom_toBottomOf="@id/ivRestaurantPhoto"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ivRestaurantPhoto"
+        app:tint="@color/green"
+        />
+
+    <View
+        android:id="@+id/vDescriptionContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="?attr/colorPrimary"
+        app:layout_constraintHeight_percent=".125"
+        app:layout_constraintTop_toBottomOf="@id/ivRestaurantPhoto"
+        />
+
+    <TextView
+        android:id="@+id/tvRestaurantName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/restaurant_restaurant_name_margin"
+        android:textAppearance="?attr/textAppearanceHeadline5"
+        android:textColor="?attr/colorOnPrimary"
+        app:layout_constraintLeft_toLeftOf="@id/vDescriptionContainer"
+        app:layout_constraintTop_toTopOf="@id/vDescriptionContainer"
+        tools:text="Le Zinc"
+        />
+
+    <LinearLayout
+        android:id="@+id/linearLayoutRating"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/item_restaurant_star_size"
+        android:layout_marginStart="@dimen/restaurant_restaurant_name_margin"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="@id/tvRestaurantName"
+        app:layout_constraintLeft_toRightOf="@id/tvRestaurantName"
+        app:layout_constraintTop_toTopOf="@id/tvRestaurantName"
+        />
+
+    <TextView
+        android:id="@+id/tvRestaurantAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceBody2"
+        android:textColor="?attr/colorOnPrimary"
+        app:layout_constraintLeft_toLeftOf="@id/tvRestaurantName"
+        app:layout_constraintTop_toBottomOf="@id/tvRestaurantName"
+        tools:text="French restaurant - 12 rue du Faubourg Poissonnière"
+        />
+
+    <TextView
+        android:id="@+id/tvCall"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:drawablePadding="@dimen/restaurant_options_drawablePadding"
+        android:paddingVertical="@dimen/restaurant_options_paddingVertical"
+        android:text="@string/text_call"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textAppearance="?attr/textAppearanceHeadline6"
+        android:textColor="?attr/colorPrimary"
+        app:drawableTint="?attr/colorPrimary"
+        app:drawableTopCompat="@drawable/ic_call"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/tvLike"
+        app:layout_constraintTop_toBottomOf="@id/vDescriptionContainer"
+        />
+
+    <TextView
+        android:id="@+id/tvLike"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:drawablePadding="@dimen/restaurant_options_drawablePadding"
+        android:paddingVertical="@dimen/restaurant_options_paddingVertical"
+        android:text="@string/text_like"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textAppearance="?attr/textAppearanceHeadline6"
+        android:textColor="?attr/colorPrimary"
+        app:drawableTint="?attr/colorPrimary"
+        app:drawableTopCompat="@drawable/ic_star"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintLeft_toRightOf="@id/tvCall"
+        app:layout_constraintRight_toLeftOf="@id/tvWebsite"
+        app:layout_constraintTop_toBottomOf="@id/vDescriptionContainer"
+        />
+
+    <TextView
+        android:id="@+id/tvWebsite"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:drawablePadding="@dimen/restaurant_options_drawablePadding"
+        android:paddingVertical="@dimen/restaurant_options_paddingVertical"
+        android:text="@string/text_website"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textAppearance="?attr/textAppearanceHeadline6"
+        android:textColor="?attr/colorPrimary"
+        app:drawableTint="?attr/colorPrimary"
+        app:drawableTopCompat="@drawable/ic_globe"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintLeft_toRightOf="@id/tvLike"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/vDescriptionContainer"
+        />
+
+    <View
+        android:id="@+id/vSeparation"
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="?attr/scrimBackground"
+        app:layout_constraintTop_toBottomOf="@id/tvCall"
+        />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvWorkmates"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/vSeparation"
+        tools:itemCount="2"
+        tools:listitem="@layout/item_workmate_joining"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
