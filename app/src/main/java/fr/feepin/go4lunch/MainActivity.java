@@ -25,6 +25,8 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final static String LATEST_FRAGMENT_TAG_KEY = "LATEST_FRAGMENT_TAG_KEY";
+
     private ActivityMainBinding binding;
     private HeaderNavBinding headerNavBinding;
 
@@ -58,10 +60,11 @@ public class MainActivity extends AppCompatActivity {
         setupObservers();
         setupToolbar();
 
+        setupBottomNavigation();
+
         if (savedInstanceState == null) {
             setupFragments();
         }
-        setupBottomNavigation();
         setupDrawerLayout();
     }
 
@@ -80,33 +83,6 @@ public class MainActivity extends AppCompatActivity {
                 headerNavBinding.tvUserEmail.setText(firebaseUser.getEmail());
             }
         });
-    }
-
-    @Override
-    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        mapViewFragment = (MapViewFragment) getSupportFragmentManager().findFragmentByTag(MapViewFragment.TAG);
-        listViewFragment = (ListViewFragment) getSupportFragmentManager().findFragmentByTag(ListViewFragment.TAG);
-        workmatesFragment = (WorkmatesFragment) getSupportFragmentManager().findFragmentByTag(WorkmatesFragment.TAG);
-
-        for (Fragment fragment : getSupportFragmentManager().getFragments()) {
-            if (!fragment.isHidden()) {
-                currentBotNavFragment = fragment;
-                break;
-            }
-        }
-        int titleId;
-
-        if (currentBotNavFragment == mapViewFragment) {
-            titleId = R.string.title_map_view;
-        }else if (currentBotNavFragment == listViewFragment) {
-            titleId = R.string.title_list_view;
-        }else {
-            titleId = R.string.title_workmates;
-        }
-
-        getSupportActionBar().setTitle(titleId);
-
     }
 
     private void setupToolbar() {
@@ -180,6 +156,35 @@ public class MainActivity extends AppCompatActivity {
 
             return true;
         });
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(LATEST_FRAGMENT_TAG_KEY, currentBotNavFragment.getTag());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mapViewFragment = (MapViewFragment) getSupportFragmentManager().findFragmentByTag(MapViewFragment.TAG);
+        listViewFragment = (ListViewFragment) getSupportFragmentManager().findFragmentByTag(ListViewFragment.TAG);
+        workmatesFragment = (WorkmatesFragment) getSupportFragmentManager().findFragmentByTag(WorkmatesFragment.TAG);
+
+        currentBotNavFragment = getSupportFragmentManager().findFragmentByTag(savedInstanceState.getString(LATEST_FRAGMENT_TAG_KEY));
+
+        int titleId;
+
+        if (currentBotNavFragment == mapViewFragment) {
+            titleId = R.string.title_map_view;
+        } else if (currentBotNavFragment == listViewFragment) {
+            titleId = R.string.title_list_view;
+        } else {
+            titleId = R.string.title_workmates;
+        }
+
+        getSupportActionBar().setTitle(titleId);
+
     }
 
     @Override
