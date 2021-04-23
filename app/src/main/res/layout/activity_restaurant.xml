@@ -13,14 +13,6 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/vStatusZone"
-        app:navigationIconTint="?attr/colorOnPrimary"
-        />
-
     <ImageView
         android:id="@+id/ivRestaurantPhoto"
         android:layout_width="match_parent"
@@ -29,6 +21,14 @@
         android:contentDescription="@string/desc_restaurant_photo"
         app:layout_constraintHeight_percent=".35"
         app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/vStatusZone"
+        app:navigationIconTint="?attr/colorOnPrimary"
         />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -41,7 +41,7 @@
         app:layout_constraintBottom_toBottomOf="@id/ivRestaurantPhoto"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ivRestaurantPhoto"
-        app:tint="@color/green"
+        app:tint="@color/fab_join_restaurant_color"
         />
 
     <View
