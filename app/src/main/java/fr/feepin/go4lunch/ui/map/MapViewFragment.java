@@ -17,6 +17,8 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.libraries.places.api.model.Place;
 
 import fr.feepin.go4lunch.R;
 import fr.feepin.go4lunch.databinding.FragmentMapViewBinding;
@@ -36,7 +38,6 @@ public class MapViewFragment extends Fragment {
             isGranted -> {
                 if (isGranted) {
                     enableMyLocation();
-                    locationButton.callOnClick();
                 } else {
                     if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
                         PermissionUtils.showRationalDialog(getActivity(), R.string.rational_location_permission, (dialog, which) -> {
@@ -64,6 +65,7 @@ public class MapViewFragment extends Fragment {
 
     private void configGoogleMap() {
         enableMyLocation();
+        setMapStyle();
     }
 
     private void enableMyLocation() {
@@ -83,6 +85,11 @@ public class MapViewFragment extends Fragment {
                 requestLocationPermission();
             });
         }
+    }
+
+    private void setMapStyle() {
+        MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(getContext(), R.raw.map_style);
+        googleMap.setMapStyle(mapStyleOptions);
     }
 
     private void requestLocationPermission() {
