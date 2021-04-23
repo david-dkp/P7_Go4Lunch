@@ -4,7 +4,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.os.Build;
 
+import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
 import fr.feepin.go4lunch.R;
@@ -21,5 +24,9 @@ public class PermissionUtils {
                 .setMessage(rationalMessageId)
                 .create()
                 .show();
+    }
+
+    public static boolean isPermissionGranted(Context context, String permission) {
+        return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED;
     }
 }
