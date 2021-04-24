@@ -3,6 +3,7 @@ package fr.feepin.go4lunch.ui.map;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -10,6 +11,8 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.provider.Settings;
+import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -43,6 +47,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import fr.feepin.go4lunch.Constants;
 import fr.feepin.go4lunch.R;
+import fr.feepin.go4lunch.contracts.LocationSettingsContract;
 import fr.feepin.go4lunch.databinding.FragmentMapViewBinding;
 import fr.feepin.go4lunch.utils.PermissionUtils;
 
@@ -69,6 +74,13 @@ public class MapViewFragment extends Fragment {
             lastLocation = locationResult.getLastLocation();
         }
     };
+
+    private final ActivityResultLauncher<Void> navigateToLocationSettingsLauncher = registerForActivityResult(
+            new LocationSettingsContract(),
+            result -> {
+                moveCameraToMyPosition();
+            }
+    );
 
     private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
             new ActivityResultContracts.RequestPermission(),
@@ -109,10 +121,15 @@ public class MapViewFragment extends Fragment {
             }
         });
 
+        binding.btnEnableLocation.setOnClickListener(v -> {
+            navigateToLocationSettingsLauncher.launch(null);
+        });
+
         return binding.getRoot();
     }
 
     private void toggleLocationError(boolean isLocationEnabled) {
+        TransitionManager.beginDelayedTransition(binding.getRoot());
         binding.clLocationErrorContainer.setVisibility(isLocationEnabled ? View.INVISIBLE : View.VISIBLE);
     }
 
@@ -162,6 +179,7 @@ public class MapViewFragment extends Fragment {
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.map_view_menu, menu);
+
     }
 
     @Override
