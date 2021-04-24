@@ -59,13 +59,14 @@ public class MapViewFragment extends Fragment {
 
     private LocationManager locationManager;
 
+    private Location lastLocation;
+
     private LocationCallback locationCallback = new LocationCallback(){
         @Override
         public void onLocationResult(LocationResult locationResult) {
             super.onLocationResult(locationResult);
-            Log.d("debug", "called");
-            fusedLocationProviderClient.removeLocationUpdates(this);
             animateCameraToLocation(locationResult.getLastLocation());
+            lastLocation = locationResult.getLastLocation();
         }
     };
 
@@ -111,6 +112,9 @@ public class MapViewFragment extends Fragment {
         return binding.getRoot();
     }
 
+    private void toggleLocationError(boolean isLocationEnabled) {
+        binding.clLocationErrorContainer.setVisibility(isLocationEnabled ? View.INVISIBLE : View.VISIBLE);
+    }
 
     private void configGoogleMap() {
         if (PermissionUtils.isPermissionGranted(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -127,19 +131,16 @@ public class MapViewFragment extends Fragment {
     @SuppressLint("MissingPermission")
     private void moveCameraToMyPosition() {
         if (LocationManagerCompat.isLocationEnabled(locationManager)) {
+            toggleLocationError(true);
             LocationRequest locationRequest = new LocationRequest();
             locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
             locationRequest.setInterval(10000);
             locationRequest.setFastestInterval(1000);
             locationRequest.setNumUpdates(1);
-            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
         } else {
-            fusedLocationProviderClient.getLastLocation().addOnCompleteListener(task -> {
-                if (task.getResult() != null) {
-                     animateCameraToLocation(task.getResult());
-                }
-                //TODO: show location not enabled error
-            });
+            toggleLocationError(false);
+            if (lastLocation != null) animateCameraToLocation(lastLocation);
         }
     }
 

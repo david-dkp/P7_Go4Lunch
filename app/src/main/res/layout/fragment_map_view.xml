@@ -5,39 +5,6 @@
     android:layout_height="match_parent"
     >
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:background="@drawable/location_error_background"
-        app:backgroundTint="?attr/colorSurface"
-        android:layout_margin="@dimen/map_view_location_error_margin"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/clLocationErrorContainer"
-        android:visibility="invisible"
-        >
-
-        <TextView
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:id="@+id/tvLocationErrorMessage"
-            android:textAppearance="?attr/textAppearanceBody1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/text_location_error"
-            />
-
-        <Button
-            app:layout_constraintLeft_toRightOf="@id/tvLocationErrorMessage"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/text_enable" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
     <com.google.android.gms.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
@@ -55,5 +22,42 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:background="@drawable/location_error_background"
+        android:layout_margin="@dimen/map_view_location_error_margin"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/clLocationErrorContainer"
+        android:visibility="invisible"
+        app:elevation="20dp"
+        android:paddingHorizontal="@dimen/map_view_location_error_paddingHorizontal"
+        >
+
+        <TextView
+            app:layout_constraintRight_toLeftOf="@id/btnEnableLocation"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:id="@+id/tvLocationErrorMessage"
+            android:textAppearance="?attr/textAppearanceBody1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/text_location_error"
+            />
+
+        <Button
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:textColor="?attr/colorPrimary"
+            android:id="@+id/btnEnableLocation"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/text_enable" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
