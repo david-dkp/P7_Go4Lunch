@@ -34,4 +34,6 @@
     <string name="text_call">Call</string>
     <string name="text_like">Like</string>
     <string name="text_website">Website</string>
+    <string name="text_location_error">The location services are disabled.</string>
+    <string name="text_enable">Enable</string>
 </resources>
