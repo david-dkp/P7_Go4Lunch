@@ -1,17 +1,18 @@
-package fr.feepin.go4lunch.data.remote;
+package fr.feepin.go4lunch.data.maps;
 
 
-import fr.feepin.go4lunch.data.remote.models.NearbySearchResponse;
-import retrofit2.Call;
+import fr.feepin.go4lunch.data.maps.models.NearbySearchResponse;
+import io.reactivex.rxjava3.core.Single;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface PlacesApi {
 
     @GET("maps/api/place/nearbysearch/json")
-    public Call<NearbySearchResponse> getNearbySearch(
+    Single<NearbySearchResponse> getNearbySearch(
             @Query("key") String apiKey,
             @Query("location") String location,
-            @Query("radius") String radius
+            @Query("radius") String radius,
+            @Query("type") String type
     );
 }

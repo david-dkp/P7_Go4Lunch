@@ -21,7 +21,7 @@ import fr.feepin.go4lunch.data.maps.models.NearbySearchResponse;
 import io.reactivex.rxjava3.core.Single;
 
 @Singleton
-public class DefaultMapsRepository implements MapsRepository{
+public class DefaultMapsRepository implements MapsRepository {
 
     private LocationService locationService;
 
@@ -39,7 +39,7 @@ public class DefaultMapsRepository implements MapsRepository{
     @Override
     public Single<NearbySearchResponse> getNearbySearch(String apiKey, String location, String radius) {
 
-        return placesApi.getNearbySearch(apiKey, location, radius);
+        return placesApi.getNearbySearch(apiKey, location, radius, "restaurant");
     }
 
     @Override
@@ -68,7 +68,7 @@ public class DefaultMapsRepository implements MapsRepository{
                 .setQuery(query)
                 .build();
 
-        return Single.create( e -> {
+        return Single.create(e -> {
             FindAutocompletePredictionsResponse findAutocompletePredictionsResponse = Tasks.await(placesClient.findAutocompletePredictions(request));
             e.onSuccess(findAutocompletePredictionsResponse);
         });
