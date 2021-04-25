@@ -1,5 +1,9 @@
 package fr.feepin.go4lunch.modules;
 
+import android.content.Context;
+
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.gson.GsonBuilder;
 
 import java.lang.annotation.Retention;
@@ -11,6 +15,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import fr.feepin.go4lunch.Constants;
 import fr.feepin.go4lunch.data.maps.PlacesApi;
@@ -43,6 +48,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
             @MapsRetrofit Retrofit mapsRetrofitInstance
     ) {
         return mapsRetrofitInstance.create(PlacesApi.class);
+    }
+
+    @Singleton
+    @Provides
+    public static PlacesClient providesPlacesClient(@ApplicationContext Context context) {
+        return Places.createClient(context);
     }
 
     @Qualifier
