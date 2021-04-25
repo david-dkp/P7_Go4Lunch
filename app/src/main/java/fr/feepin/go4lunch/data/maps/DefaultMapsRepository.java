@@ -84,7 +84,7 @@ public class DefaultMapsRepository implements MapsRepository {
 
             FetchPlaceRequest fetchPlaceRequest = FetchPlaceRequest.builder(
                     placeId,
-                    Arrays.asList(Place.Field.NAME, Place.Field.PHONE_NUMBER, Place.Field.WEBSITE_URI, Place.Field.ADDRESS)
+                    Arrays.asList(Place.Field.NAME, Place.Field.PHONE_NUMBER, Place.Field.WEBSITE_URI, Place.Field.ADDRESS, Place.Field.OPENING_HOURS)
                     ).build();
 
             Place place = Tasks.await(placesClient.fetchPlace(fetchPlaceRequest)).getPlace();
