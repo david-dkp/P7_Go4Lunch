@@ -7,12 +7,16 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.LocationRestriction;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
+import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.FetchPhotoRequest;
 import com.google.android.libraries.places.api.net.FetchPhotoResponse;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
+
+import java.util.Arrays;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -71,6 +75,21 @@ public class DefaultMapsRepository implements MapsRepository {
         return Single.create(e -> {
             FindAutocompletePredictionsResponse findAutocompletePredictionsResponse = Tasks.await(placesClient.findAutocompletePredictions(request));
             e.onSuccess(findAutocompletePredictionsResponse);
+        });
+    }
+
+    @Override
+    public Single<Place> getRestaurantDetails(String placeId) {
+        return Single.create( e -> {
+
+            FetchPlaceRequest fetchPlaceRequest = FetchPlaceRequest.builder(
+                    placeId,
+                    Arrays.asList(Place.Field.NAME, Place.Field.PHONE_NUMBER, Place.Field.WEBSITE_URI, Place.Field.ADDRESS)
+                    ).build();
+
+            Place place = Tasks.await(placesClient.fetchPlace(fetchPlaceRequest)).getPlace();
+
+            e.onSuccess(place);
         });
     }
 
