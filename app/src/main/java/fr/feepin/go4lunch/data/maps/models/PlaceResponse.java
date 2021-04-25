@@ -1,7 +1,10 @@
-package fr.feepin.go4lunch.data.remote.models;
+package fr.feepin.go4lunch.data.maps.models;
 
+import com.google.android.libraries.places.api.Places;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
 
 public class PlaceResponse {
 
@@ -11,6 +14,12 @@ public class PlaceResponse {
 
     @Expose
     private Geometry geometry;
+
+    @Expose
+    private List<Photo> photos;
+
+    @Expose
+    private String vicinity;
 
     public PlaceResponse(String placeId, Geometry geometry) {
         this.placeId = placeId;
@@ -52,29 +61,75 @@ public class PlaceResponse {
     }
 
     public class LatLng {
-        private String lat;
-        private String lng;
 
-        public LatLng(String lat, String lng) {
+        @Expose
+        private float lat;
+
+        @Expose
+        private float lng;
+
+        public LatLng(float lat, float lng) {
             this.lat = lat;
             this.lng = lng;
         }
 
-        public String getLat() {
+        public float getLat() {
             return lat;
         }
 
-        public void setLat(String lat) {
+        public void setLat(float lat) {
             this.lat = lat;
         }
 
-        public String getLng() {
+        public float getLng() {
             return lng;
         }
 
-        public void setLng(String lng) {
+        public void setLng(float lng) {
             this.lng = lng;
         }
     }
 
+    public class Photo {
+
+        @Expose
+        private int height;
+
+        @Expose
+        private int width;
+
+        @SerializedName("photo_reference")
+        @Expose
+        private String reference;
+
+        public Photo(int height, int width, String reference) {
+            this.height = height;
+            this.width = width;
+            this.reference = reference;
+        }
+
+        public int getHeight() {
+            return height;
+        }
+
+        public void setHeight(int height) {
+            this.height = height;
+        }
+
+        public int getWidth() {
+            return width;
+        }
+
+        public void setWidth(int width) {
+            this.width = width;
+        }
+
+        public String getReference() {
+            return reference;
+        }
+
+        public void setReference(String reference) {
+            this.reference = reference;
+        }
+    }
 }
