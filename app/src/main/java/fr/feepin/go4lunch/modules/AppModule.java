@@ -1,6 +1,5 @@
 package fr.feepin.go4lunch.modules;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.lang.annotation.Retention;
@@ -14,20 +13,21 @@ import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.components.SingletonComponent;
 import fr.feepin.go4lunch.Constants;
-import fr.feepin.go4lunch.data.remote.PlacesApi;
+import fr.feepin.go4lunch.data.maps.PlacesApi;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 @Module
-@InstallIn(SingletonComponent.class)
-abstract public class AppModule {
+@InstallIn(SingletonComponent.class) abstract public class AppModule {
 
     @MapsRetrofit
     @Singleton
     @Provides
-    public Retrofit providesMapsRetrofitInstance() {
+    public static Retrofit providesMapsRetrofitInstance() {
         return new Retrofit.Builder()
                 .baseUrl(Constants.MAPS_BASE_URL)
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(
                         GsonConverterFactory.create(
                                 new GsonBuilder()
@@ -39,7 +39,7 @@ abstract public class AppModule {
 
     @Singleton
     @Provides
-    public PlacesApi providesPlacesApi(
+    public static PlacesApi providesPlacesApi(
             @MapsRetrofit Retrofit mapsRetrofitInstance
     ) {
         return mapsRetrofitInstance.create(PlacesApi.class);
