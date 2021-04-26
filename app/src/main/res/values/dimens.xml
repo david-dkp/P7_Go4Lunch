@@ -34,6 +34,7 @@
     <dimen name="restaurant_restaurant_name_margin">13dp</dimen>
     <dimen name="restaurant_options_drawablePadding">12dp</dimen>
     <dimen name="restaurant_options_paddingVertical">15dp</dimen>
-    <dimen name="map_view_location_error_radius">15dp</dimen>
+    <dimen name="map_view_location_error_radius">10dp</dimen>
     <dimen name="map_view_location_error_margin">10dp</dimen>
+    <dimen name="map_view_location_error_paddingHorizontal">10dp</dimen>
 </resources>

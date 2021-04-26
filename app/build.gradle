@@ -102,4 +102,9 @@ dependencies {
     implementation "io.reactivex.rxjava3:rxandroid:$rxandroid_version"
     implementation "io.reactivex.rxjava3:rxjava:$rxandroid_version"
 
+    //Datastore
+    def datastore_version = "1.0.0-beta01"
+    implementation "androidx.datastore:datastore-preferences:$datastore_version"
+    implementation "androidx.datastore:datastore-preferences-rxjava3:$datastore_version"
+
 }
