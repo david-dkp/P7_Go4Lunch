@@ -3,16 +3,22 @@ package fr.feepin.go4lunch;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+import fr.feepin.go4lunch.data.maps.FusedLocationService;
 import fr.feepin.go4lunch.databinding.ActivityMainBinding;
 import fr.feepin.go4lunch.databinding.HeaderNavBinding;
 import fr.feepin.go4lunch.ui.list.ListViewFragment;
@@ -21,8 +27,11 @@ import fr.feepin.go4lunch.ui.map.MapViewFragment;
 import fr.feepin.go4lunch.ui.restaurant.RestaurantActivity;
 import fr.feepin.go4lunch.ui.settings.SettingsActivity;
 import fr.feepin.go4lunch.ui.workmates.WorkmatesFragment;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
     private final static String LATEST_FRAGMENT_TAG_KEY = "LATEST_FRAGMENT_TAG_KEY";
@@ -42,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Places.initialize(this, BuildConfig.MAPS_API_KEY);
+        Places.initialize(getApplicationContext(), BuildConfig.MAPS_API_KEY);
 
         //Bindings
         binding = ActivityMainBinding.inflate(getLayoutInflater());
