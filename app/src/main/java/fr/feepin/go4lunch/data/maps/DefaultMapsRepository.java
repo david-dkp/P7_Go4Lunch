@@ -103,4 +103,9 @@ public class DefaultMapsRepository implements MapsRepository {
     public Single<Location> getCurrentLocation() {
         return locationService.getCurrentPosition();
     }
+
+    @Override
+    public Single<LatLng> getLatestPositionFromPrefs() {
+        return locationService.getLatestPositionFromPrefs();
+    }
 }

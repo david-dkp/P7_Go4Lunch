@@ -27,4 +27,6 @@ interface MapsRepository {
     Single<Location> getLastKnownLocation();
 
     Single<Location> getCurrentLocation();
+
+    Single<LatLng> getLatestPositionFromPrefs();
 }

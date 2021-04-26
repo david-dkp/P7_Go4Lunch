@@ -8,11 +8,16 @@ import android.location.LocationManager;
 import android.os.Looper;
 
 import androidx.core.location.LocationManagerCompat;
+import androidx.datastore.preferences.core.MutablePreferences;
+import androidx.datastore.preferences.core.Preferences;
+import androidx.datastore.preferences.core.PreferencesKeys;
+import androidx.datastore.rxjava3.RxDataStore;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Task;
 
 import javax.inject.Inject;
@@ -30,11 +35,17 @@ public class FusedLocationService implements LocationService {
     private Context context;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private Location lastKnownLocation;
+    private RxDataStore<Preferences> rxDatastore;
+
+    private Preferences.Key<Double> LATEST_LATITUDE = PreferencesKeys.doubleKey("latest_latitude");
+    private Preferences.Key<Double> LATEST_LONGITUDE = PreferencesKeys.doubleKey("latest_longitude");
 
     @Inject
-    public FusedLocationService(@ApplicationContext Context context) {
+    public FusedLocationService(@ApplicationContext Context context, RxDataStore<Preferences> rxDataStore) {
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         fusedLocationProviderClient = new FusedLocationProviderClient(context);;
+
+        this.rxDatastore = rxDataStore;
         this.context = context;
     }
     
@@ -44,7 +55,7 @@ public class FusedLocationService implements LocationService {
         return Single.create(e -> {
 
             if (!PermissionUtils.isPermissionGranted(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                e.onError(new Throwable(NO_LOCATION_PERMISSION_MESSAGE));
+                e.onError(new Exception(NO_LOCATION_PERMISSION_MESSAGE));
                 return;
             }
 
@@ -61,12 +72,30 @@ public class FusedLocationService implements LocationService {
                             super.onLocationResult(locationResult);
                             fusedLocationProviderClient.removeLocationUpdates(this);
                             lastKnownLocation = locationResult.getLastLocation();
+                            saveLocationInPrefs(lastKnownLocation);
                             e.onSuccess(locationResult.getLastLocation());
                         }
                     },
                     Looper.getMainLooper()
             );
         });
+    }
+
+    private void saveLocationInPrefs(Location location) {
+        rxDatastore.updateDataAsync(preferences -> {
+            MutablePreferences mutablePreferences = preferences.toMutablePreferences();
+            mutablePreferences.set(LATEST_LATITUDE, location.getLatitude());
+            mutablePreferences.set(LATEST_LONGITUDE, location.getLongitude());
+            return Single.just(mutablePreferences);
+        });
+    }
+
+    public Single<LatLng> getLatestPositionFromPrefs() {
+        return rxDatastore.data().map(preferences -> {
+            Double latitude = preferences.get(LATEST_LATITUDE);
+            Double longitude = preferences.get(LATEST_LONGITUDE);
+            return new LatLng(latitude, longitude);
+        }).firstOrError();
     }
 
     @Override
