@@ -9,6 +9,8 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FetchPhotoResponse;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 
+import java.util.List;
+
 import fr.feepin.go4lunch.data.maps.models.NearbySearchResponse;
 import io.reactivex.rxjava3.core.Single;
 
@@ -20,7 +22,7 @@ interface MapsRepository {
 
     Single<FindAutocompletePredictionsResponse> getRestaurantsFromQuery(AutocompleteSessionToken token, String query, LatLng origin, LocationRestriction locationRestriction);
 
-    Single<Place> getRestaurantDetails(String placeId);
+    Single<Place> getRestaurantDetails(String placeId, List<Place.Field> fields);
 
     Single<Location> getLastKnownLocation();
 
