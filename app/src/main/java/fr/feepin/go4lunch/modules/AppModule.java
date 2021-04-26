@@ -2,8 +2,13 @@ package fr.feepin.go4lunch.modules;
 
 import android.content.Context;
 
+import androidx.datastore.preferences.core.Preferences;
+import androidx.datastore.preferences.rxjava3.RxPreferenceDataStoreBuilder;
+import androidx.datastore.rxjava3.RxDataStore;
+
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.gson.GsonBuilder;
 
 import java.lang.annotation.Retention;
@@ -22,9 +27,13 @@ import fr.feepin.go4lunch.Constants;
 import fr.feepin.go4lunch.data.maps.FusedLocationService;
 import fr.feepin.go4lunch.data.maps.LocationService;
 import fr.feepin.go4lunch.data.maps.PlacesApi;
+import fr.feepin.go4lunch.data.user.DefaultUserRepository;
+import fr.feepin.go4lunch.data.user.UserRepository;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import static fr.feepin.go4lunch.Constants.USER_PREFS_NAME;
 
 @Module
 @InstallIn(SingletonComponent.class) abstract public class AppModule {
@@ -59,8 +68,23 @@ import retrofit2.converter.gson.GsonConverterFactory;
         return Places.createClient(context);
     }
 
+    @Singleton
+    @Provides
+    public static RxDataStore<Preferences> providesRxDataStore (@ApplicationContext Context context){
+        return new RxPreferenceDataStoreBuilder(context, USER_PREFS_NAME).build();
+    }
+
+    @Singleton
+    @Provides
+    public static FirebaseAuth providesFirebaseAuth() {
+        return FirebaseAuth.getInstance();
+    }
+
     @Binds
     public abstract LocationService bindsFusedLocationService(FusedLocationService fusedLocationService);
+
+    @Binds
+    public abstract UserRepository bindsDefaultUserRepository(DefaultUserRepository defaultUserRepository);
 
     @Qualifier
     @Retention(RetentionPolicy.RUNTIME)
