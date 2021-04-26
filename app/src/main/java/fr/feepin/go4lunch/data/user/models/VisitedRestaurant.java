@@ -2,21 +2,21 @@ package fr.feepin.go4lunch.data.user.models;
 
 public class VisitedRestaurant {
 
-    private String placeId;
+    private String restaurantId;
 
     private boolean liked;
 
-    public VisitedRestaurant(String placeId, boolean liked) {
-        this.placeId = placeId;
+    public VisitedRestaurant(String restaurantId, boolean liked) {
+        this.restaurantId = restaurantId;
         this.liked = liked;
     }
 
-    public String getPlaceId() {
-        return placeId;
+    public String getRestaurantId() {
+        return restaurantId;
     }
 
-    public void setPlaceId(String placeId) {
-        this.placeId = placeId;
+    public void setRestaurantId(String restaurantId) {
+        this.restaurantId = restaurantId;
     }
 
     public boolean isLiked() {
