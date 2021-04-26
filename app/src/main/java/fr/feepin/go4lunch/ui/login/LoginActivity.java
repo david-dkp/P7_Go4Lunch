@@ -9,7 +9,6 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -25,22 +24,35 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthCredential;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import fr.feepin.go4lunch.MainActivity;
 import fr.feepin.go4lunch.R;
+import fr.feepin.go4lunch.data.user.UserRepository;
+import fr.feepin.go4lunch.data.user.models.UserInfo;
 import fr.feepin.go4lunch.databinding.ActivityLoginBinding;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.CompletableObserver;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
+@AndroidEntryPoint
 public class LoginActivity extends AppCompatActivity {
 
     private static final List<String> FACEBOOK_PERMISSIONS = Arrays.asList("public_profile", "email");
@@ -48,10 +60,14 @@ public class LoginActivity extends AppCompatActivity {
 
     private ActivityLoginBinding binding;
 
-    private FirebaseAuth firebaseAuth;
-    private CallbackManager callbackManager;
+    @Inject
+    public FirebaseAuth firebaseAuth;
 
+    private CallbackManager callbackManager;
     private GoogleSignInClient googleSignInClient;
+
+    @Inject
+    public UserRepository userRepository;
 
     private ActivityResultLauncher<Intent> googleSignInLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -60,8 +76,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 try {
                     GoogleSignInAccount account = task.getResult(ApiException.class);
-                    Log.d(TAG, "Authenticating with google : " + account.getId());
-                    firebaseAuthWithGoogle(account.getIdToken());
+                    firebaseAuthWithCredential(GoogleAuthProvider.getCredential(account.getIdToken(), null));
                 } catch (ApiException apiException) {
                     Log.w(TAG, "Google sign in failed", apiException);
                 }
@@ -79,8 +94,6 @@ public class LoginActivity extends AppCompatActivity {
                 .transform(new BlurTransformation(getResources().getInteger(R.integer.blur_radius)))
                 .into(binding.ivLoginBackground);
 
-        firebaseAuth = FirebaseAuth.getInstance();
-
         setupFacebookSignIn();
         setupGoogleSignIn();
     }
@@ -91,7 +104,8 @@ public class LoginActivity extends AppCompatActivity {
         LoginManager.getInstance().registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                handleFacebookAccessToken(loginResult.getAccessToken());
+                AuthCredential authCredential = FacebookAuthProvider.getCredential(loginResult.getAccessToken().getToken());
+                firebaseAuthWithCredential(authCredential);
             }
 
             @Override
@@ -125,41 +139,45 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void handleFacebookAccessToken(AccessToken token) {
-        Log.d(TAG, "handleFacebookAccessToken:" + token);
+    private void firebaseAuthWithCredential(AuthCredential credential) {
+        firebaseAuth.signInWithCredential(credential).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                AuthResult authResult = task.getResult();
 
-        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
-        firebaseAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        Log.d(TAG, "signInWithCredential:success");
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        Log.w(TAG, "signInWithCredential:failure", task.getException());
-                        Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                Toast.LENGTH_SHORT).show();
+                FirebaseUser user = authResult.getUser();
+                String name = user.getDisplayName() != null ? user.getDisplayName() : "Unknown";
+                String photoUrl = user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : null;
 
-                    }
-                });
-    }
+                if (authResult.getAdditionalUserInfo().isNewUser()) {
+                    UserInfo userInfo = new UserInfo(name, photoUrl, "");
+                    userRepository
+                            .registerUserInfo(userInfo)
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new CompletableObserver() {
+                                @Override
+                                public void onSubscribe(@NonNull Disposable d) {
 
-    private void firebaseAuthWithGoogle(String token) {
-        AuthCredential authCredential = GoogleAuthProvider.getCredential(token, null);
-        firebaseAuth.signInWithCredential(authCredential)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        Log.d(TAG, "signInWithCredential: success");
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        Log.w(TAG, "signInWithCredential: failure", task.getException());
-                        Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
+                                }
+
+                                @Override
+                                public void onComplete() {
+                                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+
+                                @Override
+                                public void onError(@NonNull Throwable e) {
+                                    Log.d("debug", e.getMessage());
+                                }
+                            });
+                }
+
+            } else {
+
+            }
+        });
     }
 
     @Override
