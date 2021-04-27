@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
                 .transform(new BlurTransformation(getResources().getInteger(R.integer.blur_radius)))
                 .into(headerNavBinding.ivHeader);
 
-        mainViewModel = new ViewModelProvider(this, new ViewModelProvider.NewInstanceFactory()).get(MainViewModel.class);
+        mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
         setupObservers();
         setupToolbar();

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
+import android.util.Log;
 
 import androidx.core.location.LocationManagerCompat;
 import androidx.lifecycle.LiveData;
@@ -43,7 +44,7 @@ public class MainViewModel extends ViewModel {
     private MapsRepository mapsRepository;
     private UserRepository userRepository;
 
-    private MutableLiveData<FirebaseUser> currentUser = new MutableLiveData<>(firebaseAuth.getCurrentUser());
+    private MutableLiveData<FirebaseUser> currentUser;
     private MutableLiveData<Resource<LatLng>> position = new MutableLiveData<>();
 
     @Inject
@@ -62,6 +63,7 @@ public class MainViewModel extends ViewModel {
     }
 
     private void setupFirebaseUser() {
+        currentUser = new MutableLiveData<>(firebaseAuth.getCurrentUser());
         firebaseAuth.addAuthStateListener( newAuth -> {
             currentUser.postValue(newAuth.getCurrentUser());
         });
@@ -80,7 +82,7 @@ public class MainViewModel extends ViewModel {
 
         if (!LocationManagerCompat.isLocationEnabled(locationManager)){
 
-            Location latestKnown = mapsRepository.getLastKnownLocation().blockingGet();
+            Location latestKnown = mapsRepository.getLastKnownLocation();
 
             if (latestKnown != null) {
                 position.setValue(new Resource.Error<>(new LatLng(latestKnown.getLatitude(), latestKnown.getLongitude()), Constants.LOCATION_DISABLED_MESSAGE));
@@ -118,6 +120,7 @@ public class MainViewModel extends ViewModel {
                         @Override
                         public void onSuccess(@NonNull Location location) {
                             position.setValue(new Resource.Success<>(new LatLng(location.getLatitude(), location.getLongitude()), null));
+                            Log.d("debug", "called");
                         }
 
                         @Override

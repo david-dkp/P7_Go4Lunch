@@ -1,17 +1,7 @@
 package fr.feepin.go4lunch.ui.map;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Looper;
-import android.provider.Settings;
 import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,33 +11,24 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.core.content.ContextCompat;
-import androidx.core.location.LocationManagerCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.libraries.places.api.model.Place;
 
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import fr.feepin.go4lunch.Constants;
+import fr.feepin.go4lunch.MainViewModel;
 import fr.feepin.go4lunch.R;
 import fr.feepin.go4lunch.contracts.LocationSettingsContract;
+import fr.feepin.go4lunch.data.Resource;
 import fr.feepin.go4lunch.databinding.FragmentMapViewBinding;
 import fr.feepin.go4lunch.utils.PermissionUtils;
 
@@ -60,25 +41,12 @@ public class MapViewFragment extends Fragment {
 
     private GoogleMap googleMap;
 
-    private FusedLocationProviderClient fusedLocationProviderClient;
-
-    private LocationManager locationManager;
-
-    private Location lastLocation;
-
-    private LocationCallback locationCallback = new LocationCallback(){
-        @Override
-        public void onLocationResult(LocationResult locationResult) {
-            super.onLocationResult(locationResult);
-            animateCameraToLocation(locationResult.getLastLocation());
-            lastLocation = locationResult.getLastLocation();
-        }
-    };
+    private MainViewModel mainViewModel;
 
     private final ActivityResultLauncher<Void> navigateToLocationSettingsLauncher = registerForActivityResult(
             new LocationSettingsContract(),
             result -> {
-                moveCameraToMyPosition();
+                mainViewModel.askLocation();
             }
     );
 
@@ -86,7 +54,7 @@ public class MapViewFragment extends Fragment {
             new ActivityResultContracts.RequestPermission(),
             isGranted -> {
                 if (isGranted) {
-                    moveCameraToMyPosition();
+                    mainViewModel.askLocation();
                 } else {
                     if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
                         PermissionUtils.showRationalDialog(getActivity(), R.string.rational_location_permission, (dialog, which) -> {
@@ -97,7 +65,6 @@ public class MapViewFragment extends Fragment {
             }
     );
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -105,8 +72,7 @@ public class MapViewFragment extends Fragment {
         binding.mapView.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        locationManager = (LocationManager) getContext().getSystemService(Context.LOCATION_SERVICE);
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getContext());
+        mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
 
         binding.mapView.getMapAsync(googleMap -> {
             this.googleMap = googleMap;
@@ -114,18 +80,38 @@ public class MapViewFragment extends Fragment {
         });
 
         binding.fabMyLocation.setOnClickListener(v -> {
-            if (PermissionUtils.isPermissionGranted(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)) {
-                moveCameraToMyPosition();
-            } else {
-                requestLocationPermission();
-            }
+            mainViewModel.askLocation();
         });
 
         binding.btnEnableLocation.setOnClickListener(v -> {
             navigateToLocationSettingsLauncher.launch(null);
         });
 
+        setupObservers();
+
         return binding.getRoot();
+    }
+
+    private void setupObservers() {
+        setupPosition();
+    }
+
+    private void setupPosition() {
+        mainViewModel.getPosition().observe(getViewLifecycleOwner(), resource -> {
+            if (resource instanceof Resource.Success) {
+                toggleLocationError(true);
+                animateCameraToPosition(resource.getData());
+            } else if (resource instanceof Resource.Error) {
+                if (resource.getMessage().equals(Constants.NO_LOCATION_PERMISSION_MESSAGE)) {
+                    requestLocationPermission();
+                } else if (resource.getMessage().equals(Constants.LOCATION_DISABLED_MESSAGE)) {
+                    if (resource.getData() != null) {
+                        animateCameraToPosition(resource.getData());
+                    }
+                    toggleLocationError(false);
+                }
+            }
+        });
     }
 
     private void toggleLocationError(boolean isLocationEnabled) {
@@ -134,31 +120,11 @@ public class MapViewFragment extends Fragment {
     }
 
     private void configGoogleMap() {
-        if (PermissionUtils.isPermissionGranted(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)) {
-            moveCameraToMyPosition();
-        }
         setMapStyle();
     }
 
-    private void animateCameraToLocation(Location location) {
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+    private void animateCameraToPosition(LatLng latLng) {
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, Constants.MAPS_START_ZOOM_LEVEL));
-    }
-
-    @SuppressLint("MissingPermission")
-    private void moveCameraToMyPosition() {
-        if (LocationManagerCompat.isLocationEnabled(locationManager)) {
-            toggleLocationError(true);
-            LocationRequest locationRequest = new LocationRequest();
-            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-            locationRequest.setInterval(10000);
-            locationRequest.setFastestInterval(1000);
-            locationRequest.setNumUpdates(1);
-            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
-        } else {
-            toggleLocationError(false);
-            if (lastLocation != null) animateCameraToLocation(lastLocation);
-        }
     }
 
     private void setMapStyle() {
@@ -171,15 +137,9 @@ public class MapViewFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-    }
-
-    @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.map_view_menu, menu);
-
     }
 
     @Override
