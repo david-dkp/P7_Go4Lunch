@@ -53,12 +53,6 @@ public class FusedLocationService implements LocationService {
     @Override
     public Single<Location> getCurrentPosition() {
         return Single.create(e -> {
-
-            if (!PermissionUtils.isPermissionGranted(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                e.onError(new Exception(NO_LOCATION_PERMISSION_MESSAGE));
-                return;
-            }
-
             LocationRequest locationRequest = new LocationRequest();
             locationRequest.setInterval(10000);
             locationRequest.setFastestInterval(1000);
