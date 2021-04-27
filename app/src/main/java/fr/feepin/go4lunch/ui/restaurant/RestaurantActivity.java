@@ -3,35 +3,86 @@ package fr.feepin.go4lunch.ui.restaurant;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.ViewTreeObserver;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.google.android.libraries.places.api.model.Place;
+
+import dagger.hilt.android.AndroidEntryPoint;
+import fr.feepin.go4lunch.Constants;
 import fr.feepin.go4lunch.databinding.ActivityRestaurantBinding;
 
+@AndroidEntryPoint
 public class RestaurantActivity extends AppCompatActivity {
 
-    public final static String EXTRA_RESTAURANT_ID = "EXTRA_RESTAURANT_ID";
-
     private ActivityRestaurantBinding binding;
+
+    private RestaurantViewModel restaurantViewModel;
+
+    private Place place;
+
+    private UsersJoiningAdapter usersJoiningAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityRestaurantBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
 
+        restaurantViewModel = new ViewModelProvider(this).get(RestaurantViewModel.class);
+
+        String restaurantId = getIntent().getStringExtra(Constants.EXTRA_RESTAURANT_ID);
+
+        restaurantViewModel.setup(restaurantId);
+
+        setupWorkmatesList();
+
+        setupObservers();
     }
 
-    public static void navigate(Context context, int restaurantId) {
+    private void setupWorkmatesList() {
+        usersJoiningAdapter = new UsersJoiningAdapter();
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
+        binding.rvWorkmates.setAdapter(usersJoiningAdapter);
+        binding.rvWorkmates.setLayoutManager(linearLayoutManager);
+    }
+
+    private void setupObservers() {
+        restaurantViewModel.getPlace().observe(this, place -> {
+            this.place = place;
+
+            binding.tvRestaurantName.setText(place.getName());
+            binding.tvRestaurantAddress.setText(place.getAddress());
+        });
+
+        restaurantViewModel.getRestaurantPhoto().observe(this, photo -> {
+            Glide.with(this)
+                    .load(photo)
+                    .centerCrop()
+                    .into(binding.ivRestaurantPhoto);
+        });
+
+        restaurantViewModel.getUsersInfo().observe(this, usersInfo -> {
+            Log.d("debug", usersInfo.size() + " ");
+            usersJoiningAdapter.submitList(usersInfo);
+        });
+    }
+
+    public static void navigate(Context context, String restaurantId) {
         Intent intent = new Intent(context, RestaurantActivity.class);
-        intent.putExtra(EXTRA_RESTAURANT_ID, restaurantId);
+        intent.putExtra(Constants.EXTRA_RESTAURANT_ID, restaurantId);
         context.startActivity(intent);
     }
 

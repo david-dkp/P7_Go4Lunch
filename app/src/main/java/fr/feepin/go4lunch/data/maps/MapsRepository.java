@@ -5,6 +5,7 @@ import android.location.Location;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.LocationRestriction;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FetchPhotoResponse;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
@@ -18,7 +19,7 @@ public interface MapsRepository {
 
     Single<NearbySearchResponse> getNearbySearch(String apiKey, String location, int radius);
 
-    Single<FetchPhotoResponse> getRestaurantPhoto(String ref, int width, int height);
+    Single<FetchPhotoResponse> getRestaurantPhoto(PhotoMetadata photoMetadata);
 
     Single<FindAutocompletePredictionsResponse> getRestaurantsFromQuery(AutocompleteSessionToken token, String query, LatLng origin, LocationRestriction locationRestriction);
 

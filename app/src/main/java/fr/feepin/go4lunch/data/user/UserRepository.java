@@ -16,7 +16,6 @@ public interface UserRepository {
 
     Observable<List<UserInfo>> getUsersInfo();
 
-
     Completable setRestaurantRating(String restaurantId, boolean liked);
 
     Completable joinRestaurant(String restaurantId);

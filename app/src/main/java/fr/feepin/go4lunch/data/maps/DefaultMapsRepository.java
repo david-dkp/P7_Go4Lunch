@@ -47,13 +47,9 @@ public class DefaultMapsRepository implements MapsRepository {
     }
 
     @Override
-    public Single<FetchPhotoResponse> getRestaurantPhoto(String ref, int width, int height) {
-        PhotoMetadata photoMetadata = PhotoMetadata.builder(ref)
-                .setWidth(width)
-                .setHeight(height)
+    public Single<FetchPhotoResponse> getRestaurantPhoto(PhotoMetadata photoMetadata) {
+        FetchPhotoRequest fetchPhotoRequest = FetchPhotoRequest.builder(photoMetadata)
                 .build();
-
-        FetchPhotoRequest fetchPhotoRequest = FetchPhotoRequest.builder(photoMetadata).build();
 
         return Single.create(emitter -> {
             FetchPhotoResponse fetchPhotoResponse = Tasks.await(placesClient.fetchPhoto(fetchPhotoRequest));

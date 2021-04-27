@@ -41,6 +41,7 @@ import fr.feepin.go4lunch.R;
 import fr.feepin.go4lunch.contracts.LocationSettingsContract;
 import fr.feepin.go4lunch.data.Resource;
 import fr.feepin.go4lunch.databinding.FragmentMapViewBinding;
+import fr.feepin.go4lunch.ui.restaurant.RestaurantActivity;
 import fr.feepin.go4lunch.utils.PermissionUtils;
 
 @AndroidEntryPoint
@@ -179,6 +180,10 @@ public class MapViewFragment extends Fragment {
                         getBitmapFromVectorDrawable(R.drawable.ic_restaurant_pin_joined)
                         )
         );
+        clusterManager.setOnClusterItemClickListener(item -> {
+            RestaurantActivity.navigate(getContext(), item.getRestaurantId());
+            return true;
+        });
 
         googleMap.setOnCameraIdleListener(clusterManager);
         googleMap.setOnMarkerClickListener(clusterManager);
