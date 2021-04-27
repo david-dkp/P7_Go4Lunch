@@ -54,6 +54,7 @@ public class FusedLocationService implements LocationService {
     public Single<Location> getCurrentPosition() {
         return Single.create(e -> {
             LocationRequest locationRequest = new LocationRequest();
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
             locationRequest.setInterval(10000);
             locationRequest.setFastestInterval(1000);
             locationRequest.setNumUpdates(1);
@@ -93,7 +94,7 @@ public class FusedLocationService implements LocationService {
     }
 
     @Override
-    public Single<Location> getLastKnownPosition() {
-        return Single.just(lastKnownLocation);
+    public Location getLastKnownPosition() {
+        return lastKnownLocation;
     }
 }

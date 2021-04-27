@@ -94,7 +94,7 @@ public class DefaultMapsRepository implements MapsRepository {
     }
 
     @Override
-    public Single<Location> getLastKnownLocation() {
+    public Location getLastKnownLocation() {
         return locationService.getLastKnownPosition();
     }
 

@@ -24,7 +24,7 @@ public interface MapsRepository {
 
     Single<Place> getRestaurantDetails(String placeId, List<Place.Field> fields);
 
-    Single<Location> getLastKnownLocation();
+    Location getLastKnownLocation();
 
     Single<Location> getCurrentLocation();
 

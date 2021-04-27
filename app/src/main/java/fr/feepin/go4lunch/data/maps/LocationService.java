@@ -11,7 +11,7 @@ public interface LocationService {
 
     Single<Location> getCurrentPosition();
 
-    Single<Location> getLastKnownPosition();
+    Location getLastKnownPosition();
 
     Single<LatLng> getLatestPositionFromPrefs();
 }
