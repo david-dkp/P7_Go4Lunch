@@ -1,5 +1,6 @@
 package fr.feepin.go4lunch.data.maps.models;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.Places;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
@@ -58,6 +59,7 @@ public class PlaceResponse {
         public void setLocation(LatLng location) {
             this.location = location;
         }
+
     }
 
     public class LatLng {
@@ -87,6 +89,10 @@ public class PlaceResponse {
 
         public void setLng(float lng) {
             this.lng = lng;
+        }
+
+        public com.google.android.gms.maps.model.LatLng toMapsLatLng() {
+            return new com.google.android.gms.maps.model.LatLng(getLat(), getLng());
         }
     }
 

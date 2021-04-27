@@ -15,9 +15,14 @@ public class NearbySearchResponse {
     @Expose
     private List<PlaceResponse> results;
 
-    public NearbySearchResponse(String status, List<PlaceResponse> results) {
+    @SerializedName("error_message")
+    @Expose
+    private String errorMessage;
+
+    public NearbySearchResponse(String status, List<PlaceResponse> results, String errorMessage) {
         this.status = status;
         this.results = results;
+        this.errorMessage = errorMessage;
     }
 
     public String getStatus() {
@@ -34,5 +39,13 @@ public class NearbySearchResponse {
 
     public void setResults(List<PlaceResponse> results) {
         this.results = results;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 }
