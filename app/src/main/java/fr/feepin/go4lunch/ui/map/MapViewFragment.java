@@ -30,6 +30,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.collections.MarkerManager;
 
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -51,6 +53,8 @@ public class MapViewFragment extends Fragment {
     private GoogleMap googleMap;
 
     private MainViewModel mainViewModel;
+
+    private ClusterManager<RestaurantItem> clusterManager;
 
     private final ActivityResultLauncher<Void> navigateToLocationSettingsLauncher = registerForActivityResult(
             new LocationSettingsContract(),
@@ -125,11 +129,8 @@ public class MapViewFragment extends Fragment {
 
     private void setupRestaurantsState() {
 
-        Bitmap restaurantNotJoinedIcon = getBitmapFromVectorDrawable(R.drawable.ic_restaurant_pin_not_joined);
-        Bitmap restaurantJoinedIcon = getBitmapFromVectorDrawable(R.drawable.ic_restaurant_pin_joined);
-
         mainViewModel.getRestaurantsState().observe(getViewLifecycleOwner(), statesResource -> {
-            googleMap.clear();
+            clusterManager.clearItems();
 
             if (statesResource instanceof Resource.Error) {
                 Log.d("debug", "Error: "+statesResource.getMessage());
@@ -137,12 +138,9 @@ public class MapViewFragment extends Fragment {
             }
 
             for (RestaurantState restaurantState : statesResource.getData()) {
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(restaurantState.isJoined() ? restaurantJoinedIcon : restaurantNotJoinedIcon));
-                markerOptions.position(restaurantState.getPosition());
-                Marker marker = googleMap.addMarker(markerOptions);
-                marker.setTag(restaurantState.getId());
+                clusterManager.addItem(new RestaurantItem(restaurantState.getPosition(), restaurantState.getId(), restaurantState.isJoined()));
             }
+            clusterManager.cluster();
         } );
     }
 
@@ -171,6 +169,20 @@ public class MapViewFragment extends Fragment {
     }
 
     private void configGoogleMap() {
+        clusterManager = new ClusterManager<>(getContext(), googleMap);
+        clusterManager.setRenderer(
+                new RestaurantRenderer(
+                        getContext(),
+                        googleMap,
+                        clusterManager,
+                        getBitmapFromVectorDrawable(R.drawable.ic_restaurant_pin_not_joined),
+                        getBitmapFromVectorDrawable(R.drawable.ic_restaurant_pin_joined)
+                        )
+        );
+
+        googleMap.setOnCameraIdleListener(clusterManager);
+        googleMap.setOnMarkerClickListener(clusterManager);
+
         setMapStyle();
         googleMap.getUiSettings().setMapToolbarEnabled(false);
     }
