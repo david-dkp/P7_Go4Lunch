@@ -24,13 +24,15 @@ import dagger.hilt.InstallIn;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import fr.feepin.go4lunch.Constants;
+import fr.feepin.go4lunch.data.maps.DefaultMapsRepository;
 import fr.feepin.go4lunch.data.maps.FusedLocationService;
 import fr.feepin.go4lunch.data.maps.LocationService;
+import fr.feepin.go4lunch.data.maps.MapsRepository;
 import fr.feepin.go4lunch.data.maps.PlacesApi;
 import fr.feepin.go4lunch.data.user.DefaultUserRepository;
 import fr.feepin.go4lunch.data.user.UserRepository;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import static fr.feepin.go4lunch.Constants.USER_PREFS_NAME;
@@ -44,7 +46,7 @@ import static fr.feepin.go4lunch.Constants.USER_PREFS_NAME;
     public static Retrofit providesMapsRetrofitInstance() {
         return new Retrofit.Builder()
                 .baseUrl(Constants.MAPS_BASE_URL)
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
                 .addConverterFactory(
                         GsonConverterFactory.create(
                                 new GsonBuilder()
@@ -85,6 +87,9 @@ import static fr.feepin.go4lunch.Constants.USER_PREFS_NAME;
 
     @Binds
     public abstract UserRepository bindsDefaultUserRepository(DefaultUserRepository defaultUserRepository);
+
+    @Binds
+    public abstract MapsRepository bindsDefaultMapsRepository(DefaultMapsRepository defaultMapsRepository);
 
     @Qualifier
     @Retention(RetentionPolicy.RUNTIME)
