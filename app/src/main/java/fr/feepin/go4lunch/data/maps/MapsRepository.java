@@ -14,9 +14,9 @@ import java.util.List;
 import fr.feepin.go4lunch.data.maps.models.NearbySearchResponse;
 import io.reactivex.rxjava3.core.Single;
 
-interface MapsRepository {
+public interface MapsRepository {
 
-    Single<NearbySearchResponse> getNearbySearch(String apiKey, String location, String radius);
+    Single<NearbySearchResponse> getNearbySearch(String apiKey, String location, int radius);
 
     Single<FetchPhotoResponse> getRestaurantPhoto(String ref, int width, int height);
 

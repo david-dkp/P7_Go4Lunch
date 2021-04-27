@@ -16,7 +16,6 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
-import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -42,7 +41,7 @@ public class DefaultMapsRepository implements MapsRepository {
     }
 
     @Override
-    public Single<NearbySearchResponse> getNearbySearch(String apiKey, String location, String radius) {
+    public Single<NearbySearchResponse> getNearbySearch(String apiKey, String location, int radius) {
 
         return placesApi.getNearbySearch(apiKey, location, radius, "restaurant");
     }

@@ -12,7 +12,7 @@ public interface PlacesApi {
     Single<NearbySearchResponse> getNearbySearch(
             @Query("key") String apiKey,
             @Query("location") String location,
-            @Query("radius") String radius,
+            @Query("radius") int radius,
             @Query("type") String type
     );
 }
