@@ -1,6 +1,10 @@
 package fr.feepin.go4lunch.ui.map;
 
 import android.Manifest;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.transition.TransitionManager;
 import android.util.Log;
@@ -14,13 +18,18 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -77,6 +86,7 @@ public class MapViewFragment extends Fragment {
         binding.mapView.getMapAsync(googleMap -> {
             this.googleMap = googleMap;
             configGoogleMap();
+            setupObservers();
         });
 
         binding.fabMyLocation.setOnClickListener(v -> {
@@ -87,13 +97,12 @@ public class MapViewFragment extends Fragment {
             navigateToLocationSettingsLauncher.launch(null);
         });
 
-        setupObservers();
-
         return binding.getRoot();
     }
 
     private void setupObservers() {
         setupPosition();
+        setupRestaurantsState();
     }
 
     private void setupPosition() {
@@ -114,6 +123,48 @@ public class MapViewFragment extends Fragment {
         });
     }
 
+    private void setupRestaurantsState() {
+
+        Bitmap restaurantNotJoinedIcon = getBitmapFromVectorDrawable(R.drawable.ic_restaurant_pin_not_joined);
+        Bitmap restaurantJoinedIcon = getBitmapFromVectorDrawable(R.drawable.ic_restaurant_pin_joined);
+
+        mainViewModel.getRestaurantsState().observe(getViewLifecycleOwner(), statesResource -> {
+            googleMap.clear();
+
+            if (statesResource instanceof Resource.Error) {
+                Log.d("debug", "Error: "+statesResource.getMessage());
+                return;
+            }
+
+            for (RestaurantState restaurantState : statesResource.getData()) {
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.icon(BitmapDescriptorFactory.fromBitmap(restaurantState.isJoined() ? restaurantJoinedIcon : restaurantNotJoinedIcon));
+                markerOptions.position(restaurantState.getPosition());
+                Marker marker = googleMap.addMarker(markerOptions);
+                marker.setTag(restaurantState.getId());
+            }
+        } );
+    }
+
+    private Bitmap getBitmapFromVectorDrawable(int vectorId) {
+        Drawable drawable = ContextCompat.getDrawable(getContext(), vectorId);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            drawable = (DrawableCompat.wrap(drawable)).mutate();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(
+                drawable.getIntrinsicWidth(),
+                drawable.getIntrinsicHeight(),
+                Bitmap.Config.ARGB_8888
+        );
+
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
+    }
+
     private void toggleLocationError(boolean isLocationEnabled) {
         TransitionManager.beginDelayedTransition(binding.getRoot());
         binding.clLocationErrorContainer.setVisibility(isLocationEnabled ? View.INVISIBLE : View.VISIBLE);
@@ -121,6 +172,7 @@ public class MapViewFragment extends Fragment {
 
     private void configGoogleMap() {
         setMapStyle();
+        googleMap.getUiSettings().setMapToolbarEnabled(false);
     }
 
     private void animateCameraToPosition(LatLng latLng) {

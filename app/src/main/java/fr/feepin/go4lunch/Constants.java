@@ -8,4 +8,6 @@ public class Constants {
     public static final String LOCATION_DISABLED_MESSAGE = "Location is disabled";
 
     public static final String USER_PREFS_NAME = "User preferences";
+
+    public static final int NEARBY_SEARCH_RADIUS = 300;
 }
