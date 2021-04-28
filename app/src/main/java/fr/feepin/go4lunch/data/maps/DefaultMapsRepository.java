@@ -18,6 +18,7 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -75,13 +76,19 @@ public class DefaultMapsRepository implements MapsRepository {
     }
 
     @Override
-    public Single<Place> getRestaurantDetails(String placeId, List<Place.Field> fields) {
+    public Single<Place> getRestaurantDetails(String placeId, List<Place.Field> fields, @Nullable AutocompleteSessionToken token) {
         return Single.create( e -> {
 
-            FetchPlaceRequest fetchPlaceRequest = FetchPlaceRequest.builder(
+            FetchPlaceRequest.Builder builder = FetchPlaceRequest.builder(
                     placeId,
                     fields
-                    ).build();
+                    );
+
+            if (token != null) {
+                builder.setSessionToken(token);
+            }
+
+            FetchPlaceRequest fetchPlaceRequest = builder.build();
 
             Place place = Tasks.await(placesClient.fetchPlace(fetchPlaceRequest)).getPlace();
 

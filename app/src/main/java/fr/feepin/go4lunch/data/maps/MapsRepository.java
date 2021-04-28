@@ -23,7 +23,7 @@ public interface MapsRepository {
 
     Single<FindAutocompletePredictionsResponse> getRestaurantsFromQuery(AutocompleteSessionToken token, String query, LatLng origin, LocationRestriction locationRestriction);
 
-    Single<Place> getRestaurantDetails(String placeId, List<Place.Field> fields);
+    Single<Place> getRestaurantDetails(String placeId, List<Place.Field> fields, AutocompleteSessionToken token);
 
     Location getLastKnownLocation();
 
