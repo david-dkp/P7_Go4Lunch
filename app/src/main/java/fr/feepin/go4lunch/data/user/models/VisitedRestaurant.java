@@ -11,6 +11,8 @@ public class VisitedRestaurant {
         this.liked = liked;
     }
 
+    public VisitedRestaurant(){};
+
     public String getRestaurantId() {
         return restaurantId;
     }

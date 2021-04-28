@@ -17,7 +17,6 @@
         android:id="@+id/ivRestaurantPhoto"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/green"
         android:contentDescription="@string/desc_restaurant_photo"
         app:layout_constraintHeight_percent=".35"
         app:layout_constraintTop_toTopOf="parent"
@@ -54,6 +53,8 @@
         />
 
     <TextView
+        android:singleLine="true"
+        android:ellipsize="marquee"
         android:id="@+id/tvRestaurantName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -77,6 +78,8 @@
         />
 
     <TextView
+        android:singleLine="true"
+        android:ellipsize="marquee"
         android:id="@+id/tvRestaurantAddress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -147,7 +150,7 @@
     <View
         android:id="@+id/vSeparation"
         android:layout_width="match_parent"
-        android:layout_height="1px"
+        android:layout_height="1dp"
         android:background="?attr/scrimBackground"
         app:layout_constraintTop_toBottomOf="@id/tvCall"
         />
