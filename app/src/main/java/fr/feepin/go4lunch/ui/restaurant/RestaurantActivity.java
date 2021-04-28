@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -61,6 +62,19 @@ public class RestaurantActivity extends AppCompatActivity {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse("tel:"+place.getPhoneNumber()));
                 startActivity(intent);
+            } else {
+                Toast.makeText(this, "Yeah, no", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        binding.tvWebsite.setOnClickListener(v -> {
+            Place place = restaurantViewModel.getPlace().getValue();
+            if (place == null) return;
+
+            if (place.getWebsiteUri() != null) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(place.getWebsiteUri());
+                startActivity(intent);
             }
         });
 
@@ -80,6 +94,15 @@ public class RestaurantActivity extends AppCompatActivity {
         restaurantViewModel.getPlace().observe(this, place -> {
             binding.tvRestaurantName.setText(place.getName());
             binding.tvRestaurantAddress.setText(place.getAddress());
+
+            if (place.getPhoneNumber() == null) {
+                binding.tvCall.setEnabled(false);
+            }
+
+            if (place.getWebsiteUri() == null) {
+                binding.tvWebsite.setEnabled(false);
+            }
+
         });
 
         restaurantViewModel.getRestaurantPhoto().observe(this, photo -> {
