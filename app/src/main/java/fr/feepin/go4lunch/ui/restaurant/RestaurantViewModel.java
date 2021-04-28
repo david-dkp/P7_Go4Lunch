@@ -26,6 +26,7 @@ import fr.feepin.go4lunch.data.user.models.UserInfo;
 import fr.feepin.go4lunch.data.user.models.VisitedRestaurant;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.CompletableObserver;
 import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.core.Scheduler;
@@ -88,7 +89,7 @@ public class RestaurantViewModel extends ViewModel {
                 if (visitedRestaurant.isLiked()) likes++;
             }
 
-            int rating = Math.round(((float)likes/(float)visitedRestaurants.size()) * 3f);
+            int rating = Math.round(((float) likes / (float) visitedRestaurants.size()) * 3f);
             this.rating.setValue(rating);
         });
     }
@@ -293,7 +294,37 @@ public class RestaurantViewModel extends ViewModel {
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        Log.d("debug", "error: "+e.getMessage());
+                        Log.d("debug", "error: " + e.getMessage());
+                    }
+                });
+    }
+
+    public void joinOrLeaveRestaurant() {
+        Completable completable;
+
+        if (isJoined().getValue()) {
+            completable = userRepository.leaveRestaurant();
+        } else {
+            completable = userRepository.joinRestaurant(placeId);
+        }
+
+        completable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        compositeDisposable.add(d);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        joined.setValue(!joined.getValue());
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Log.d("debug", e.getMessage());
                     }
                 });
     }
@@ -314,11 +345,17 @@ public class RestaurantViewModel extends ViewModel {
         return restaurantPhoto;
     }
 
-    public LiveData<Boolean> isLiked() { return liked; }
+    public LiveData<Boolean> isLiked() {
+        return liked;
+    }
 
-    public LiveData<Boolean> isJoined() { return joined; }
+    public LiveData<Boolean> isJoined() {
+        return joined;
+    }
 
-    public LiveData<Boolean> hasAlreadyVisited() { return alreadyVisited; }
+    public LiveData<Boolean> hasAlreadyVisited() {
+        return alreadyVisited;
+    }
 
     @Override
     protected void onCleared() {

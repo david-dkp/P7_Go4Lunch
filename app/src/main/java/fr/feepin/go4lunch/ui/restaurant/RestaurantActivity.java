@@ -60,7 +60,7 @@ public class RestaurantActivity extends AppCompatActivity {
 
             if (place.getPhoneNumber() != null) {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("tel:"+place.getPhoneNumber()));
+                intent.setData(Uri.parse("tel:" + place.getPhoneNumber()));
                 startActivity(intent);
             } else {
                 Toast.makeText(this, "Yeah, no", Toast.LENGTH_LONG).show();
@@ -82,8 +82,12 @@ public class RestaurantActivity extends AppCompatActivity {
             }
         });
 
-        setupWorkmatesList();
+        //User joining the restaurant
+        binding.fabJoinRestaurant.setOnClickListener(v -> {
+            restaurantViewModel.joinOrLeaveRestaurant();
+        });
 
+        setupWorkmatesList();
         setupObservers();
     }
 
@@ -139,6 +143,11 @@ public class RestaurantActivity extends AppCompatActivity {
 
         restaurantViewModel.hasAlreadyVisited().observe(this, hasVisited -> {
             binding.tvLike.setEnabled(hasVisited);
+        });
+
+        //Joining info
+        restaurantViewModel.isJoined().observe(this, isJoined -> {
+            binding.fabJoinRestaurant.setActivated(isJoined);
         });
     }
 

@@ -115,20 +115,24 @@ public class DefaultUserRepository implements UserRepository {
     @Override
     public Completable joinRestaurant(String restaurantId) {
         return Completable.create(e -> {
-            firebaseFirestore
+            Tasks.await(firebaseFirestore
                     .collection("users")
                     .document(firebaseAuth.getCurrentUser().getUid())
-                    .update("restaurantChoiceId", restaurantId);
+                    .update("restaurantChoiceId", restaurantId)
+            );
+            e.onComplete();
         });
     }
 
     @Override
     public Completable leaveRestaurant() {
         return Completable.create(e -> {
-            firebaseFirestore
+            Tasks.await(firebaseFirestore
                     .collection("users")
                     .document(firebaseAuth.getCurrentUser().getUid())
-                    .update("restaurantChoiceId", null);
+                    .update("restaurantChoiceId", "")
+            );
+            e.onComplete();
         });
     }
 
@@ -158,6 +162,21 @@ public class DefaultUserRepository implements UserRepository {
             );
 
             emitter.onComplete();
+        });
+    }
+
+    @Override
+    public Single<List<VisitedRestaurant>> getCurrentUserVisitedRestaurants() {
+        return Single.create(e -> {
+            List<VisitedRestaurant> visitedRestaurants = Tasks.await(
+                    firebaseFirestore
+                            .collection("users")
+                            .document(firebaseAuth.getCurrentUser().getUid())
+                            .collection("visited_restaurants")
+                            .get()
+            ).toObjects(VisitedRestaurant.class);
+
+            e.onSuccess(visitedRestaurants);
         });
     }
 }

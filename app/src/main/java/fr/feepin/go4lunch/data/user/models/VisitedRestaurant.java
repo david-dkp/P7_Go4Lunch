@@ -1,5 +1,7 @@
 package fr.feepin.go4lunch.data.user.models;
 
+import java.util.Objects;
+
 public class VisitedRestaurant {
 
     private String restaurantId;
@@ -11,7 +13,10 @@ public class VisitedRestaurant {
         this.liked = liked;
     }
 
-    public VisitedRestaurant(){};
+    public VisitedRestaurant() {
+    }
+
+    ;
 
     public String getRestaurantId() {
         return restaurantId;
@@ -27,5 +32,19 @@ public class VisitedRestaurant {
 
     public void setLiked(boolean liked) {
         this.liked = liked;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VisitedRestaurant that = (VisitedRestaurant) o;
+        return liked == that.liked &&
+                Objects.equals(restaurantId, that.restaurantId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(restaurantId, liked);
     }
 }
