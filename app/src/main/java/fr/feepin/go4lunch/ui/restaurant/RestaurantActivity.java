@@ -47,6 +47,9 @@ public class RestaurantActivity extends AppCompatActivity {
 
         restaurantViewModel.setup(restaurantId);
 
+        binding.tvRestaurantName.setSelected(true);
+        binding.tvRestaurantAddress.setSelected(true);
+
         setupWorkmatesList();
 
         setupObservers();

@@ -53,12 +53,15 @@
         />
 
     <TextView
-        android:singleLine="true"
-        android:ellipsize="marquee"
         android:id="@+id/tvRestaurantName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/restaurant_restaurant_name_margin"
+        android:ellipsize="marquee"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:singleLine="true"
         android:textAppearance="?attr/textAppearanceHeadline5"
         android:textColor="?attr/colorOnPrimary"
         app:layout_constraintLeft_toLeftOf="@id/vDescriptionContainer"
@@ -78,11 +81,14 @@
         />
 
     <TextView
-        android:singleLine="true"
-        android:ellipsize="marquee"
         android:id="@+id/tvRestaurantAddress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:ellipsize="marquee"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:singleLine="true"
         android:textAppearance="?attr/textAppearanceBody2"
         android:textColor="?attr/colorOnPrimary"
         app:layout_constraintLeft_toLeftOf="@id/tvRestaurantName"
