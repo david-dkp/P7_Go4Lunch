@@ -6,9 +6,12 @@ import android.widget.TextView;
 import androidx.datastore.preferences.core.Preferences;
 import androidx.datastore.rxjava3.RxDataStore;
 
+import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -24,7 +27,7 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 
 @Singleton
-public class DefaultUserRepository implements UserRepository{
+public class DefaultUserRepository implements UserRepository {
 
     private FirebaseFirestore firebaseFirestore;
     private RxDataStore<Preferences> rxDataStore;
@@ -54,23 +57,39 @@ public class DefaultUserRepository implements UserRepository{
     }
 
     @Override
+    public Single<UserInfo> getCurrentUserInfo() {
+        return Single.create(emitter -> {
+            DocumentSnapshot documentSnapshot = Tasks.await(
+                    firebaseFirestore
+                            .collection("users")
+                            .document(firebaseAuth.getCurrentUser().getUid())
+                            .get()
+            );
+
+            emitter.onSuccess(documentSnapshot.toObject(UserInfo.class));
+        });
+    }
+
+    @Override
     public Observable<List<UserInfo>> getUsersInfo() {
         return Observable.create(e -> {
 
-            firebaseFirestore.collection("users").addSnapshotListener((command, error) -> {
-                if (error != null) {
-                    e.onError(error);
-                } else {
-                    e.onNext(command.toObjects(UserInfo.class));
-                }
-            });
+            firebaseFirestore.collection("users")
+                    .whereNotEqualTo(FieldPath.documentId(), firebaseAuth.getCurrentUser().getUid())
+                    .addSnapshotListener((command, error) -> {
+                        if (error != null) {
+                            e.onError(error);
+                        } else {
+                            e.onNext(command.toObjects(UserInfo.class));
+                        }
+                    });
 
         });
     }
 
     @Override
     public Completable setRestaurantRating(String restaurantId, boolean liked) {
-        return Completable.create( e -> {
+        return Completable.create(e -> {
             QuerySnapshot querySnapshot = Tasks.await(
                     firebaseFirestore
                             .collection("users")
@@ -82,7 +101,13 @@ public class DefaultUserRepository implements UserRepository{
 
             );
 
-            Tasks.await(querySnapshot.getDocuments().get(0).getReference().update("liked", liked));
+            Tasks.await(
+                    querySnapshot
+                            .getDocuments()
+                            .get(0)
+                            .getReference()
+                            .update("liked", liked)
+            );
             e.onComplete();
         });
     }
@@ -110,7 +135,27 @@ public class DefaultUserRepository implements UserRepository{
     @Override
     public Completable registerUserInfo(UserInfo userInfo) {
         return Completable.create(emitter -> {
-            Tasks.await(firebaseFirestore.collection("users").document(firebaseAuth.getCurrentUser().getUid()).set(userInfo));
+            Tasks.await(
+                    firebaseFirestore
+                            .collection("users")
+                            .document(firebaseAuth.getCurrentUser().getUid())
+                            .set(userInfo)
+            );
+
+            emitter.onComplete();
+        });
+    }
+
+    @Override
+    public Completable addRestaurantToVisited(String restaurantId) {
+        return Completable.create(emitter -> {
+            Tasks.await(
+                    firebaseFirestore
+                            .collection("users")
+                            .document(firebaseAuth.getCurrentUser().getUid())
+                            .collection("visited_restaurants")
+                            .add(new VisitedRestaurant(restaurantId, false))
+            );
 
             emitter.onComplete();
         });
