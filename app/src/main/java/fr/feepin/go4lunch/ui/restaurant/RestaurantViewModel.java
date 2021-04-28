@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -13,6 +14,7 @@ import com.google.android.libraries.places.api.net.FetchPhotoResponse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -24,6 +26,7 @@ import fr.feepin.go4lunch.data.user.models.UserInfo;
 import fr.feepin.go4lunch.data.user.models.VisitedRestaurant;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.CompletableObserver;
 import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.core.SingleObserver;
@@ -39,10 +42,19 @@ public class RestaurantViewModel extends ViewModel {
     private UserRepository userRepository;
     private MapsRepository mapsRepository;
 
+    //States
     private MutableLiveData<Bitmap> restaurantPhoto = new MutableLiveData<>();
     private MutableLiveData<Place> place = new MutableLiveData<>();
     private MutableLiveData<List<UserInfo>> usersInfo = new MutableLiveData<>();
-    private MutableLiveData<Integer> rating = new MutableLiveData<>();
+    private MediatorLiveData<Integer> rating = new MediatorLiveData<>();
+    private MediatorLiveData<Boolean> liked = new MediatorLiveData<>();
+    private MediatorLiveData<Boolean> joined = new MediatorLiveData<>();
+    private MediatorLiveData<Boolean> alreadyVisited = new MediatorLiveData<>();
+
+    //Datas
+    private MutableLiveData<UserInfo> currentUserInfo = new MutableLiveData<>();
+    private MutableLiveData<List<VisitedRestaurant>> usersVisitedRestaurants = new MutableLiveData<>(Collections.emptyList());
+    private MutableLiveData<List<VisitedRestaurant>> currentUserVisitedRestaurants = new MutableLiveData<>(Collections.emptyList());
 
     private String placeId;
 
@@ -54,12 +66,60 @@ public class RestaurantViewModel extends ViewModel {
 
     public void setup(String placeId) {
         this.placeId = placeId;
-        setupPlace();
+
         setupRating();
-        setupUsersInfo();
+        setupLiked();
+        setupJoined();
+        setupAlreadyVisited();
+
+
+        askPlace();
+        askRating();
+        askUsersInfo();
+        askCurrentUserInfo();
+        askCurrentUserVisitedRestaurants();
     }
 
-    private void setupPlace() {
+    private void setupRating() {
+        rating.addSource(usersVisitedRestaurants, visitedRestaurants -> {
+            int likes = 0;
+
+            for (VisitedRestaurant visitedRestaurant : visitedRestaurants) {
+                if (visitedRestaurant.isLiked()) likes++;
+            }
+
+            int rating = Math.round(((float)likes/(float)visitedRestaurants.size()) * 3f);
+            this.rating.setValue(rating);
+        });
+    }
+
+    private void setupLiked() {
+        liked.addSource(currentUserVisitedRestaurants, visitedRestaurants -> {
+            liked.setValue(visitedRestaurants.contains(new VisitedRestaurant(placeId, true)));
+        });
+    }
+
+    private void setupJoined() {
+        joined.addSource(currentUserInfo, userInfo -> {
+            joined.setValue(userInfo.getRestaurantChoiceId().equals(placeId));
+        });
+    }
+
+    private void setupAlreadyVisited() {
+        alreadyVisited.addSource(currentUserVisitedRestaurants, visitedRestaurants -> {
+
+            for (VisitedRestaurant visitedRestaurant : visitedRestaurants) {
+                if (visitedRestaurant.getRestaurantId().equals(placeId)) {
+                    alreadyVisited.setValue(true);
+                    return;
+                }
+            }
+
+            alreadyVisited.setValue(false);
+        });
+    }
+
+    private void askPlace() {
         mapsRepository.getRestaurantDetails(placeId, Arrays.asList(
                 Place.Field.NAME,
                 Place.Field.ADDRESS,
@@ -81,7 +141,7 @@ public class RestaurantViewModel extends ViewModel {
                         RestaurantViewModel.this.place.setValue(place);
                         if (place.getPhotoMetadatas() != null) {
                             if (!place.getPhotoMetadatas().isEmpty()) {
-                                setupPhoto(place.getPhotoMetadatas().get(0));
+                                askPhoto(place.getPhotoMetadatas().get(0));
                             }
                         }
                     }
@@ -93,7 +153,7 @@ public class RestaurantViewModel extends ViewModel {
                 });
     }
 
-    private void setupPhoto(PhotoMetadata photoMetadata) {
+    private void askPhoto(PhotoMetadata photoMetadata) {
         mapsRepository.getRestaurantPhoto(photoMetadata)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -115,7 +175,7 @@ public class RestaurantViewModel extends ViewModel {
                 });
     }
 
-    private void setupRating() {
+    private void askRating() {
         userRepository.getVisitedRestaurants(placeId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -127,14 +187,7 @@ public class RestaurantViewModel extends ViewModel {
 
                     @Override
                     public void onSuccess(@NonNull List<VisitedRestaurant> visitedRestaurants) {
-                        int likes = 0;
-
-                        for (VisitedRestaurant visitedRestaurant : visitedRestaurants) {
-                            if (visitedRestaurant.isLiked()) likes++;
-                        }
-
-                        int rating = Math.round(((float)likes/(float)visitedRestaurants.size()) * 3f);
-                        RestaurantViewModel.this.rating.setValue(rating);
+                        usersVisitedRestaurants.setValue(visitedRestaurants);
                     }
 
                     @Override
@@ -144,7 +197,7 @@ public class RestaurantViewModel extends ViewModel {
                 });
     }
 
-    private void setupUsersInfo() {
+    private void askUsersInfo() {
         userRepository.getUsersInfo()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -179,6 +232,72 @@ public class RestaurantViewModel extends ViewModel {
                 });
     }
 
+    private void askCurrentUserInfo() {
+        userRepository.getCurrentUserInfo()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleObserver<UserInfo>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        compositeDisposable.add(d);
+                    }
+
+                    @Override
+                    public void onSuccess(@NonNull UserInfo userInfo) {
+                        RestaurantViewModel.this.currentUserInfo.setValue(userInfo);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+                });
+    }
+
+    private void askCurrentUserVisitedRestaurants() {
+        userRepository.getCurrentUserVisitedRestaurants()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleObserver<List<VisitedRestaurant>>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        compositeDisposable.add(d);
+                    }
+
+                    @Override
+                    public void onSuccess(@NonNull List<VisitedRestaurant> visitedRestaurants) {
+                        currentUserVisitedRestaurants.setValue(visitedRestaurants);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Log.d("debug", e.getMessage());
+                    }
+                });
+    }
+
+    public void rateRestaurant() {
+        userRepository.setRestaurantRating(placeId, !liked.getValue())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        compositeDisposable.add(d);
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        liked.setValue(!liked.getValue());
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Log.d("debug", "error: "+e.getMessage());
+                    }
+                });
+    }
+
     public LiveData<Place> getPlace() {
         return place;
     }
@@ -194,6 +313,12 @@ public class RestaurantViewModel extends ViewModel {
     public LiveData<Bitmap> getRestaurantPhoto() {
         return restaurantPhoto;
     }
+
+    public LiveData<Boolean> isLiked() { return liked; }
+
+    public LiveData<Boolean> isJoined() { return joined; }
+
+    public LiveData<Boolean> hasAlreadyVisited() { return alreadyVisited; }
 
     @Override
     protected void onCleared() {

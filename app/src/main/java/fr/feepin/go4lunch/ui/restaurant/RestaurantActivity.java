@@ -67,6 +67,10 @@ public class RestaurantActivity extends AppCompatActivity {
             }
         });
 
+        binding.tvLike.setOnClickListener(v -> {
+            restaurantViewModel.rateRestaurant();
+        });
+
         binding.tvWebsite.setOnClickListener(v -> {
             Place place = restaurantViewModel.getPlace().getValue();
             if (place == null) return;
@@ -91,6 +95,8 @@ public class RestaurantActivity extends AppCompatActivity {
     }
 
     private void setupObservers() {
+
+        //Restaurant infos
         restaurantViewModel.getPlace().observe(this, place -> {
             binding.tvRestaurantName.setText(place.getName());
             binding.tvRestaurantAddress.setText(place.getAddress());
@@ -105,6 +111,7 @@ public class RestaurantActivity extends AppCompatActivity {
 
         });
 
+        //Restaurant photo
         restaurantViewModel.getRestaurantPhoto().observe(this, photo -> {
             Glide.with(this)
                     .load(photo)
@@ -112,15 +119,26 @@ public class RestaurantActivity extends AppCompatActivity {
                     .into(binding.ivRestaurantPhoto);
         });
 
+        //Workmates joining
         restaurantViewModel.getUsersInfo().observe(this, usersInfo -> {
             usersJoiningAdapter.submitList(usersInfo);
         });
 
+        //Rating
         restaurantViewModel.getRating().observe(this, rating -> {
             binding.linearLayoutRating.removeAllViews();
             for (int i = 0; i < rating; i++) {
                 getLayoutInflater().inflate(R.layout.item_restaurant_rating_star, binding.linearLayoutRating, true);
             }
+        });
+
+        //Liking
+        restaurantViewModel.isLiked().observe(this, liked -> {
+            binding.tvLike.setActivated(liked);
+        });
+
+        restaurantViewModel.hasAlreadyVisited().observe(this, hasVisited -> {
+            binding.tvLike.setEnabled(hasVisited);
         });
     }
 
