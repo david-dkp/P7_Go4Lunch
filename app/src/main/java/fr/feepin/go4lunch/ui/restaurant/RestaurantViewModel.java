@@ -21,6 +21,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import fr.feepin.go4lunch.data.maps.MapsRepository;
 import fr.feepin.go4lunch.data.user.UserRepository;
 import fr.feepin.go4lunch.data.user.models.UserInfo;
+import fr.feepin.go4lunch.data.user.models.VisitedRestaurant;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observer;
@@ -87,7 +88,7 @@ public class RestaurantViewModel extends ViewModel {
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        Log.d("debug", "error: " + e.getMessage());
+
                     }
                 });
     }
@@ -109,13 +110,38 @@ public class RestaurantViewModel extends ViewModel {
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        Log.d("debug", "Error: " + e.getMessage());
+
                     }
                 });
     }
 
     private void setupRating() {
+        userRepository.getVisitedRestaurants(placeId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleObserver<List<VisitedRestaurant>>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        compositeDisposable.add(d);
+                    }
 
+                    @Override
+                    public void onSuccess(@NonNull List<VisitedRestaurant> visitedRestaurants) {
+                        int likes = 0;
+
+                        for (VisitedRestaurant visitedRestaurant : visitedRestaurants) {
+                            if (visitedRestaurant.isLiked()) likes++;
+                        }
+
+                        int rating = Math.round(((float)likes/(float)visitedRestaurants.size()) * 3f);
+                        RestaurantViewModel.this.rating.setValue(rating);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+                });
     }
 
     private void setupUsersInfo() {
@@ -143,7 +169,7 @@ public class RestaurantViewModel extends ViewModel {
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        Log.d("debug", e.getMessage());
+
                     }
 
                     @Override

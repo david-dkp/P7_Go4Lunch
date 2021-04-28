@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.ViewTreeObserver;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,6 +20,7 @@ import com.google.android.libraries.places.api.model.Place;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import fr.feepin.go4lunch.Constants;
+import fr.feepin.go4lunch.R;
 import fr.feepin.go4lunch.databinding.ActivityRestaurantBinding;
 
 @AndroidEntryPoint
@@ -27,8 +29,6 @@ public class RestaurantActivity extends AppCompatActivity {
     private ActivityRestaurantBinding binding;
 
     private RestaurantViewModel restaurantViewModel;
-
-    private Place place;
 
     private UsersJoiningAdapter usersJoiningAdapter;
 
@@ -61,8 +61,6 @@ public class RestaurantActivity extends AppCompatActivity {
 
     private void setupObservers() {
         restaurantViewModel.getPlace().observe(this, place -> {
-            this.place = place;
-
             binding.tvRestaurantName.setText(place.getName());
             binding.tvRestaurantAddress.setText(place.getAddress());
         });
@@ -75,8 +73,16 @@ public class RestaurantActivity extends AppCompatActivity {
         });
 
         restaurantViewModel.getUsersInfo().observe(this, usersInfo -> {
-            Log.d("debug", usersInfo.size() + " ");
             usersJoiningAdapter.submitList(usersInfo);
+        });
+
+        restaurantViewModel.getRating().observe(this, rating -> {
+            binding.linearLayoutRating.removeAllViews();
+            Log.d("debug", rating.toString());
+            for (int i = 0; i < rating; i++) {
+                getLayoutInflater().inflate(R.layout.item_restaurant_rating_star, binding.linearLayoutRating, true);
+            }
+
         });
     }
 
