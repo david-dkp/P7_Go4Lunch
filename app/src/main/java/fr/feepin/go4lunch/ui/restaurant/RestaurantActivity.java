@@ -2,6 +2,7 @@ package fr.feepin.go4lunch.ui.restaurant;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -47,8 +48,21 @@ public class RestaurantActivity extends AppCompatActivity {
 
         restaurantViewModel.setup(restaurantId);
 
+        //Trigger name and address scroll when too long
         binding.tvRestaurantName.setSelected(true);
         binding.tvRestaurantAddress.setSelected(true);
+
+        //Setup options button listeners, call/like/website
+        binding.tvCall.setOnClickListener(v -> {
+            Place place = restaurantViewModel.getPlace().getValue();
+            if (place == null) return;
+
+            if (place.getPhoneNumber() != null) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse("tel:"+place.getPhoneNumber()));
+                startActivity(intent);
+            }
+        });
 
         setupWorkmatesList();
 
@@ -81,11 +95,9 @@ public class RestaurantActivity extends AppCompatActivity {
 
         restaurantViewModel.getRating().observe(this, rating -> {
             binding.linearLayoutRating.removeAllViews();
-            Log.d("debug", rating.toString());
             for (int i = 0; i < rating; i++) {
                 getLayoutInflater().inflate(R.layout.item_restaurant_rating_star, binding.linearLayoutRating, true);
             }
-
         });
     }
 
