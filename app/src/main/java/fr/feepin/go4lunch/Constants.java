@@ -10,4 +10,6 @@ public class Constants {
     public static final String USER_PREFS_NAME = "User preferences";
 
     public static final int NEARBY_SEARCH_RADIUS = 300;
+
+    public static final String EXTRA_RESTAURANT_ID = "EXTRA_RESTAURANT_ID";
 }
