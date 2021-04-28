@@ -36,4 +36,5 @@
     <string name="text_website">Website</string>
     <string name="text_location_error">The location services are disabled.</string>
     <string name="text_enable">Enable</string>
+    <string name="text_user_joining">%1$s is joining!</string>
 </resources>
