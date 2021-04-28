@@ -67,6 +67,10 @@ dependencies {
     def maps_version = "17.0.0"
     implementation "com.google.android.gms:play-services-maps:$maps_version"
 
+    //Maps util
+    def maps_util_version = "2.2.2"
+    implementation "com.google.maps.android:android-maps-utils:$maps_util_version"
+
     //Places
     def places_version = "2.4.0"
     implementation "com.google.android.libraries.places:places:$places_version"
@@ -107,4 +111,9 @@ dependencies {
     implementation "androidx.datastore:datastore-preferences:$datastore_version"
     implementation "androidx.datastore:datastore-preferences-rxjava3:$datastore_version"
 
+    //WorkManager
+    def work_version = "2.5.0"
+    implementation "androidx.work:work-runtime:$work_version"
+    implementation "androidx.work:work-rxjava2:$work_version"
+    androidTestImplementation "androidx.work:work-testing:$work_version"
 }
