@@ -97,9 +97,14 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
     implementation "com.squareup.retrofit2:adapter-rxjava3:$retrofit_version"
 
-    //Dagger
+    //Dagger Hilt
     implementation "com.google.dagger:hilt-android:$hilt_version"
     annotationProcessor "com.google.dagger:hilt-compiler:$hilt_version"
+
+    //Dagger hilt - Work manager
+    def hilt_work_version = "1.0.0-beta01"
+    implementation "androidx.hilt:hilt-work:$hilt_work_version"
+    annotationProcessor "androidx.hilt:hilt-compiler:$hilt_work_version"
 
     //RxAndroid
     def rxandroid_version = "3.0.0"
