@@ -178,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.itemYourLunch:
                     String restaurantId = mainViewModel.getCurrentUserInfo().getValue().getRestaurantChoiceId();
 
-                    if (restaurantId.trim() == "") {
+                    if (restaurantId.trim().equals("")) {
                         Toast toast = Toast.makeText(this, R.string.text_restaurant_not_chosen, Toast.LENGTH_SHORT);
                         toast.setGravity(Gravity.BOTTOM, 0, binding.botNav.getHeight() + binding.botNav.getHeight()/2);
                         toast.show();

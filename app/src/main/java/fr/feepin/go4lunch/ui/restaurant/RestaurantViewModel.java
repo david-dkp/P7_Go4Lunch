@@ -48,6 +48,15 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 @HiltViewModel
 public class RestaurantViewModel extends ViewModel {
 
+    private static final List<Place.Field> REQUIRED_PLACE_FIELDS = Arrays.asList(
+            Place.Field.NAME,
+            Place.Field.ADDRESS,
+            Place.Field.PHONE_NUMBER,
+            Place.Field.WEBSITE_URI,
+            Place.Field.PHOTO_METADATAS,
+            Place.Field.OPENING_HOURS
+    );
+
     private AlarmManager alarmManager;
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -133,14 +142,7 @@ public class RestaurantViewModel extends ViewModel {
     }
 
     private void askPlace() {
-        mapsRepository.getRestaurantDetails(placeId, Arrays.asList(
-                Place.Field.NAME,
-                Place.Field.ADDRESS,
-                Place.Field.PHONE_NUMBER,
-                Place.Field.WEBSITE_URI,
-                Place.Field.PHOTO_METADATAS,
-                Place.Field.OPENING_HOURS
-        ), null)
+        mapsRepository.getRestaurantDetails(placeId, REQUIRED_PLACE_FIELDS, null)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<Place>() {

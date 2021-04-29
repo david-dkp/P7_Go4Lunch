@@ -1,6 +1,7 @@
 package fr.feepin.go4lunch.ui.map;
 
 import android.Manifest;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -27,8 +29,15 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.model.TypeFilter;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.maps.android.clustering.ClusterManager;
 
+
+import java.util.Arrays;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import fr.feepin.go4lunch.Constants;
@@ -38,6 +47,7 @@ import fr.feepin.go4lunch.contracts.LocationSettingsContract;
 import fr.feepin.go4lunch.data.Resource;
 import fr.feepin.go4lunch.databinding.FragmentMapViewBinding;
 import fr.feepin.go4lunch.ui.restaurant.RestaurantActivity;
+import fr.feepin.go4lunch.utils.LatLngUtils;
 import fr.feepin.go4lunch.utils.PermissionUtils;
 
 @AndroidEntryPoint
@@ -52,6 +62,15 @@ public class MapViewFragment extends Fragment {
     private MainViewModel mainViewModel;
 
     private ClusterManager<RestaurantItem> clusterManager;
+
+    private final ActivityResultLauncher<Intent> autocompleteActivityLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                Place place = Autocomplete.getPlaceFromIntent(result.getData());
+                mainViewModel.addRestaurant(place);
+                animateCameraToPosition(place.getLatLng());
+            }
+    );
 
     private final ActivityResultLauncher<Void> navigateToLocationSettingsLauncher = registerForActivityResult(
             new LocationSettingsContract(),
@@ -205,6 +224,27 @@ public class MapViewFragment extends Fragment {
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.map_view_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        if (item.getItemId() == R.id.search) {
+            Intent intent = new Autocomplete.IntentBuilder(
+                    AutocompleteActivityMode.OVERLAY,
+                    Arrays.asList(Place.Field.ID, Place.Field.LAT_LNG)
+            )
+                    .setCountry("FR")
+                    .setTypeFilter(TypeFilter.ESTABLISHMENT)
+                    .setLocationBias(RectangularBounds.newInstance(LatLngUtils.toBounds(
+                            mainViewModel.getPosition().getValue().getData(),
+                            Constants.PREDICTION_SEARCH_RADIUS
+                    )))
+                    .build(getContext());
+            autocompleteActivityLauncher.launch(intent);
+        }
+
+        return true;
     }
 
     @Override

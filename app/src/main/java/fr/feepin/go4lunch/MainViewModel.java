@@ -346,6 +346,18 @@ public class MainViewModel extends ViewModel {
                 });
     }
 
+    public void addRestaurant(Place place) {
+        PlaceResponse placeResponse = new PlaceResponse(
+                place.getId(),
+                new PlaceResponse.Geometry(PlaceResponse.LatLng.fromMapsLatLng(place.getLatLng()))
+        );
+
+        ArrayList<PlaceResponse> newPlaces = new ArrayList<>(placesResponse.getValue());
+        newPlaces.add(placeResponse);
+
+        placesResponse.setValue(newPlaces);
+    }
+
     public void startAutocompleteSession() {
         sessionToken = AutocompleteSessionToken.newInstance();
     }
