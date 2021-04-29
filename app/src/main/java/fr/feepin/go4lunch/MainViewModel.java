@@ -90,8 +90,8 @@ public class MainViewModel extends ViewModel {
         setupRestaurantStates();
         setupLocationManager();
         setupFirebaseUser();
-
         listenToUserInfos();
+        askLocation();
     }
 
     private void setupListItemStates() {
