@@ -37,4 +37,10 @@
     <string name="text_location_error">The location services are disabled.</string>
     <string name="text_enable">Enable</string>
     <string name="text_user_joining">%1$s is joining!</string>
+
+    <string name="notification_channel_name">Go4Lunch notification channel.</string>
+    <string name="notification_channel_description">Notify you every 12 AM on where you eat and with who.</string>
+
+    <string name="eat_notification_context_text">Hi ! Today you\'re eating to %1$s in %2$s with </string>
+    <string name="text_restaurant_not_chosen">You have not decded where to eat yet !</string>
 </resources>

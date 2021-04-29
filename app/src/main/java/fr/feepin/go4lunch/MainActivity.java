@@ -3,13 +3,20 @@ package fr.feepin.go4lunch;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.libraries.places.api.Places;
@@ -31,6 +38,8 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
+import static fr.feepin.go4lunch.Constants.EAT_NOTIFICATION_ID;
+
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
 
@@ -50,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        createNotificationChannel();
 
         Places.initialize(getApplicationContext(), BuildConfig.MAPS_API_KEY);
 
@@ -75,6 +86,20 @@ public class MainActivity extends AppCompatActivity {
             setupFragments();
         }
         setupDrawerLayout();
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String name = getString(R.string.notification_channel_name);
+            String description = getString(R.string.notification_channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+
+            NotificationChannel notificationChannel = new NotificationChannel(EAT_NOTIFICATION_ID, name, importance);
+            notificationChannel.setDescription(description);
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
     }
 
     private void setupObservers() {
@@ -151,7 +176,15 @@ public class MainActivity extends AppCompatActivity {
 
             switch (item.getItemId()) {
                 case R.id.itemYourLunch:
-                    RestaurantActivity.navigate(this, 0);
+                    String restaurantId = mainViewModel.getCurrentUserInfo().getValue().getRestaurantChoiceId();
+
+                    if (restaurantId.trim() == "") {
+                        Toast toast = Toast.makeText(this, R.string.text_restaurant_not_chosen, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.BOTTOM, 0, binding.botNav.getHeight() + binding.botNav.getHeight()/2);
+                        toast.show();
+                        break;
+                    }
+                    RestaurantActivity.navigate(this, restaurantId);
                     break;
                 case R.id.itemSettings:
                     SettingsActivity.navigate(this);

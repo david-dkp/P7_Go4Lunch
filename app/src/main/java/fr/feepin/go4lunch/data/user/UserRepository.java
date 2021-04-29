@@ -14,6 +14,8 @@ public interface UserRepository {
 
     Single<List<VisitedRestaurant>> getVisitedRestaurants(String restaurantId);
 
+    Observable<UserInfo> getCurrentUserInfoObservable();
+
     Single<UserInfo> getCurrentUserInfo();
 
     Single<List<VisitedRestaurant>> getCurrentUserVisitedRestaurants();

@@ -25,13 +25,9 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
-import com.google.maps.android.collections.MarkerManager;
 
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -130,7 +126,7 @@ public class MapViewFragment extends Fragment {
 
     private void setupRestaurantsState() {
 
-        mainViewModel.getRestaurantsState().observe(getViewLifecycleOwner(), statesResource -> {
+        mainViewModel.getRestaurantStates().observe(getViewLifecycleOwner(), statesResource -> {
             clusterManager.clearItems();
 
             if (statesResource instanceof Resource.Error) {

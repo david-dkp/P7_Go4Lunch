@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Handler;
 import android.util.Log;
 
 import androidx.core.location.LocationManagerCompat;
@@ -13,11 +14,15 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,10 +36,14 @@ import fr.feepin.go4lunch.data.maps.models.NearbySearchResponse;
 import fr.feepin.go4lunch.data.maps.models.PlaceResponse;
 import fr.feepin.go4lunch.data.user.UserRepository;
 import fr.feepin.go4lunch.data.user.models.UserInfo;
+import fr.feepin.go4lunch.ui.list.ListItemState;
+import fr.feepin.go4lunch.ui.list.SortMethod;
 import fr.feepin.go4lunch.ui.map.RestaurantState;
+import fr.feepin.go4lunch.utils.LatLngUtils;
 import fr.feepin.go4lunch.utils.PermissionUtils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
 import io.reactivex.rxjava3.core.SingleObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
@@ -45,8 +54,10 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class MainViewModel extends ViewModel {
 
     private Context context;
-
+    private Handler handler = new Handler();
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
+
+    private AutocompleteSessionToken sessionToken;
 
     private LocationManager locationManager;
 
@@ -55,12 +66,18 @@ public class MainViewModel extends ViewModel {
     private UserRepository userRepository;
 
     private MutableLiveData<FirebaseUser> currentUser;
+
+    //States
     private MutableLiveData<Resource<LatLng>> position = new MutableLiveData<>();
+    private MediatorLiveData<Resource<List<RestaurantState>>> restaurantStates = new MediatorLiveData<>();
+    private MediatorLiveData<Resource<List<ListItemState>>> listItemStates = new MediatorLiveData<>();
+    private MutableLiveData<UserInfo> currentUserInfo = new MutableLiveData<>();
 
-    private MediatorLiveData<Resource<List<RestaurantState>>> restaurantsState = new MediatorLiveData();
-
+    //Datas
+    private MutableLiveData<FindAutocompletePredictionsResponse> autocompletePredictions = new MutableLiveData<>();
     private MutableLiveData<List<PlaceResponse>> placesResponse = new MutableLiveData<>(Collections.emptyList());
-    private MutableLiveData<List<UserInfo>> usersInfo = new MutableLiveData<>(Collections.emptyList());
+    private MutableLiveData<List<UserInfo>> userInfos = new MutableLiveData<>(Collections.emptyList());
+    private MutableLiveData<SortMethod> sortMethod = new MutableLiveData<>(SortMethod.NONE);
 
     @Inject
     public MainViewModel(@ApplicationContext Context context, FirebaseAuth firebaseAuth, MapsRepository mapsRepository, UserRepository userRepository) {
@@ -69,20 +86,78 @@ public class MainViewModel extends ViewModel {
         this.mapsRepository = mapsRepository;
         this.userRepository = userRepository;
 
-        setupRestaurantsState();
+        //setupListItemStates();
+        setupRestaurantStates();
         setupLocationManager();
         setupFirebaseUser();
+
+        listenToUserInfos();
     }
 
-    private void setupRestaurantsState() {
-        restaurantsState.setValue(new Resource.Success<>(Collections.emptyList(), null));
+    private void setupListItemStates() {
+        listItemStates.setValue(new Resource.Success<>(Collections.emptyList(), null));
 
-        restaurantsState.addSource(placesResponse, places -> updateRestaurantsState(places, usersInfo.getValue()));
-
-        restaurantsState.addSource(usersInfo, infos -> {
-            updateRestaurantsState(placesResponse.getValue(), infos);
+        listItemStates.addSource(placesResponse, placeResponses -> {
+            updateListItemStates(placeResponses, autocompletePredictions.getValue(), sortMethod.getValue());
         });
 
+        listItemStates.addSource(autocompletePredictions, autocompletePredictions -> {
+            updateListItemStates(placesResponse.getValue(), autocompletePredictions, sortMethod.getValue());
+        });
+
+        listItemStates.addSource(sortMethod, sortMethod -> {
+            updateListItemStates(placesResponse.getValue(), autocompletePredictions.getValue(), sortMethod);
+        });
+
+    }
+
+    private void setupRestaurantStates() {
+        restaurantStates.setValue(new Resource.Success<>(Collections.emptyList(), null));
+
+        restaurantStates.addSource(placesResponse, places -> updateRestaurantsState(places, userInfos.getValue()));
+
+        restaurantStates.addSource(userInfos, infos -> {
+            updateRestaurantsState(placesResponse.getValue(), infos);
+        });
+    }
+
+    private void setupLocationManager() {
+        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+    }
+
+    private void setupFirebaseUser() {
+        currentUser = new MutableLiveData<>(firebaseAuth.getCurrentUser());
+        firebaseAuth.addAuthStateListener(newAuth -> {
+            currentUser.postValue(newAuth.getCurrentUser());
+        });
+
+        userRepository.getCurrentUserInfoObservable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<UserInfo>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        compositeDisposable.add(d);
+                    }
+
+                    @Override
+                    public void onNext(@NonNull UserInfo userInfo) {
+                        currentUserInfo.setValue(userInfo);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    private void listenToUserInfos() {
         userRepository.getUsersInfo()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -94,7 +169,7 @@ public class MainViewModel extends ViewModel {
 
                     @Override
                     public void onNext(@NonNull List<UserInfo> infos) {
-                        usersInfo.setValue(infos);
+                        userInfos.setValue(infos);
                     }
 
                     @Override
@@ -109,15 +184,8 @@ public class MainViewModel extends ViewModel {
                 });
     }
 
-    private void setupLocationManager() {
-        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-    }
+    private void updateListItemStates(List<PlaceResponse> placeResponses, FindAutocompletePredictionsResponse autocompletePredictionsResponse, SortMethod sortMethod) {
 
-    private void setupFirebaseUser() {
-        currentUser = new MutableLiveData<>(firebaseAuth.getCurrentUser());
-        firebaseAuth.addAuthStateListener(newAuth -> {
-            currentUser.postValue(newAuth.getCurrentUser());
-        });
     }
 
     private void updateRestaurantsState(List<PlaceResponse> places, List<UserInfo> usersInfo) {
@@ -132,7 +200,25 @@ public class MainViewModel extends ViewModel {
             restaurantsState.add(restaurantState);
         }
 
-        this.restaurantsState.setValue(new Resource.Success<>(restaurantsState, null));
+        this.restaurantStates.setValue(new Resource.Success<>(restaurantsState, null));
+    }
+
+    private List<ListItemState> sortPredictions(List<ListItemState> states, SortMethod sortMethod) {
+        if (sortMethod == SortMethod.NONE) return states;
+
+        switch (sortMethod) {
+            case RATING:
+                Collections.sort(states, ListItemState.RATING_COMPARATOR);
+                break;
+            case DISTANCE:
+                Collections.sort(states, ListItemState.DISTANCE_COMPARATOR);
+                break;
+            case WOKRMATES:
+                Collections.sort(states, ListItemState.WORKMATES_COMPARATOR);
+                break;
+        }
+
+        return states;
     }
 
     private boolean restaurantJoined(String id, List<UserInfo> usersInfo) {
@@ -211,7 +297,7 @@ public class MainViewModel extends ViewModel {
         }
     }
 
-    public void getNearbyPlaces(LatLng latLng) {
+    private void getNearbyPlaces(LatLng latLng) {
         mapsRepository.getNearbySearch(BuildConfig.MAPS_API_KEY, latLng.latitude + "," + latLng.longitude, Constants.NEARBY_SEARCH_RADIUS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -228,9 +314,63 @@ public class MainViewModel extends ViewModel {
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        Log.d("debug", "nearby error: "+e.getMessage());
+                        Log.d("debug", "nearby error: " + e.getMessage());
                     }
                 });
+    }
+
+    private void getPredictionsForQuery(String query) {
+        mapsRepository.getRestaurantsFromQuery(
+                sessionToken,
+                query,
+                position.getValue().getData(),
+                RectangularBounds.newInstance(LatLngUtils.toBounds(position.getValue().getData(), Constants.PREDICTION_SEARCH_RADIUS))
+        )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleObserver<FindAutocompletePredictionsResponse>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+                        compositeDisposable.add(d);
+                    }
+
+                    @Override
+                    public void onSuccess(@NonNull FindAutocompletePredictionsResponse findAutocompletePredictionsResponse) {
+                        autocompletePredictions.setValue(findAutocompletePredictionsResponse);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+                });
+    }
+
+    public void startAutocompleteSession() {
+        sessionToken = AutocompleteSessionToken.newInstance();
+    }
+
+    public AutocompleteSessionToken getSessionToken() {
+        return sessionToken;
+    }
+
+    public void autoCompleteQuery(String query) {
+        String cleanQuery = query.trim();
+
+        if (sessionToken == null) {
+            sessionToken = AutocompleteSessionToken.newInstance();
+        }
+
+        if (cleanQuery.equals("")){
+            autocompletePredictions.setValue(null);
+        }
+
+            //Prevent excessive requests
+        handler.postDelayed(() -> {
+            handler.removeCallbacksAndMessages(null);
+            getPredictionsForQuery(cleanQuery);
+        },400);
+
     }
 
     public LiveData<FirebaseUser> getCurrentUser() {
@@ -241,8 +381,12 @@ public class MainViewModel extends ViewModel {
         return position;
     }
 
-    public LiveData<Resource<List<RestaurantState>>> getRestaurantsState() {
-        return restaurantsState;
+    public LiveData<Resource<List<RestaurantState>>> getRestaurantStates() {
+        return restaurantStates;
+    }
+
+    public LiveData<UserInfo> getCurrentUserInfo() {
+        return currentUserInfo;
     }
 
     @Override

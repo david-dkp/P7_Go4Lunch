@@ -1,5 +1,9 @@
 package fr.feepin.go4lunch.ui.restaurant;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 
@@ -7,6 +11,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
@@ -20,10 +27,13 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import dagger.hilt.android.qualifiers.ApplicationContext;
+import fr.feepin.go4lunch.Constants;
 import fr.feepin.go4lunch.data.maps.MapsRepository;
 import fr.feepin.go4lunch.data.user.UserRepository;
 import fr.feepin.go4lunch.data.user.models.UserInfo;
 import fr.feepin.go4lunch.data.user.models.VisitedRestaurant;
+import fr.feepin.go4lunch.workers.NotifyWorker;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Completable;
@@ -37,6 +47,8 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 @HiltViewModel
 public class RestaurantViewModel extends ViewModel {
+
+    private AlarmManager alarmManager;
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -60,9 +72,10 @@ public class RestaurantViewModel extends ViewModel {
     private String placeId;
 
     @Inject
-    public RestaurantViewModel(UserRepository userRepository, MapsRepository mapsRepository) {
+    public RestaurantViewModel(@ApplicationContext Context context, UserRepository userRepository, MapsRepository mapsRepository) {
         this.userRepository = userRepository;
         this.mapsRepository = mapsRepository;
+        alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
 
     public void setup(String placeId) {
@@ -72,7 +85,6 @@ public class RestaurantViewModel extends ViewModel {
         setupLiked();
         setupJoined();
         setupAlreadyVisited();
-
 
         askPlace();
         askRating();
@@ -128,7 +140,7 @@ public class RestaurantViewModel extends ViewModel {
                 Place.Field.WEBSITE_URI,
                 Place.Field.PHOTO_METADATAS,
                 Place.Field.OPENING_HOURS
-        ))
+        ), null)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<Place>() {
@@ -301,8 +313,9 @@ public class RestaurantViewModel extends ViewModel {
 
     public void joinOrLeaveRestaurant() {
         Completable completable;
+        boolean isJoining = !isJoined().getValue();
 
-        if (isJoined().getValue()) {
+        if (!isJoining) {
             completable = userRepository.leaveRestaurant();
         } else {
             completable = userRepository.joinRestaurant(placeId);
@@ -319,7 +332,17 @@ public class RestaurantViewModel extends ViewModel {
 
                     @Override
                     public void onComplete() {
-                        joined.setValue(!joined.getValue());
+
+                        if (isJoining) {
+                            /*TODO
+                             * Create alarm every 12h notifying
+                             * Push VisitedRestaurant to db at end time
+                             */
+                        } else {
+                            //TODO: remove alarms
+                        }
+
+                        joined.setValue(isJoining);
                     }
 
                     @Override

@@ -71,6 +71,22 @@ public class DefaultUserRepository implements UserRepository {
     }
 
     @Override
+    public Observable<UserInfo> getCurrentUserInfoObservable() {
+        return Observable.create(emitter -> {
+            firebaseFirestore
+                    .collection("users")
+                    .document(firebaseAuth.getCurrentUser().getUid())
+                    .addSnapshotListener((snapshot, error) -> {
+                        if (error != null) {
+                            emitter.tryOnError(error);
+                        } else {
+                            emitter.onNext(snapshot.toObject(UserInfo.class));
+                        }
+                    });
+        });
+    }
+
+    @Override
     public Observable<List<UserInfo>> getUsersInfo() {
         return Observable.create(e -> {
 
