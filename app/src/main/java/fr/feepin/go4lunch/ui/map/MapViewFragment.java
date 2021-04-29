@@ -68,7 +68,7 @@ public class MapViewFragment extends Fragment {
             result -> {
                 Place place = Autocomplete.getPlaceFromIntent(result.getData());
                 mainViewModel.addRestaurant(place);
-                animateCameraToPosition(place.getLatLng());
+                animateCameraToPosition(place.getLatLng(), Constants.MAPS_RESTAURANT_ZOOM_LEVEL);
             }
     );
 
@@ -129,13 +129,13 @@ public class MapViewFragment extends Fragment {
         mainViewModel.getPosition().observe(getViewLifecycleOwner(), resource -> {
             if (resource instanceof Resource.Success) {
                 toggleLocationError(true);
-                animateCameraToPosition(resource.getData());
+                animateCameraToPosition(resource.getData(), Constants.MAPS_MY_LOCATION_ZOOM_LEVEL);
             } else if (resource instanceof Resource.Error) {
                 if (resource.getMessage().equals(Constants.NO_LOCATION_PERMISSION_MESSAGE)) {
                     requestLocationPermission();
                 } else if (resource.getMessage().equals(Constants.LOCATION_DISABLED_MESSAGE)) {
                     if (resource.getData() != null) {
-                        animateCameraToPosition(resource.getData());
+                        animateCameraToPosition(resource.getData(), Constants.MAPS_MY_LOCATION_ZOOM_LEVEL);
                     }
                     toggleLocationError(false);
                 }
@@ -207,8 +207,8 @@ public class MapViewFragment extends Fragment {
         googleMap.getUiSettings().setMapToolbarEnabled(false);
     }
 
-    private void animateCameraToPosition(LatLng latLng) {
-        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, Constants.MAPS_START_ZOOM_LEVEL));
+    private void animateCameraToPosition(LatLng latLng, float zoom) {
+        googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
 
     private void setMapStyle() {
