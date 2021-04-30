@@ -42,5 +42,10 @@
     <string name="notification_channel_description">Notify you every 12 AM on where you eat and with who.</string>
 
     <string name="eat_notification_context_text">Hi ! Today you\'re eating to %1$s in %2$s with </string>
-    <string name="text_restaurant_not_chosen">You have not decded where to eat yet !</string>
+    <string name="text_restaurant_not_chosen">You have not decided where to eat yet !</string>
+
+    <string name="text_workmate_decided">%1$s is eating at %2$s</string>
+    <string name="text_workmate_not_decided">%1$s hasn\'t decided yet</string>
+    <string name="settings_enable_notification">Enable notifications</string>
+    <string name="settings_enable_notification_summary">Send you every 12 AM information about your lunch.</string>
 </resources>

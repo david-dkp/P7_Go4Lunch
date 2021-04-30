@@ -106,6 +106,10 @@ dependencies {
     implementation "androidx.hilt:hilt-work:$hilt_work_version"
     annotationProcessor "androidx.hilt:hilt-compiler:$hilt_work_version"
 
+    //Concurrent
+    def concurrent_version = "1.1.0"
+    implementation "androidx.concurrent:concurrent-futures:$concurrent_version"
+
     //RxAndroid
     def rxandroid_version = "3.0.0"
     implementation "io.reactivex.rxjava3:rxandroid:$rxandroid_version"
@@ -119,6 +123,10 @@ dependencies {
     //WorkManager
     def work_version = "2.5.0"
     implementation "androidx.work:work-runtime:$work_version"
-    implementation "androidx.work:work-rxjava2:$work_version"
+    implementation "androidx.work:work-rxjava3:$work_version"
     androidTestImplementation "androidx.work:work-testing:$work_version"
+
+    //Preferences
+    def preferences_version = "1.1.0"
+    implementation "androidx.preference:preference:$preferences_version"
 }

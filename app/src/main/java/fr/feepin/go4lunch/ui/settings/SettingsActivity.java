@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import fr.feepin.go4lunch.R;
 import fr.feepin.go4lunch.databinding.ActivitySettingsBinding;
 import fr.feepin.go4lunch.ui.restaurant.RestaurantActivity;
 
@@ -24,13 +25,16 @@ public class SettingsActivity extends AppCompatActivity {
         binding = ActivitySettingsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        setupFragment();
+
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
-        super.onCreate(savedInstanceState, persistentState);
+    private void setupFragment() {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.fragmentContainer, new SettingsFragment())
+                .commit();
     }
 
     public static void navigate(Context context) {
