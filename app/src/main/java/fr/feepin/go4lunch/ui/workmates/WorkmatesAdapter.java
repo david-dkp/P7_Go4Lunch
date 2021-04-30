@@ -19,6 +19,8 @@ import fr.feepin.go4lunch.R;
 
 public class WorkmatesAdapter extends ListAdapter<WorkmateState, WorkmatesAdapter.ViewHolder> {
 
+    private OnWorkmateListener listener;
+
     private static final DiffUtil.ItemCallback<WorkmateState> DIFF_CALLBACK = new DiffUtil.ItemCallback<WorkmateState>() {
         @Override
         public boolean areItemsTheSame(@NonNull WorkmateState oldItem, @NonNull WorkmateState newItem) {
@@ -31,8 +33,9 @@ public class WorkmatesAdapter extends ListAdapter<WorkmateState, WorkmatesAdapte
         }
     };
 
-    protected WorkmatesAdapter() {
+    protected WorkmatesAdapter(OnWorkmateListener onWorkmateListener) {
         super(DIFF_CALLBACK);
+        this.listener = onWorkmateListener;
     }
 
     @Override
@@ -64,6 +67,11 @@ public class WorkmatesAdapter extends ListAdapter<WorkmateState, WorkmatesAdapte
         WorkmateState workmateState = getItem(position);
 
         View view = holder.itemView;
+
+        view.setOnClickListener(v -> {
+            this.listener.onClick(workmateState);
+        });
+
         TextView tvUserInfo = view.findViewById(R.id.tvWorkmateInfo);
         ImageView ivPhoto = view.findViewById(R.id.ivWorkmatePhoto);
 
@@ -79,14 +87,14 @@ public class WorkmatesAdapter extends ListAdapter<WorkmateState, WorkmatesAdapte
         }
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
         }
     }
 
-    public class DecidedViewHolder extends ViewHolder{
+    public class DecidedViewHolder extends ViewHolder {
 
         public final static int VIEW_TYPE = 1;
 
@@ -95,12 +103,16 @@ public class WorkmatesAdapter extends ListAdapter<WorkmateState, WorkmatesAdapte
         }
     }
 
-    public class NotDecidedViewHolder extends ViewHolder{
+    public class NotDecidedViewHolder extends ViewHolder {
 
         public final static int VIEW_TYPE = 2;
 
         public NotDecidedViewHolder(@NonNull View itemView) {
             super(itemView);
         }
+    }
+
+    public interface OnWorkmateListener {
+        void onClick(WorkmateState workmateState);
     }
 }

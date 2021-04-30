@@ -1,5 +1,6 @@
 package fr.feepin.go4lunch.ui.workmates;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 public class WorkmateState {
@@ -12,7 +13,7 @@ public class WorkmateState {
 
     private String restaurantId;
 
-    public WorkmateState(String restaurantId, String photoUrl, String name, String restaurantName) {
+    public WorkmateState(String restaurantId, String restaurantName, String photoUrl, String name) {
         this.restaurantId = restaurantId;
         this.photoUrl = photoUrl;
         this.name = name;
@@ -62,4 +63,27 @@ public class WorkmateState {
     public int hashCode() {
         return Objects.hash(photoUrl, name, restaurantName, restaurantId);
     }
+
+    @Override
+    public String toString() {
+        return "WorkmateState{" +
+                "photoUrl='" + photoUrl + '\'' +
+                ", name='" + name + '\'' +
+                ", restaurantName='" + restaurantName + '\'' +
+                ", restaurantId='" + restaurantId + '\'' +
+                '}';
+    }
+
+    public static final Comparator<WorkmateState> RESTAURANT_NOT_CHOSEN_COMPARATOR = new Comparator<WorkmateState>() {
+        @Override
+        public int compare(WorkmateState a, WorkmateState b) {
+            if (a.getRestaurantId().equals("") && !b.getRestaurantId().equals("")) {
+                return 1;
+            } else if (!a.getRestaurantId().equals("") && b.getRestaurantId().equals("")){
+                return -1;
+            } else {
+                return 0;
+            }
+        }
+    };
 }

@@ -23,6 +23,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,6 +40,7 @@ import fr.feepin.go4lunch.data.user.models.UserInfo;
 import fr.feepin.go4lunch.ui.list.ListItemState;
 import fr.feepin.go4lunch.ui.list.SortMethod;
 import fr.feepin.go4lunch.ui.map.RestaurantState;
+import fr.feepin.go4lunch.ui.workmates.WorkmateState;
 import fr.feepin.go4lunch.utils.LatLngUtils;
 import fr.feepin.go4lunch.utils.PermissionUtils;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -69,9 +71,10 @@ public class MainViewModel extends ViewModel {
 
     //States
     private MutableLiveData<Resource<LatLng>> position = new MutableLiveData<>();
+    private MutableLiveData<UserInfo> currentUserInfo = new MutableLiveData<>();
     private MediatorLiveData<Resource<List<RestaurantState>>> restaurantStates = new MediatorLiveData<>();
     private MediatorLiveData<Resource<List<ListItemState>>> listItemStates = new MediatorLiveData<>();
-    private MutableLiveData<UserInfo> currentUserInfo = new MutableLiveData<>();
+    private MediatorLiveData<Resource<List<WorkmateState>>> workmateStates = new MediatorLiveData<>();
 
     //Datas
     private MutableLiveData<FindAutocompletePredictionsResponse> autocompletePredictions = new MutableLiveData<>();
@@ -88,6 +91,7 @@ public class MainViewModel extends ViewModel {
 
         //setupListItemStates();
         setupRestaurantStates();
+        setupWorkmateStates();
         setupLocationManager();
         setupFirebaseUser();
         listenToUserInfos();
@@ -119,6 +123,10 @@ public class MainViewModel extends ViewModel {
         restaurantStates.addSource(userInfos, infos -> {
             updateRestaurantsState(placesResponse.getValue(), infos);
         });
+    }
+
+    private void setupWorkmateStates() {
+        workmateStates.addSource(userInfos, this::updateWorkmateStates);
     }
 
     private void setupLocationManager() {
@@ -201,6 +209,62 @@ public class MainViewModel extends ViewModel {
         }
 
         this.restaurantStates.setValue(new Resource.Success<>(restaurantsState, null));
+    }
+
+    private void updateWorkmateStates(List<UserInfo> userInfos) {
+
+        ArrayList<WorkmateState> states = new ArrayList<>();
+
+        for (UserInfo userInfo : userInfos) {
+            PlaceResponse placeResponse = getPlaceFromId(userInfo.getRestaurantChoiceId());
+
+            if (placeResponse != null) {
+                states.add(new WorkmateState(userInfo.getRestaurantChoiceId(), placeResponse.getName(), userInfo.getPhotoUrl(), userInfo.getName()));
+            } else if (userInfo.getRestaurantChoiceId().equals("")){
+                states.add(new WorkmateState(userInfo.getRestaurantChoiceId(), null, userInfo.getPhotoUrl(), userInfo.getName()));
+            }else {
+                mapsRepository.getRestaurantDetails(userInfo.getRestaurantChoiceId(), Collections.singletonList(Place.Field.NAME), null)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new SingleObserver<Place>() {
+                            @Override
+                            public void onSubscribe(@NonNull Disposable d) {
+                                compositeDisposable.add(d);
+                            }
+
+                            @Override
+                            public void onSuccess(@NonNull Place place) {
+                                ArrayList<WorkmateState> newStates = new ArrayList<>(workmateStates.getValue().getData());
+                                newStates.add(new WorkmateState(userInfo.getRestaurantChoiceId(), place.getName(), userInfo.getPhotoUrl(), userInfo.getName()));
+                                orderWorkmateStates(newStates);
+                                workmateStates.setValue(new Resource.Success<>(newStates, null));
+                            }
+
+                            @Override
+                            public void onError(@NonNull Throwable e) {
+
+                            }
+                        });
+            }
+        }
+
+        orderWorkmateStates(states);
+
+        workmateStates.setValue(new Resource.Success<>(states, null));
+    }
+
+    private void orderWorkmateStates(List<WorkmateState> workmateStates) {
+        Collections.sort(workmateStates, WorkmateState.RESTAURANT_NOT_CHOSEN_COMPARATOR);
+    }
+
+    private PlaceResponse getPlaceFromId(String id) {
+        for (PlaceResponse placeResponse : placesResponse.getValue()) {
+            if (placeResponse.getPlaceId().equals(id)) {
+                return placeResponse;
+            }
+        }
+
+        return null;
     }
 
     private List<ListItemState> sortPredictions(List<ListItemState> states, SortMethod sortMethod) {
@@ -349,7 +413,10 @@ public class MainViewModel extends ViewModel {
     public void addRestaurant(Place place) {
         PlaceResponse placeResponse = new PlaceResponse(
                 place.getId(),
-                new PlaceResponse.Geometry(PlaceResponse.LatLng.fromMapsLatLng(place.getLatLng()))
+                new PlaceResponse.Geometry(PlaceResponse.LatLng.fromMapsLatLng(place.getLatLng())),
+                null,
+                null,
+                null
         );
 
         ArrayList<PlaceResponse> newPlaces = new ArrayList<>(placesResponse.getValue());
@@ -373,15 +440,15 @@ public class MainViewModel extends ViewModel {
             sessionToken = AutocompleteSessionToken.newInstance();
         }
 
-        if (cleanQuery.equals("")){
+        if (cleanQuery.equals("")) {
             autocompletePredictions.setValue(null);
         }
 
-            //Prevent excessive requests
+        //Prevent excessive requests
         handler.postDelayed(() -> {
             handler.removeCallbacksAndMessages(null);
             getPredictionsForQuery(cleanQuery);
-        },400);
+        }, 400);
 
     }
 
@@ -395,6 +462,10 @@ public class MainViewModel extends ViewModel {
 
     public LiveData<Resource<List<RestaurantState>>> getRestaurantStates() {
         return restaurantStates;
+    }
+
+    public LiveData<Resource<List<WorkmateState>>> getWorkmateStates() {
+        return workmateStates;
     }
 
     public LiveData<UserInfo> getCurrentUserInfo() {
