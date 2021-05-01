@@ -13,6 +13,7 @@ import androidx.concurrent.futures.CallbackToFutureAdapter;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.hilt.work.HiltWorker;
+import androidx.preference.PreferenceManager;
 import androidx.work.ListenableWorker;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
@@ -62,6 +63,10 @@ public class NotifyWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+
+        boolean isNotificationEnabled = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("notifications", true);
+
+        if (!isNotificationEnabled) return Result.success();
 
         String restaurantId = getInputData().getString(Constants.KEY_RESTAURANT_ID);
         String restaurantName = getInputData().getString(Constants.KEY_RESTAURANT_NAME);
