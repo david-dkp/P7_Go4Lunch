@@ -21,6 +21,5 @@ public class Constants {
     public static final String KEY_RESTAURANT_ID = "KEY_RESTAURANT_ID";
     public static final String KEY_RESTAURANT_NAME = "KEY_RESTAURANT_NAME";
     public static final String KEY_RESTAURANT_ADDRESS = "KEY_RESTAURANT_ADDRESS";
-    public static final String KEY_WORKMATES_JOINING = "KEY_WORKMATES_JOINING";
     public static final String EAT_NOTIFICATION_ID = "EAT_NOTIFICATION_ID";
 }

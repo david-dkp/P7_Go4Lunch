@@ -11,5 +11,21 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        <item name="android:windowTranslucentStatus">true</item>
+
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Go4Lunch.MaterialAlertDialog</item>
+    </style>
+
+    <style name="ThemeOverlay.Go4Lunch.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="colorSecondary">?attr/colorPrimary</item>
+    </style>
+
+    <style name="TextAppearance.Go4Lunch.NavigationItem" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="Widget.Go4Lunch.TextView.Restaurant" parent="Widget.MaterialComponents.TextView">
+        <item name="backgroundTint">@color/restaurant_layout_options_background_color</item>
     </style>
 </resources>

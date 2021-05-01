@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String name = getString(R.string.notification_channel_name);
             String description = getString(R.string.notification_channel_description);
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            int importance = NotificationManager.IMPORTANCE_HIGH;
 
             NotificationChannel notificationChannel = new NotificationChannel(EAT_NOTIFICATION_ID, name, importance);
             notificationChannel.setDescription(description);

@@ -38,14 +38,17 @@
     <string name="text_enable">Enable</string>
     <string name="text_user_joining">%1$s is joining!</string>
 
-    <string name="notification_channel_name">Go4Lunch notification channel.</string>
+    <string name="notification_channel_name">Lunch reminder.</string>
     <string name="notification_channel_description">Notify you every 12 AM on where you eat and with who.</string>
 
-    <string name="eat_notification_context_text">Hi ! Today you\'re eating to %1$s in %2$s with </string>
+    <string name="text_and">and</string>
+    <string name="eat_notification_context_text">Hi! Today you\'re eating to %1$s in %2$s with</string>
+    <string name="eat_notification_context_text_no_workmates">Hi ! Today you\'re eating to %1$s in %2$s.</string>
     <string name="text_restaurant_not_chosen">You have not decided where to eat yet !</string>
-
     <string name="text_workmate_decided">%1$s is eating at %2$s</string>
     <string name="text_workmate_not_decided">%1$s hasn\'t decided yet</string>
     <string name="settings_enable_notification">Enable notifications</string>
     <string name="settings_enable_notification_summary">Send you every 12 AM information about your lunch.</string>
+    <string name="title_sort_by">Sort by</string>
+    <string name="text_sort">Sort</string>
 </resources>

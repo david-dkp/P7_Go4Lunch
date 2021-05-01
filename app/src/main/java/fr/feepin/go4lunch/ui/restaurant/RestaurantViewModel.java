@@ -1,8 +1,5 @@
 package fr.feepin.go4lunch.ui.restaurant;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
@@ -11,9 +8,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import androidx.work.OneTimeWorkRequest;
+import androidx.work.Data;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
+import androidx.work.WorkQuery;
 
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
@@ -22,8 +21,12 @@ import com.google.android.libraries.places.api.net.FetchPhotoResponse;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -58,7 +61,7 @@ public class RestaurantViewModel extends ViewModel {
             Place.Field.OPENING_HOURS
     );
 
-    private AlarmManager alarmManager;
+    private WorkManager workManager;
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
@@ -86,7 +89,7 @@ public class RestaurantViewModel extends ViewModel {
     public RestaurantViewModel(@ApplicationContext Context context, UserRepository userRepository, MapsRepository mapsRepository) {
         this.userRepository = userRepository;
         this.mapsRepository = mapsRepository;
-        alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        workManager = WorkManager.getInstance(context);
     }
 
     public void setup(String placeId, AutocompleteSessionToken sessionToken) {
@@ -340,15 +343,36 @@ public class RestaurantViewModel extends ViewModel {
                     public void onComplete() {
 
                         if (isJoining) {
-                            /*TODO
-                             * Create alarm every 12h notifying
-                             * Push VisitedRestaurant to db at end time
-                             * WorkManager.setInitialDelay();
-                             */
+                            long timeMillisFromNextMidday;
 
+                            Calendar currentCalendar = Calendar.getInstance();
+                            Calendar nextMiddayCalendar = Calendar.getInstance();
+
+                            if (currentCalendar.get(Calendar.HOUR_OF_DAY) >= 12) {
+                                nextMiddayCalendar.add(Calendar.DAY_OF_MONTH, 1);
+                            }
+                            nextMiddayCalendar.set(Calendar.HOUR_OF_DAY, 12);
+
+                            timeMillisFromNextMidday = nextMiddayCalendar.getTimeInMillis() - currentCalendar.getTimeInMillis();
+
+                            Data data = new Data.Builder()
+                                    .putString(Constants.KEY_RESTAURANT_ID, placeId)
+                                    .putString(Constants.KEY_RESTAURANT_ADDRESS, place.getValue().getAddress())
+                                    .putString(Constants.KEY_RESTAURANT_NAME, place.getValue().getName())
+                                    .build();
+
+                            PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(
+                                    NotifyWorker.class,
+                                    12,
+                                    TimeUnit.HOURS
+                            )
+                                    .setInputData(data)
+                                    .setInitialDelay(5, TimeUnit.SECONDS)
+                                    .build();
+                            workManager.enqueueUniquePeriodicWork(Constants.NOTIFY_WORKER_TAG, ExistingPeriodicWorkPolicy.REPLACE, request);
 
                         } else {
-                            //TODO: remove alarms
+                            workManager.cancelUniqueWork(Constants.NOTIFY_WORKER_TAG);
                         }
 
                         joined.setValue(isJoining);
