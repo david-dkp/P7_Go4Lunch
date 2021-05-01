@@ -23,12 +23,12 @@ public class UsersJoiningAdapter extends ListAdapter<UserInfo, UsersJoiningAdapt
     private static final DiffUtil.ItemCallback<UserInfo> diffCallback = new DiffUtil.ItemCallback<UserInfo>() {
         @Override
         public boolean areItemsTheSame(@NonNull UserInfo oldItem, @NonNull UserInfo newItem) {
-            return oldItem.equals(newItem);
+            return oldItem.getPhotoUrl().equals(newItem.getPhotoUrl());
         }
 
         @Override
         public boolean areContentsTheSame(@NonNull UserInfo oldItem, @NonNull UserInfo newItem) {
-            return oldItem.hashCode() == newItem.hashCode();
+            return oldItem.equals(newItem);
         }
     };
 

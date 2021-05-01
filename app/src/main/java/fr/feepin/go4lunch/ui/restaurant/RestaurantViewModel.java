@@ -15,6 +15,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.FetchPhotoResponse;
@@ -79,6 +80,7 @@ public class RestaurantViewModel extends ViewModel {
     private MutableLiveData<List<VisitedRestaurant>> currentUserVisitedRestaurants = new MutableLiveData<>(Collections.emptyList());
 
     private String placeId;
+    private AutocompleteSessionToken sessionToken;
 
     @Inject
     public RestaurantViewModel(@ApplicationContext Context context, UserRepository userRepository, MapsRepository mapsRepository) {
@@ -87,8 +89,9 @@ public class RestaurantViewModel extends ViewModel {
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
     }
 
-    public void setup(String placeId) {
+    public void setup(String placeId, AutocompleteSessionToken sessionToken) {
         this.placeId = placeId;
+        this.sessionToken = sessionToken;
 
         setupRating();
         setupLiked();
@@ -142,7 +145,7 @@ public class RestaurantViewModel extends ViewModel {
     }
 
     private void askPlace() {
-        mapsRepository.getRestaurantDetails(placeId, REQUIRED_PLACE_FIELDS, null)
+        mapsRepository.getRestaurantDetails(placeId, REQUIRED_PLACE_FIELDS, this.sessionToken)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<Place>() {
@@ -153,6 +156,7 @@ public class RestaurantViewModel extends ViewModel {
 
                     @Override
                     public void onSuccess(@NonNull Place place) {
+                        RestaurantViewModel.this.sessionToken = null;
                         RestaurantViewModel.this.place.setValue(place);
                         if (place.getPhotoMetadatas() != null) {
                             if (!place.getPhotoMetadatas().isEmpty()) {
@@ -339,7 +343,10 @@ public class RestaurantViewModel extends ViewModel {
                             /*TODO
                              * Create alarm every 12h notifying
                              * Push VisitedRestaurant to db at end time
+                             * WorkManager.setInitialDelay();
                              */
+
+
                         } else {
                             //TODO: remove alarms
                         }

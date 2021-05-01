@@ -2,6 +2,8 @@ package fr.feepin.go4lunch.ui.restaurant;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,8 +18,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.transition.DrawableCrossFadeTransition;
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.Place;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -46,8 +52,9 @@ public class RestaurantActivity extends AppCompatActivity {
         restaurantViewModel = new ViewModelProvider(this).get(RestaurantViewModel.class);
 
         String restaurantId = getIntent().getStringExtra(Constants.EXTRA_RESTAURANT_ID);
+        AutocompleteSessionToken sessionToken = getIntent().getParcelableExtra(Constants.EXTRA_AUTOCOMPLETE_TOKEN);
 
-        restaurantViewModel.setup(restaurantId);
+        restaurantViewModel.setup(restaurantId, sessionToken);
 
         //Trigger name and address scroll when too long
         binding.tvRestaurantName.setSelected(true);
@@ -115,10 +122,16 @@ public class RestaurantActivity extends AppCompatActivity {
 
         });
 
+        CircularProgressDrawable circularProgressDrawable = new CircularProgressDrawable(this);
+        circularProgressDrawable.setStrokeWidth(5f);
+        circularProgressDrawable.setCenterRadius(30f);
+        circularProgressDrawable.start();
+
         //Restaurant photo
         restaurantViewModel.getRestaurantPhoto().observe(this, photo -> {
             Glide.with(this)
                     .load(photo)
+                    .placeholder(circularProgressDrawable)
                     .centerCrop()
                     .into(binding.ivRestaurantPhoto);
         });
@@ -154,6 +167,16 @@ public class RestaurantActivity extends AppCompatActivity {
     public static void navigate(Context context, String restaurantId) {
         Intent intent = new Intent(context, RestaurantActivity.class);
         intent.putExtra(Constants.EXTRA_RESTAURANT_ID, restaurantId);
+        context.startActivity(intent);
+    }
+
+    public static void navigate(Context context, String restaurantId, AutocompleteSessionToken autocompleteSessionToken) {
+        Intent intent = new Intent(context, RestaurantActivity.class);
+        intent.putExtra(Constants.EXTRA_RESTAURANT_ID, restaurantId);
+
+        if (autocompleteSessionToken != null) {
+            intent.putExtra(Constants.EXTRA_AUTOCOMPLETE_TOKEN, autocompleteSessionToken);
+        }
         context.startActivity(intent);
     }
 
