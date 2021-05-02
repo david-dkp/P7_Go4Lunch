@@ -14,16 +14,18 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.net.FetchPhotoResponse;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
+import com.google.common.base.Optional;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.maps.android.SphericalUtil;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,7 +39,9 @@ import fr.feepin.go4lunch.data.maps.models.NearbySearchResponse;
 import fr.feepin.go4lunch.data.maps.models.PlaceResponse;
 import fr.feepin.go4lunch.data.user.UserRepository;
 import fr.feepin.go4lunch.data.user.models.UserInfo;
+import fr.feepin.go4lunch.data.user.models.VisitedRestaurant;
 import fr.feepin.go4lunch.ui.list.ListItemState;
+import fr.feepin.go4lunch.ui.list.ListViewState;
 import fr.feepin.go4lunch.ui.list.SortMethod;
 import fr.feepin.go4lunch.ui.map.RestaurantState;
 import fr.feepin.go4lunch.ui.workmates.WorkmateState;
@@ -47,6 +51,7 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
+import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.core.SingleObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
@@ -73,7 +78,7 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<Resource<LatLng>> position = new MutableLiveData<>();
     private MutableLiveData<UserInfo> currentUserInfo = new MutableLiveData<>();
     private MediatorLiveData<Resource<List<RestaurantState>>> restaurantStates = new MediatorLiveData<>();
-    private MediatorLiveData<Resource<List<ListItemState>>> listItemStates = new MediatorLiveData<>();
+    private MediatorLiveData<Resource<ListViewState>> listViewState = new MediatorLiveData<>();
     private MediatorLiveData<Resource<List<WorkmateState>>> workmateStates = new MediatorLiveData<>();
 
     //Datas
@@ -89,30 +94,32 @@ public class MainViewModel extends ViewModel {
         this.mapsRepository = mapsRepository;
         this.userRepository = userRepository;
 
-        //setupListItemStates();
         setupRestaurantStates();
+        setupListViewState();
         setupWorkmateStates();
         setupLocationManager();
         setupFirebaseUser();
+
         listenToUserInfos();
         askLocation();
     }
 
-    private void setupListItemStates() {
-        listItemStates.setValue(new Resource.Success<>(Collections.emptyList(), null));
+    private void setupListViewState() {
 
-        listItemStates.addSource(placesResponse, placeResponses -> {
-            updateListItemStates(placeResponses, autocompletePredictions.getValue(), sortMethod.getValue());
+        listViewState.setValue(new Resource.Success<>(new ListViewState(Collections.emptyList(), true), null));
+
+        listViewState.addSource(placesResponse, placeResponses -> {
+            updateListViewState(placeResponses, autocompletePredictions.getValue(), sortMethod.getValue());
         });
 
-        listItemStates.addSource(autocompletePredictions, autocompletePredictions -> {
-            updateListItemStates(placesResponse.getValue(), autocompletePredictions, sortMethod.getValue());
+        listViewState.addSource(autocompletePredictions, autocompletePredictions -> {
+
         });
 
-        listItemStates.addSource(sortMethod, sortMethod -> {
-            updateListItemStates(placesResponse.getValue(), autocompletePredictions.getValue(), sortMethod);
+        listViewState.addSource(sortMethod, sortMethod -> {
+            Collections.sort(listViewState.getValue().getData().getListItemStates(), sortMethod.getComparator());
+            listViewState.setValue(listViewState.getValue());
         });
-
     }
 
     private void setupRestaurantStates() {
@@ -166,7 +173,7 @@ public class MainViewModel extends ViewModel {
     }
 
     private void listenToUserInfos() {
-        userRepository.getUsersInfo()
+        userRepository.getUsersInfoObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<List<UserInfo>>() {
@@ -192,8 +199,104 @@ public class MainViewModel extends ViewModel {
                 });
     }
 
-    private void updateListItemStates(List<PlaceResponse> placeResponses, FindAutocompletePredictionsResponse autocompletePredictionsResponse, SortMethod sortMethod) {
+    private void updateListViewState(List<PlaceResponse> placeResponses, FindAutocompletePredictionsResponse autocompletePredictionsResponse, SortMethod sortMethod) {
+        listViewState.setValue(new Resource.Loading(new ListViewState(listViewState.getValue().getData().getListItemStates(), true), null));
+        if (autocompletePredictionsResponse == null) {
+            userRepository.getUsersInfo()
+                    .flatMapObservable(userInfos -> {
+                        return Observable.fromIterable(placeResponses)
+                                .flatMap(placeResponse -> {
+                                    List<PlaceResponse.Photo> photos = placeResponse.getPhotos();
 
+                                    Single<Optional<FetchPhotoResponse>> singleFetchPhoto;
+
+                                    if (photos != null) {
+                                        singleFetchPhoto = mapsRepository.getRestaurantPhoto(
+                                                PhotoMetadata.builder(photos.get(0).getReference())
+                                                        .setHeight(photos.get(0).getHeight())
+                                                        .setWidth(photos.get(0).getWidth())
+                                                        .build()
+                                        )
+                                        .map(Optional::of);
+                                    } else {
+                                        singleFetchPhoto = Single.just(Optional.fromNullable(null));
+                                    }
+
+                                    return Single.zip(
+                                            singleFetchPhoto.onErrorReturn(throwable -> Optional.absent()),
+                                            userRepository.getVisitedRestaurants(placeResponse.getPlaceId()),
+                                            (fetchPhotoResponse, visitedRestaurants) -> {
+                                                int rating = calculateRating(visitedRestaurants);
+                                                int usersJoining = calculateUsersJoining(userInfos, placeResponse.getPlaceId());
+                                                int distance = (int) SphericalUtil.computeDistanceBetween(
+                                                        placeResponse.getGeometry().getLocation().toMapsLatLng(), getPosition().getValue().getData()
+                                                );
+
+                                                PlaceResponse.OpeningHours openingHours = placeResponse.getOpeningHours();
+
+                                                return new ListItemState(
+                                                        placeResponse.getName(),
+                                                        placeResponse.getVicinity(),
+                                                        openingHours != null ? openingHours.isOpenNow() : null,
+                                                        distance,
+                                                        usersJoining,
+                                                        rating,
+                                                        fetchPhotoResponse.isPresent() ? fetchPhotoResponse.get().getBitmap() : null,
+                                                        placeResponse.getPlaceId()
+                                                );
+                                            }
+                                    ).toObservable();
+                                });
+                    })
+                    .toList()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new SingleObserver<List<ListItemState>>() {
+                        @Override
+                        public void onSubscribe(@NonNull Disposable d) {
+                            compositeDisposable.add(d);
+                        }
+
+                        @Override
+                        public void onSuccess(@NonNull List<ListItemState> listItemStates) {
+                            if (sortMethod != SortMethod.NONE) {
+                                Collections.sort(listItemStates, sortMethod.getComparator());
+                            }
+                            MainViewModel.this.listViewState.setValue(new Resource.Success<>(new ListViewState(listItemStates, true), null));
+                        }
+
+                        @Override
+                        public void onError(@NonNull Throwable e) {
+                            e.printStackTrace();
+                        }
+                    });
+        } else {
+
+        }
+    }
+
+    private int calculateUsersJoining(List<UserInfo> userInfos, String placeId) {
+        int usersJoining = 0;
+
+        for (UserInfo userInfo : userInfos) {
+            if (userInfo.getRestaurantChoiceId().equals(placeId)) {
+                usersJoining++;
+            }
+        }
+
+        return usersJoining;
+    }
+
+    private int calculateRating(List<VisitedRestaurant> visitedRestaurants) {
+        int likes = 0;
+
+        for (VisitedRestaurant visitedRestaurant : visitedRestaurants) {
+            if (visitedRestaurant.isLiked()) likes++;
+        }
+
+        int rating = Math.round(((float) likes / (float) visitedRestaurants.size()) * 3f);
+
+        return rating;
     }
 
     private void updateRestaurantsState(List<PlaceResponse> places, List<UserInfo> usersInfo) {
@@ -220,9 +323,9 @@ public class MainViewModel extends ViewModel {
 
             if (placeResponse != null) {
                 states.add(new WorkmateState(userInfo.getRestaurantChoiceId(), placeResponse.getName(), userInfo.getPhotoUrl(), userInfo.getName()));
-            } else if (userInfo.getRestaurantChoiceId().equals("")){
+            } else if (userInfo.getRestaurantChoiceId().equals("")) {
                 states.add(new WorkmateState(userInfo.getRestaurantChoiceId(), null, userInfo.getPhotoUrl(), userInfo.getName()));
-            }else {
+            } else {
                 mapsRepository.getRestaurantDetails(userInfo.getRestaurantChoiceId(), Collections.singletonList(Place.Field.NAME), null)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -277,7 +380,7 @@ public class MainViewModel extends ViewModel {
             case DISTANCE:
                 Collections.sort(states, ListItemState.DISTANCE_COMPARATOR);
                 break;
-            case WOKRMATES:
+            case WORKMATES:
                 Collections.sort(states, ListItemState.WORKMATES_COMPARATOR);
                 break;
         }
@@ -362,6 +465,7 @@ public class MainViewModel extends ViewModel {
     }
 
     private void getNearbyPlaces(LatLng latLng) {
+
         mapsRepository.getNearbySearch(BuildConfig.MAPS_API_KEY, latLng.latitude + "," + latLng.longitude, Constants.NEARBY_SEARCH_RADIUS)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -416,6 +520,7 @@ public class MainViewModel extends ViewModel {
                 new PlaceResponse.Geometry(PlaceResponse.LatLng.fromMapsLatLng(place.getLatLng())),
                 null,
                 null,
+                null,
                 null
         );
 
@@ -425,12 +530,12 @@ public class MainViewModel extends ViewModel {
         placesResponse.setValue(newPlaces);
     }
 
-    public void startAutocompleteSession() {
-        sessionToken = AutocompleteSessionToken.newInstance();
-    }
-
     public AutocompleteSessionToken getSessionToken() {
         return sessionToken;
+    }
+
+    public void destroyAutocompleteSession() {
+        sessionToken = null;
     }
 
     public void autoCompleteQuery(String query) {
@@ -442,6 +547,7 @@ public class MainViewModel extends ViewModel {
 
         if (cleanQuery.equals("")) {
             autocompletePredictions.setValue(null);
+            return;
         }
 
         //Prevent excessive requests
@@ -462,6 +568,18 @@ public class MainViewModel extends ViewModel {
 
     public LiveData<Resource<List<RestaurantState>>> getRestaurantStates() {
         return restaurantStates;
+    }
+
+    public LiveData<Resource<ListViewState>> getListViewState() {
+        return listViewState;
+    }
+
+    public void setSortMethod(SortMethod sortMethod) {
+        this.sortMethod.setValue(sortMethod);
+    }
+
+    public LiveData<SortMethod> getSortMethod() {
+        return sortMethod;
     }
 
     public LiveData<Resource<List<WorkmateState>>> getWorkmateStates() {

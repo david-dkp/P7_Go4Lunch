@@ -22,6 +22,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import java.util.ArrayList;
+
 import fr.feepin.go4lunch.MainViewModel;
 import fr.feepin.go4lunch.R;
 import fr.feepin.go4lunch.data.Resource;
@@ -36,6 +38,8 @@ public class ListViewFragment extends Fragment {
     private MainViewModel mainViewModel;
 
     private ListItemAdapter listItemAdapter;
+
+    private MenuItem sortMenuItem;
 
     @Nullable
     @Override
@@ -58,10 +62,15 @@ public class ListViewFragment extends Fragment {
         mainViewModel.getListViewState().observe(getViewLifecycleOwner(), listViewState -> {
             if (listViewState instanceof Resource.Success) {
                 binding.progressBar.hide();
-                listItemAdapter.submitList(listViewState.getData().getListItemStates());
+                listItemAdapter.submitList(new ArrayList<>(listViewState.getData().getListItemStates()));
             } else if (listViewState instanceof Resource.Loading) {
                 binding.progressBar.show();
             }
+
+            if (sortMenuItem != null) {
+                sortMenuItem.setEnabled(listViewState.getData().isSortable());
+            }
+
         });
     }
 
@@ -71,7 +80,7 @@ public class ListViewFragment extends Fragment {
         inflater.inflate(R.menu.list_view_menu, menu);
 
         MenuItem searchItem = menu.findItem(R.id.search);
-
+        sortMenuItem = menu.findItem(R.id.sort);
         SearchView searchView = (SearchView) searchItem.getActionView();
         EditText editText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
         editText.setTextColor(Color.WHITE);
@@ -81,30 +90,27 @@ public class ListViewFragment extends Fragment {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
         if (item.getItemId() == R.id.sort) {
-
-//            final SortMethod[] sortMethod = {SortMethod.NONE};
-//
-//            new MaterialAlertDialogBuilder(requireContext())
-//                    .setTitle(R.string.title_sort_by)
-//                    .setSingleChoiceItems(R.array.array_sorting_methods, -1, new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialog, int which) {
-//                            switch(which) {
-//                                case 0:
-//                                    sortMethod[0] = SortMethod.DISTANCE;
-//                                    break;
-//                                case 1:
-//                                    break;
-//                                case 2:
-//                                    break;
-//                            }
-//                        }
-//                    })
-//                    .setPositiveButton(R.string.text_sort, (dialog, which) -> {
-//
-//                    })
-//                    .create()
-//                    .show();
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.title_sort_by)
+                    .setSingleChoiceItems(R.array.array_sorting_methods, mainViewModel.getSortMethod().getValue().getPosition(), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch(which) {
+                                case 0:
+                                    mainViewModel.setSortMethod(SortMethod.DISTANCE);
+                                    break;
+                                case 1:
+                                    mainViewModel.setSortMethod(SortMethod.RATING);
+                                    break;
+                                case 2:
+                                    mainViewModel.setSortMethod(SortMethod.WORKMATES);
+                                    break;
+                            }
+                            dialog.dismiss();
+                        }
+                    })
+                    .create()
+                    .show();
         }
 
         return true;

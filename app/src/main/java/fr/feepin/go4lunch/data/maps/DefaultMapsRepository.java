@@ -49,10 +49,10 @@ public class DefaultMapsRepository implements MapsRepository {
 
     @Override
     public Single<FetchPhotoResponse> getRestaurantPhoto(PhotoMetadata photoMetadata) {
-        FetchPhotoRequest fetchPhotoRequest = FetchPhotoRequest.builder(photoMetadata)
-                .build();
-
         return Single.create(emitter -> {
+            FetchPhotoRequest fetchPhotoRequest = FetchPhotoRequest.builder(photoMetadata)
+                    .build();
+
             FetchPhotoResponse fetchPhotoResponse = Tasks.await(placesClient.fetchPhoto(fetchPhotoRequest));
             emitter.onSuccess(fetchPhotoResponse);
         });

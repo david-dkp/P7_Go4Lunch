@@ -11,9 +11,12 @@ import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 
 import fr.feepin.go4lunch.R;
 import fr.feepin.go4lunch.databinding.ItemRestaurantBinding;
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 public class ListItemAdapter extends ListAdapter<ListItemState, ListItemAdapter.ViewHolder> {
 
@@ -60,7 +63,7 @@ public class ListItemAdapter extends ListAdapter<ListItemState, ListItemAdapter.
 
             Glide.with(itemView.getContext())
                     .load(listItemState.getPhoto())
-                    .centerCrop()
+                    .transform(new CenterCrop(),new RoundedCorners(itemView.getContext().getResources().getDimensionPixelSize(R.dimen.item_restaurant_photo_radius)))
                     .into(binding.ivRestaurantPhoto);
 
             if (listItemState.isRestaurantOpened() != null) {
