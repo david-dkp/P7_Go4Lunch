@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="array_sorting_methods">
+        <item>Distance</item>
+        <item>Rating</item>
+        <item>Workmates joining</item>
+    </string-array>
+</resources>

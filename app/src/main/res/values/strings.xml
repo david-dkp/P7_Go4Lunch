@@ -51,4 +51,7 @@
     <string name="settings_enable_notification_summary">Send you every 12 AM information about your lunch.</string>
     <string name="title_sort_by">Sort by</string>
     <string name="text_sort">Sort</string>
+    <string name="text_restaurant_opened">Opened</string>
+    <string name="text_restaurant_closed">Closed</string>
+    <string name="distance_meters">%1$dm</string>
 </resources>
