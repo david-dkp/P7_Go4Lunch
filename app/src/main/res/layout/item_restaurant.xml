@@ -67,39 +67,47 @@
         />
 
     <TextView
-        app:layout_constraintVertical_chainStyle="spread_inside"
-        app:layout_constraintBottom_toTopOf="@id/tvTypeAddress"
-        app:layout_constraintRight_toLeftOf="@id/tvRestaurantDistance"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="@id/ivRestaurantPhoto"
         android:id="@+id/tvRestaurantName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/item_restaurant_padding"
+        android:ellipsize="marquee"
+        android:singleLine="true"
+        android:textAppearance="?attr/textAppearanceBody1"
+        app:layout_constraintBottom_toTopOf="@id/tvTypeAddress"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/tvRestaurantDistance"
+        app:layout_constraintTop_toTopOf="@id/ivRestaurantPhoto"
+        app:layout_constraintVertical_chainStyle="spread_inside"
         tools:text="Le Zinc"
-        android:textAppearance="?attr/textAppearanceBody1" />
+        />
 
     <TextView
-        app:layout_constraintBottom_toTopOf="@id/tvClosingInfo"
         android:id="@+id/tvTypeAddress"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvRestaurantName"
-        app:layout_constraintRight_toLeftOf="@id/ivPerson"
-        android:singleLine="true"
-        android:ellipsize="marquee"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/item_restaurant_padding"
+        android:ellipsize="marquee"
+        android:singleLine="true"
         android:textAppearance="?attr/textAppearancePopupMenuHeader"
-        tools:text="French - 12 rue du Faubourg Poissonnière" />
+        app:layout_constraintBottom_toTopOf="@id/tvClosingInfo"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/ivPerson"
+        app:layout_constraintTop_toBottomOf="@id/tvRestaurantName"
+        tools:text="French - 12 rue du Faubourg Poissonnière"
+        />
 
     <TextView
-        app:layout_constraintTop_toBottomOf="@id/tvTypeAddress"
-        app:layout_constraintBottom_toBottomOf="@id/ivRestaurantPhoto"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/linearLayoutRating"
         android:id="@+id/tvClosingInfo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/item_restaurant_padding"
         android:textAppearance="?attr/textAppearancePopupMenuHeader"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toBottomOf="@id/ivRestaurantPhoto"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/linearLayoutRating"
+        app:layout_constraintTop_toBottomOf="@id/tvTypeAddress"
         tools:text="Open until 7pm"
-        android:textStyle="italic" />
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>

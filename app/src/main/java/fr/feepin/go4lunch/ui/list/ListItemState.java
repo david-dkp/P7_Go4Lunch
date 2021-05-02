@@ -11,7 +11,7 @@ public class ListItemState {
 
     private String restaurantAddress;
 
-    private boolean restaurantOpened;
+    private Boolean restaurantOpened;
 
     private int distance;
 
@@ -23,7 +23,7 @@ public class ListItemState {
 
     private String id;
 
-    public ListItemState(String restaurantName, String restaurantAddress, boolean restaurantOpened, int distance, int workmatesJoining, int rating, Bitmap photo, String id) {
+    public ListItemState(String restaurantName, String restaurantAddress, Boolean restaurantOpened, int distance, int workmatesJoining, int rating, Bitmap photo, String id) {
         this.restaurantName = restaurantName;
         this.restaurantAddress = restaurantAddress;
         this.restaurantOpened = restaurantOpened;
@@ -50,11 +50,11 @@ public class ListItemState {
         this.restaurantAddress = restaurantAddress;
     }
 
-    public boolean isRestaurantOpened() {
+    public Boolean isRestaurantOpened() {
         return restaurantOpened;
     }
 
-    public void setRestaurantOpened(boolean restaurantOpened) {
+    public void setRestaurantOpened(Boolean restaurantOpened) {
         this.restaurantOpened = restaurantOpened;
     }
 

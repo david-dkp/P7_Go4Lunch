@@ -63,11 +63,14 @@ public class ListItemAdapter extends ListAdapter<ListItemState, ListItemAdapter.
                     .centerCrop()
                     .into(binding.ivRestaurantPhoto);
 
-            binding.tvClosingInfo.setText(listItemState.isRestaurantOpened() ? R.string.text_restaurant_opened : R.string.text_restaurant_closed);
+            if (listItemState.isRestaurantOpened() != null) {
+                binding.tvClosingInfo.setText(listItemState.isRestaurantOpened() ? R.string.text_restaurant_opened : R.string.text_restaurant_closed);
+            }
+
             binding.tvRestaurantName.setText(listItemState.getRestaurantName());
-            binding.tvPersonCount.setText(listItemState.getWorkmatesJoining());
+            binding.tvPersonCount.setText(String.valueOf(listItemState.getWorkmatesJoining()));
             binding.tvTypeAddress.setText(listItemState.getRestaurantAddress());
-            binding.tvRestaurantDistance.setText(listItemState.getDistance());
+            binding.tvRestaurantDistance.setText(itemView.getContext().getString(R.string.distance_meters, listItemState.getDistance()));
 
             binding.linearLayoutRating.removeAllViews();
             for (int i = 0; i < listItemState.getRating(); i++) {
