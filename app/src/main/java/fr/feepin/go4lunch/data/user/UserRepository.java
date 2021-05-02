@@ -20,7 +20,9 @@ public interface UserRepository {
 
     Single<List<VisitedRestaurant>> getCurrentUserVisitedRestaurants();
 
-    Observable<List<UserInfo>> getUsersInfo();
+    Observable<List<UserInfo>> getUsersInfoObservable();
+
+    Single<List<UserInfo>> getUsersInfo();
 
     Completable setRestaurantRating(String restaurantId, boolean liked);
 

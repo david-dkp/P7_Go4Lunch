@@ -87,7 +87,7 @@ public class DefaultUserRepository implements UserRepository {
     }
 
     @Override
-    public Observable<List<UserInfo>> getUsersInfo() {
+    public Observable<List<UserInfo>> getUsersInfoObservable() {
         return Observable.create(e -> {
 
             firebaseFirestore.collection("users")
@@ -100,6 +100,19 @@ public class DefaultUserRepository implements UserRepository {
                         }
                     });
 
+        });
+    }
+
+    @Override
+    public Single<List<UserInfo>> getUsersInfo() {
+        return Single.create(emitter -> {
+            List<UserInfo> usersInfo = Tasks.await(
+                    firebaseFirestore
+                            .collection("users")
+                            .whereNotEqualTo(FieldPath.documentId(), firebaseAuth.getCurrentUser().getUid())
+                            .get()
+            ).toObjects(UserInfo.class);
+            emitter.onSuccess(usersInfo);
         });
     }
 
