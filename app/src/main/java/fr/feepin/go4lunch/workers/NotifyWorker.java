@@ -1,27 +1,17 @@
 package fr.feepin.go4lunch.workers;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.concurrent.futures.CallbackToFutureAdapter;
-import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.hilt.work.HiltWorker;
 import androidx.preference.PreferenceManager;
-import androidx.work.ListenableWorker;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
-import androidx.work.rxjava3.RxWorker;
 
-import com.google.android.libraries.places.api.model.Place;
-
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,10 +23,7 @@ import fr.feepin.go4lunch.data.maps.MapsRepository;
 import fr.feepin.go4lunch.data.user.UserRepository;
 import fr.feepin.go4lunch.data.user.models.UserInfo;
 import fr.feepin.go4lunch.utils.ConnectivityUtils;
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 import static fr.feepin.go4lunch.Constants.EAT_NOTIFICATION_ID;
 
@@ -73,7 +60,7 @@ public class NotifyWorker extends Worker {
         String restaurantAddress = getInputData().getString(Constants.KEY_RESTAURANT_ADDRESS);
 
         if (ConnectivityUtils.hasInternetConnection(context)) {
-            return userRepository.getUsersInfo()
+            return userRepository.getUsersInfoObservable()
                     .first(Collections.emptyList())
                     .flatMapObservable(Observable::fromIterable)
                     .filter(userInfo -> userInfo.getRestaurantChoiceId().equals(restaurantId))
