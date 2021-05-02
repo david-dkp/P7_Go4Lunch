@@ -50,6 +50,8 @@ import fr.feepin.go4lunch.ui.restaurant.RestaurantActivity;
 import fr.feepin.go4lunch.utils.LatLngUtils;
 import fr.feepin.go4lunch.utils.PermissionUtils;
 
+import static android.app.Activity.RESULT_OK;
+
 @AndroidEntryPoint
 public class MapViewFragment extends Fragment {
 
@@ -66,6 +68,7 @@ public class MapViewFragment extends Fragment {
     private final ActivityResultLauncher<Intent> autocompleteActivityLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
+                if (result.getResultCode() != RESULT_OK) return;
                 Place place = Autocomplete.getPlaceFromIntent(result.getData());
                 mainViewModel.addRestaurant(place);
                 animateCameraToPosition(place.getLatLng(), Constants.MAPS_RESTAURANT_ZOOM_LEVEL);
@@ -195,6 +198,7 @@ public class MapViewFragment extends Fragment {
                         getBitmapFromVectorDrawable(R.drawable.ic_restaurant_pin_joined)
                         )
         );
+
         clusterManager.setOnClusterItemClickListener(item -> {
             RestaurantActivity.navigate(getContext(), item.getRestaurantId());
             return true;
@@ -231,7 +235,7 @@ public class MapViewFragment extends Fragment {
 
         if (item.getItemId() == R.id.search) {
             Intent intent = new Autocomplete.IntentBuilder(
-                    AutocompleteActivityMode.OVERLAY,
+                    AutocompleteActivityMode.FULLSCREEN,
                     Arrays.asList(Place.Field.ID, Place.Field.LAT_LNG)
             )
                     .setCountry("FR")
