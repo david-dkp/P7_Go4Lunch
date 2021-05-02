@@ -3,7 +3,6 @@ package fr.feepin.go4lunch.ui.list;
 import java.util.Comparator;
 
 public enum SortMethod {
-    NONE(-1, null),
     DISTANCE(0, ListItemState.DISTANCE_COMPARATOR),
     RATING(1, ListItemState.RATING_COMPARATOR),
     WORKMATES(2, ListItemState.WORKMATES_COMPARATOR);

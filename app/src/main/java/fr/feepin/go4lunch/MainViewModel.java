@@ -85,7 +85,7 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<FindAutocompletePredictionsResponse> autocompletePredictions = new MutableLiveData<>();
     private MutableLiveData<List<PlaceResponse>> placesResponse = new MutableLiveData<>(Collections.emptyList());
     private MutableLiveData<List<UserInfo>> userInfos = new MutableLiveData<>(Collections.emptyList());
-    private MutableLiveData<SortMethod> sortMethod = new MutableLiveData<>(SortMethod.NONE);
+    private MutableLiveData<SortMethod> sortMethod = new MutableLiveData<>(SortMethod.DISTANCE);
 
     @Inject
     public MainViewModel(@ApplicationContext Context context, FirebaseAuth firebaseAuth, MapsRepository mapsRepository, UserRepository userRepository) {
@@ -259,9 +259,7 @@ public class MainViewModel extends ViewModel {
 
                         @Override
                         public void onSuccess(@NonNull List<ListItemState> listItemStates) {
-                            if (sortMethod != SortMethod.NONE) {
-                                Collections.sort(listItemStates, sortMethod.getComparator());
-                            }
+                            Collections.sort(listItemStates, sortMethod.getComparator());
                             MainViewModel.this.listViewState.setValue(new Resource.Success<>(new ListViewState(listItemStates, true), null));
                         }
 
@@ -371,8 +369,6 @@ public class MainViewModel extends ViewModel {
     }
 
     private List<ListItemState> sortPredictions(List<ListItemState> states, SortMethod sortMethod) {
-        if (sortMethod == SortMethod.NONE) return states;
-
         switch (sortMethod) {
             case RATING:
                 Collections.sort(states, ListItemState.RATING_COMPARATOR);
