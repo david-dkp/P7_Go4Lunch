@@ -1,8 +1,26 @@
 package fr.feepin.go4lunch.ui.list;
 
+import java.util.Comparator;
+
 public enum SortMethod {
-    NONE,
-    DISTANCE,
-    RATING,
-    WORKMATES
+    NONE(-1, null),
+    DISTANCE(0, ListItemState.DISTANCE_COMPARATOR),
+    RATING(1, ListItemState.RATING_COMPARATOR),
+    WORKMATES(2, ListItemState.WORKMATES_COMPARATOR);
+
+    private int position;
+    private Comparator<ListItemState> comparator;
+
+    SortMethod(int position, Comparator<ListItemState> comparator) {
+        this.position = position;
+        this.comparator = comparator;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public Comparator<ListItemState> getComparator() {
+        return comparator;
+    }
 }
