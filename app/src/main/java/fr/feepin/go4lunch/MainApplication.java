@@ -8,6 +8,7 @@ import androidx.work.Configuration;
 import javax.inject.Inject;
 
 import dagger.hilt.android.HiltAndroidApp;
+import io.reactivex.rxjava3.plugins.RxJavaPlugins;
 
 @HiltAndroidApp
 public class MainApplication extends MultiDexApplication implements Configuration.Provider{
@@ -15,6 +16,13 @@ public class MainApplication extends MultiDexApplication implements Configuratio
     @Inject
     HiltWorkerFactory hiltWorkerFactory;
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        RxJavaPlugins.setErrorHandler(throwable -> {
+
+        });
+    }
 
     @NonNull
     @Override

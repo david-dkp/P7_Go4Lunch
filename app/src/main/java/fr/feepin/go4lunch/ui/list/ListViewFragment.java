@@ -82,6 +82,18 @@ public class ListViewFragment extends Fragment {
         MenuItem searchItem = menu.findItem(R.id.search);
         sortMenuItem = menu.findItem(R.id.sort);
         SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                mainViewModel.autoCompleteQuery(newText);
+                return false;
+            }
+        });
         EditText editText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
         editText.setTextColor(Color.WHITE);
     }
