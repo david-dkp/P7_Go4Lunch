@@ -89,7 +89,7 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<SortMethod> sortMethod = new MutableLiveData<>(SortMethod.DISTANCE);
 
     private Disposable runningListViewObservable;
-
+    private Disposable runningPredictionsQueryObservable;
     @Inject
     public MainViewModel(@ApplicationContext Context context, FirebaseAuth firebaseAuth, MapsRepository mapsRepository, UserRepository userRepository) {
         this.context = context;
@@ -203,10 +203,8 @@ public class MainViewModel extends ViewModel {
     }
 
     private void updateListViewState(List<PlaceResponse> placeResponses, FindAutocompletePredictionsResponse autocompletePredictionsResponse, SortMethod sortMethod) {
-
-        if (runningListViewObservable != null) runningListViewObservable.dispose();
-
         listViewState.setValue(new Resource.Loading(new ListViewState(listViewState.getValue().getData().getListItemStates(), true), null));
+
         if (autocompletePredictionsResponse == null) {
             runningListViewObservable = userRepository.getUsersInfo()
                     .flatMapObservable(userInfos -> Observable.fromIterable(placeResponses)
@@ -254,6 +252,7 @@ public class MainViewModel extends ViewModel {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe((listItemStates, throwable) -> {
+                        if (throwable != null) throwable.printStackTrace();
                         Collections.sort(listItemStates, sortMethod.getComparator());
                         MainViewModel.this.listViewState.setValue(new Resource.Success<>(new ListViewState(listItemStates, true), null));
                     });
@@ -267,27 +266,27 @@ public class MainViewModel extends ViewModel {
                                     Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS),
                                     sessionToken
                             )
-                                    .flatMapObservable(place ->{
-                                        Single<Optional<FetchPhotoResponse>> photoSingle;
+                                    .flatMapObservable(place -> {
+                                                Single<Optional<FetchPhotoResponse>> photoSingle;
 
-                                        if (place.getPhotoMetadatas() == null) {
-                                            photoSingle = Single.just(Optional.fromNullable(null));
-                                        } else {
-                                            photoSingle = mapsRepository.getRestaurantPhoto(place.getPhotoMetadatas().get(0)).map(Optional::of);
-                                        }
+                                                if (place.getPhotoMetadatas() == null) {
+                                                    photoSingle = Single.just(Optional.fromNullable(null));
+                                                } else {
+                                                    photoSingle = mapsRepository.getRestaurantPhoto(place.getPhotoMetadatas().get(0)).map(Optional::of);
+                                                }
 
-                                        return photoSingle
-                                                .flatMapObservable(fetchPhotoResponseOptional -> userRepository.getVisitedRestaurants(place.getId())
-                                                        .map(visitedRestaurants -> new ListItemState(
-                                                                place.getName(),
-                                                                place.getAddress(),
-                                                                place.isOpen(),
-                                                                (int) SphericalUtil.computeDistanceBetween(position.getValue().getData(), place.getLatLng()),
-                                                                calculateUsersJoining(userInfos, place.getId()),
-                                                                calculateRating(visitedRestaurants),
-                                                                fetchPhotoResponseOptional.isPresent() ? fetchPhotoResponseOptional.get().getBitmap() : null,
-                                                                place.getId()
-                                                        )).toObservable());
+                                                return photoSingle
+                                                        .flatMapObservable(fetchPhotoResponseOptional -> userRepository.getVisitedRestaurants(place.getId())
+                                                                .map(visitedRestaurants -> new ListItemState(
+                                                                        place.getName(),
+                                                                        place.getAddress(),
+                                                                        place.isOpen(),
+                                                                        (int) SphericalUtil.computeDistanceBetween(position.getValue().getData(), place.getLatLng()),
+                                                                        calculateUsersJoining(userInfos, place.getId()),
+                                                                        calculateRating(visitedRestaurants),
+                                                                        fetchPhotoResponseOptional.isPresent() ? fetchPhotoResponseOptional.get().getBitmap() : null,
+                                                                        place.getId()
+                                                                )).toObservable());
                                             }
                                     )))
                     .toList()
@@ -508,7 +507,7 @@ public class MainViewModel extends ViewModel {
                 .subscribe(new SingleObserver<FindAutocompletePredictionsResponse>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
-                        compositeDisposable.add(d);
+                        runningPredictionsQueryObservable = d;
                     }
 
                     @Override
@@ -549,20 +548,27 @@ public class MainViewModel extends ViewModel {
 
     public void autoCompleteQuery(String query) {
         String cleanQuery = query.trim();
-
         if (sessionToken == null) {
             sessionToken = AutocompleteSessionToken.newInstance();
         }
 
-        if (cleanQuery.equals("")) {
-            handler.removeCallbacksAndMessages(null);
-            autocompletePredictions.setValue(null);
-            return;
+        if (runningListViewObservable != null) {
+            runningListViewObservable.dispose();
+        }
+
+        if (runningPredictionsQueryObservable != null) {
+            runningPredictionsQueryObservable.dispose();
         }
 
         //Prevent excessive requests
         handler.postDelayed(() -> {
             handler.removeCallbacksAndMessages(null);
+
+            if (cleanQuery.equals("")) {
+                if (autocompletePredictions.getValue() != null) autocompletePredictions.setValue(null);
+                return;
+            }
+
             getPredictionsForQuery(cleanQuery);
         }, 400);
 

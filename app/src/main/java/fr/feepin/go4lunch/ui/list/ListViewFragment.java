@@ -28,6 +28,7 @@ import fr.feepin.go4lunch.MainViewModel;
 import fr.feepin.go4lunch.R;
 import fr.feepin.go4lunch.data.Resource;
 import fr.feepin.go4lunch.databinding.FragmentListViewBinding;
+import fr.feepin.go4lunch.ui.restaurant.RestaurantActivity;
 
 public class ListViewFragment extends Fragment {
 
@@ -54,7 +55,12 @@ public class ListViewFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        listItemAdapter = new ListItemAdapter();
+
+        listItemAdapter = new ListItemAdapter(listItemState -> {
+            RestaurantActivity.navigate(getContext(), listItemState.getId(), mainViewModel.getSessionToken());
+            mainViewModel.destroyAutocompleteSession();
+        });
+
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
         binding.rvRestaurants.setAdapter(listItemAdapter);
         binding.rvRestaurants.setLayoutManager(linearLayoutManager);
@@ -85,13 +91,13 @@ public class ListViewFragment extends Fragment {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                return true;
+                return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 mainViewModel.autoCompleteQuery(newText);
-                return false;
+                return true;
             }
         });
         EditText editText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);

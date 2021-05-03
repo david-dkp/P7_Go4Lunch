@@ -12,7 +12,6 @@ import androidx.work.Data;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
-import androidx.work.WorkQuery;
 
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
@@ -24,8 +23,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -43,7 +40,6 @@ import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.CompletableObserver;
 import io.reactivex.rxjava3.core.Observer;
-import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.core.SingleObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
@@ -220,7 +216,7 @@ public class RestaurantViewModel extends ViewModel {
     }
 
     private void askUsersInfo() {
-        userRepository.getUsersInfo()
+        userRepository.getUsersInfoObservable()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<List<UserInfo>>() {
@@ -367,10 +363,9 @@ public class RestaurantViewModel extends ViewModel {
                                     TimeUnit.HOURS
                             )
                                     .setInputData(data)
-                                    .setInitialDelay(5, TimeUnit.SECONDS)
+                                    .setInitialDelay(timeMillisFromNextMidday, TimeUnit.MILLISECONDS)
                                     .build();
                             workManager.enqueueUniquePeriodicWork(Constants.NOTIFY_WORKER_TAG, ExistingPeriodicWorkPolicy.REPLACE, request);
-
                         } else {
                             workManager.cancelUniqueWork(Constants.NOTIFY_WORKER_TAG);
                         }
@@ -380,7 +375,6 @@ public class RestaurantViewModel extends ViewModel {
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-                        Log.d("debug", e.getMessage());
                     }
                 });
     }

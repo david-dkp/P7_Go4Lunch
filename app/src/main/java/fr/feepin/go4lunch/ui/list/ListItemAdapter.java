@@ -32,8 +32,11 @@ public class ListItemAdapter extends ListAdapter<ListItemState, ListItemAdapter.
         }
     };
 
-    public ListItemAdapter() {
+    private OnRestaurantClickListener listener;
+
+    public ListItemAdapter(OnRestaurantClickListener listener) {
         super(DIFF_CALLBACK);
+        this.listener = listener;
     }
 
     @NonNull
@@ -55,6 +58,11 @@ public class ListItemAdapter extends ListAdapter<ListItemState, ListItemAdapter.
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             this.binding = ItemRestaurantBinding.bind(itemView);
+            binding.getRoot().setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onClick(getItem(getAdapterPosition()));
+                }
+            });
         }
 
         public void bind(ListItemState listItemState) {
@@ -80,5 +88,9 @@ public class ListItemAdapter extends ListAdapter<ListItemState, ListItemAdapter.
                 layoutInflater.inflate(R.layout.item_restaurant_rating_star, binding.linearLayoutRating, true);
             }
         }
+    }
+
+    public interface OnRestaurantClickListener {
+        void onClick(ListItemState listItemState);
     }
 }
