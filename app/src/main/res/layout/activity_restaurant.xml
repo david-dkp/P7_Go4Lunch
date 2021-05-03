@@ -37,6 +37,7 @@
         android:layout_marginEnd="@dimen/restaurant_fab_marginRight"
         android:contentDescription="@string/desc_join_restaurant"
         android:src="@drawable/ic_check_circle"
+        app:backgroundTint="@color/fab_join_restaurant_background_color"
         app:layout_constraintBottom_toBottomOf="@id/ivRestaurantPhoto"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ivRestaurantPhoto"
@@ -98,9 +99,9 @@
 
     <TextView
         android:id="@+id/tvCall"
-        style="@style/Widget.Go4Lunch.TextView.Restaurant"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="@color/white"
         android:clickable="true"
         android:drawablePadding="@dimen/restaurant_options_drawablePadding"
         android:focusable="true"
@@ -110,6 +111,7 @@
         android:textAllCaps="true"
         android:textAppearance="?attr/textAppearanceHeadline6"
         android:textColor="@color/restaurant_layout_options_foreground_color"
+        app:backgroundTint="@color/restaurant_layout_options_background_color"
         app:drawableTint="@color/restaurant_layout_options_foreground_color"
         app:drawableTopCompat="@drawable/ic_call"
         app:layout_constraintHorizontal_weight="1"
@@ -120,9 +122,9 @@
 
     <TextView
         android:id="@+id/tvLike"
-        style="@style/Widget.Go4Lunch.TextView.Restaurant"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="@color/white"
         android:clickable="true"
         android:drawablePadding="@dimen/restaurant_options_drawablePadding"
         android:focusable="true"
@@ -132,6 +134,7 @@
         android:textAllCaps="true"
         android:textAppearance="?attr/textAppearanceHeadline6"
         android:textColor="@color/restaurant_layout_options_foreground_color"
+        app:backgroundTint="@color/restaurant_layout_options_background_color"
         app:drawableTint="@color/restaurant_layout_options_foreground_color"
         app:drawableTopCompat="@drawable/ic_star"
         app:layout_constraintHorizontal_weight="1"
@@ -142,9 +145,9 @@
 
     <TextView
         android:id="@+id/tvWebsite"
-        style="@style/Widget.Go4Lunch.TextView.Restaurant"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="@color/white"
         android:clickable="true"
         android:drawablePadding="@dimen/restaurant_options_drawablePadding"
         android:focusable="true"
@@ -154,6 +157,7 @@
         android:textAllCaps="true"
         android:textAppearance="?attr/textAppearanceHeadline6"
         android:textColor="@color/restaurant_layout_options_foreground_color"
+        app:backgroundTint="@color/restaurant_layout_options_background_color"
         app:drawableTint="@color/restaurant_layout_options_foreground_color"
         app:drawableTopCompat="@drawable/ic_globe"
         app:layout_constraintHorizontal_weight="1"

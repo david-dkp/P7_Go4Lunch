@@ -25,7 +25,4 @@
         <item name="android:textStyle">bold</item>
     </style>
 
-    <style name="Widget.Go4Lunch.TextView.Restaurant" parent="Widget.MaterialComponents.TextView">
-        <item name="backgroundTint">@color/restaurant_layout_options_background_color</item>
-    </style>
 </resources>

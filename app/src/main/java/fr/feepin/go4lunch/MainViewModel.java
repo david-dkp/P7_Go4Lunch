@@ -264,7 +264,7 @@ public class MainViewModel extends ViewModel {
                             .fromIterable(autocompletePredictionsResponse.getAutocompletePredictions())
                             .flatMap(autocompletePrediction -> mapsRepository.getRestaurantDetails(
                                     autocompletePrediction.getPlaceId(),
-                                    Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS),
+                                    Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.UTC_OFFSET, Place.Field.LAT_LNG, Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS),
                                     sessionToken
                             )
                                     .flatMapObservable(place -> {

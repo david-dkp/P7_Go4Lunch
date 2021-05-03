@@ -54,7 +54,8 @@ public class RestaurantViewModel extends ViewModel {
             Place.Field.PHONE_NUMBER,
             Place.Field.WEBSITE_URI,
             Place.Field.PHOTO_METADATAS,
-            Place.Field.OPENING_HOURS
+            Place.Field.OPENING_HOURS,
+            Place.Field.UTC_OFFSET
     );
 
     private final WorkManager workManager;
@@ -72,6 +73,7 @@ public class RestaurantViewModel extends ViewModel {
     private final MediatorLiveData<Boolean> liked = new MediatorLiveData<>();
     private final MediatorLiveData<Boolean> joined = new MediatorLiveData<>();
     private final MediatorLiveData<Boolean> alreadyVisited = new MediatorLiveData<>();
+    private final MediatorLiveData<Boolean> canJoin = new MediatorLiveData<>();
 
     //Datas
     private final MutableLiveData<UserInfo> currentUserInfo = new MutableLiveData<>();
@@ -96,6 +98,7 @@ public class RestaurantViewModel extends ViewModel {
         setupLiked();
         setupJoined();
         setupAlreadyVisited();
+        setupCanJoin();
 
         askPlace();
         askRating();
@@ -140,6 +143,12 @@ public class RestaurantViewModel extends ViewModel {
             }
 
             alreadyVisited.setValue(false);
+        });
+    }
+
+    private void setupCanJoin() {
+        canJoin.addSource(place, place -> {
+            canJoin.setValue(place.isOpen());
         });
     }
 
@@ -405,6 +414,10 @@ public class RestaurantViewModel extends ViewModel {
 
     public LiveData<Boolean> hasAlreadyVisited() {
         return alreadyVisited;
+    }
+
+    public LiveData<Boolean> canJoin() {
+        return canJoin;
     }
 
     @Override

@@ -1,15 +1,23 @@
 package fr.feepin.go4lunch.ui.restaurant;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.content.res.ColorStateListInflaterCompat;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.widget.TextViewCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,11 +41,14 @@ public class RestaurantActivity extends AppCompatActivity {
 
     private UsersJoiningAdapter usersJoiningAdapter;
 
+    @SuppressLint("RestrictedApi")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityRestaurantBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        //Setup toolbar
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
@@ -104,7 +115,6 @@ public class RestaurantActivity extends AppCompatActivity {
         restaurantViewModel.getPlace().observe(this, place -> {
             binding.tvRestaurantName.setText(place.getName());
             binding.tvRestaurantAddress.setText(place.getAddress());
-
             if (place.getPhoneNumber() == null) {
                 binding.tvCall.setEnabled(false);
             }
@@ -154,6 +164,10 @@ public class RestaurantActivity extends AppCompatActivity {
         //Joining info
         restaurantViewModel.isJoined().observe(this, isJoined -> {
             binding.fabJoinRestaurant.setActivated(isJoined);
+        });
+
+        restaurantViewModel.canJoin().observe(this, canJoin -> {
+            binding.fabJoinRestaurant.setEnabled(canJoin);
         });
     }
 
