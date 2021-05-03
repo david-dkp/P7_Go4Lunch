@@ -37,4 +37,5 @@
     <dimen name="map_view_location_error_radius">10dp</dimen>
     <dimen name="map_view_location_error_margin">10dp</dimen>
     <dimen name="map_view_location_error_paddingHorizontal">10dp</dimen>
+    <dimen name="item_restaurant_photo_radius">5dp</dimen>
 </resources>

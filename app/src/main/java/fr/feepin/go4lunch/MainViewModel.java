@@ -61,35 +61,36 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 @HiltViewModel
 public class MainViewModel extends ViewModel {
 
-    private Context context;
-    private Handler handler = new Handler();
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private final Context context;
+    private final Handler handler = new Handler();
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private AutocompleteSessionToken sessionToken;
 
     private LocationManager locationManager;
 
-    private FirebaseAuth firebaseAuth;
-    private MapsRepository mapsRepository;
-    private UserRepository userRepository;
+    private final FirebaseAuth firebaseAuth;
+    private final MapsRepository mapsRepository;
+    private final UserRepository userRepository;
 
     private MutableLiveData<FirebaseUser> currentUser;
 
     //States
-    private MutableLiveData<Resource<LatLng>> position = new MutableLiveData<>();
-    private MutableLiveData<UserInfo> currentUserInfo = new MutableLiveData<>();
-    private MediatorLiveData<Resource<List<RestaurantState>>> restaurantStates = new MediatorLiveData<>();
-    private MediatorLiveData<Resource<ListViewState>> listViewState = new MediatorLiveData<>();
-    private MediatorLiveData<Resource<List<WorkmateState>>> workmateStates = new MediatorLiveData<>();
+    private final MutableLiveData<Resource<LatLng>> position = new MutableLiveData<>();
+    private final MutableLiveData<UserInfo> currentUserInfo = new MutableLiveData<>();
+    private final MediatorLiveData<Resource<List<RestaurantState>>> restaurantStates = new MediatorLiveData<>();
+    private final MediatorLiveData<Resource<ListViewState>> listViewState = new MediatorLiveData<>();
+    private final MediatorLiveData<Resource<List<WorkmateState>>> workmateStates = new MediatorLiveData<>();
 
     //Datas
-    private MutableLiveData<FindAutocompletePredictionsResponse> autocompletePredictions = new MutableLiveData<>();
-    private MutableLiveData<List<PlaceResponse>> placesResponse = new MutableLiveData<>(Collections.emptyList());
-    private MutableLiveData<List<UserInfo>> userInfos = new MutableLiveData<>(Collections.emptyList());
-    private MutableLiveData<SortMethod> sortMethod = new MutableLiveData<>(SortMethod.DISTANCE);
+    private final MutableLiveData<FindAutocompletePredictionsResponse> autocompletePredictions = new MutableLiveData<>();
+    private final MutableLiveData<List<PlaceResponse>> placesResponse = new MutableLiveData<>(Collections.emptyList());
+    private final MutableLiveData<List<UserInfo>> userInfos = new MutableLiveData<>(Collections.emptyList());
+    private final MutableLiveData<SortMethod> sortMethod = new MutableLiveData<>(SortMethod.DISTANCE);
 
     private Disposable runningListViewObservable;
     private Disposable runningPredictionsQueryObservable;
+
     @Inject
     public MainViewModel(@ApplicationContext Context context, FirebaseAuth firebaseAuth, MapsRepository mapsRepository, UserRepository userRepository) {
         this.context = context;
@@ -565,7 +566,8 @@ public class MainViewModel extends ViewModel {
             handler.removeCallbacksAndMessages(null);
 
             if (cleanQuery.equals("")) {
-                if (autocompletePredictions.getValue() != null) autocompletePredictions.setValue(null);
+                if (autocompletePredictions.getValue() != null)
+                    autocompletePredictions.setValue(null);
                 return;
             }
 

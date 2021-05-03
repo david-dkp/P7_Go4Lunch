@@ -3,7 +3,6 @@ package fr.feepin.go4lunch.ui.list;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -113,7 +112,7 @@ public class ListViewFragment extends Fragment {
                     .setSingleChoiceItems(R.array.array_sorting_methods, mainViewModel.getSortMethod().getValue().getPosition(), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            switch(which) {
+                            switch (which) {
                                 case 0:
                                     mainViewModel.setSortMethod(SortMethod.DISTANCE);
                                     break;

@@ -30,9 +30,9 @@ import static fr.feepin.go4lunch.Constants.EAT_NOTIFICATION_ID;
 @HiltWorker
 public class NotifyWorker extends Worker {
 
-    private MapsRepository mapsRepository;
-    private UserRepository userRepository;
-    private Context context;
+    private final MapsRepository mapsRepository;
+    private final UserRepository userRepository;
+    private final Context context;
 
     @AssistedInject
     public NotifyWorker(

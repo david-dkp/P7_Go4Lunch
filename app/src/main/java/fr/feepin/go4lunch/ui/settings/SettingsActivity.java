@@ -3,8 +3,6 @@ package fr.feepin.go4lunch.ui.settings;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.PersistableBundle;
-import android.util.Log;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -13,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import fr.feepin.go4lunch.R;
 import fr.feepin.go4lunch.databinding.ActivitySettingsBinding;
-import fr.feepin.go4lunch.ui.restaurant.RestaurantActivity;
 
 public class SettingsActivity extends AppCompatActivity {
 

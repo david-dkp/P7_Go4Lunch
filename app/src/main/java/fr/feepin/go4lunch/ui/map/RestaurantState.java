@@ -10,7 +10,7 @@ public class RestaurantState {
 
     private boolean joined;
 
-    public RestaurantState(String id,LatLng position, boolean joined) {
+    public RestaurantState(String id, LatLng position, boolean joined) {
         this.id = id;
         this.position = position;
         this.joined = joined;

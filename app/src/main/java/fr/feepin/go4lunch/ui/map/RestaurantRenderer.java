@@ -10,14 +10,13 @@ import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
-import com.google.maps.android.ui.IconGenerator;
 
 public class RestaurantRenderer extends DefaultClusterRenderer<RestaurantItem> {
 
-    private Bitmap notJoinedBitmap, joinedBitmap;
+    private final Bitmap notJoinedBitmap;
+    private final Bitmap joinedBitmap;
 
     public RestaurantRenderer(Context context, GoogleMap map, ClusterManager<RestaurantItem> clusterManager, Bitmap notJoinedBitmap, Bitmap joinedBitmap) {
         super(context, map, clusterManager);

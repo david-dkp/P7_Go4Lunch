@@ -11,7 +11,7 @@ import dagger.hilt.android.HiltAndroidApp;
 import io.reactivex.rxjava3.plugins.RxJavaPlugins;
 
 @HiltAndroidApp
-public class MainApplication extends MultiDexApplication implements Configuration.Provider{
+public class MainApplication extends MultiDexApplication implements Configuration.Provider {
 
     @Inject
     HiltWorkerFactory hiltWorkerFactory;

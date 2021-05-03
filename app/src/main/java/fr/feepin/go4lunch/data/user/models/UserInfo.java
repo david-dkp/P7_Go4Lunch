@@ -16,7 +16,8 @@ public class UserInfo {
         this.restaurantChoiceId = restaurantChoiceId;
     }
 
-    public UserInfo(){}
+    public UserInfo() {
+    }
 
     public String getName() {
         return name;

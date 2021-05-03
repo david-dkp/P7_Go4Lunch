@@ -6,9 +6,9 @@ import android.net.NetworkInfo;
 
 public class ConnectivityUtils {
 
-    public static boolean hasInternetConnection(Context context){
+    public static boolean hasInternetConnection(Context context) {
         ConnectivityManager cm =
-                (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork != null &&

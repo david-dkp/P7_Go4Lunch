@@ -38,7 +38,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import static fr.feepin.go4lunch.Constants.USER_PREFS_NAME;
 
 @Module
-@InstallIn(SingletonComponent.class) abstract public class AppModule {
+@InstallIn(SingletonComponent.class)
+abstract public class AppModule {
 
     @MapsRetrofit
     @Singleton
@@ -72,7 +73,7 @@ import static fr.feepin.go4lunch.Constants.USER_PREFS_NAME;
 
     @Singleton
     @Provides
-    public static RxDataStore<Preferences> providesRxDataStore (@ApplicationContext Context context){
+    public static RxDataStore<Preferences> providesRxDataStore(@ApplicationContext Context context) {
         return new RxPreferenceDataStoreBuilder(context, USER_PREFS_NAME).build();
     }
 
@@ -93,5 +94,6 @@ import static fr.feepin.go4lunch.Constants.USER_PREFS_NAME;
 
     @Qualifier
     @Retention(RetentionPolicy.RUNTIME)
-    private @interface MapsRetrofit {}
+    private @interface MapsRetrofit {
+    }
 }

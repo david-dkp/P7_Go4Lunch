@@ -3,7 +3,6 @@ package fr.feepin.go4lunch.ui.list;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
@@ -16,7 +15,6 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 
 import fr.feepin.go4lunch.R;
 import fr.feepin.go4lunch.databinding.ItemRestaurantBinding;
-import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 public class ListItemAdapter extends ListAdapter<ListItemState, ListItemAdapter.ViewHolder> {
 
@@ -32,7 +30,7 @@ public class ListItemAdapter extends ListAdapter<ListItemState, ListItemAdapter.
         }
     };
 
-    private OnRestaurantClickListener listener;
+    private final OnRestaurantClickListener listener;
 
     public ListItemAdapter(OnRestaurantClickListener listener) {
         super(DIFF_CALLBACK);
@@ -53,7 +51,7 @@ public class ListItemAdapter extends ListAdapter<ListItemState, ListItemAdapter.
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private ItemRestaurantBinding binding;
+        private final ItemRestaurantBinding binding;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -71,7 +69,7 @@ public class ListItemAdapter extends ListAdapter<ListItemState, ListItemAdapter.
 
             Glide.with(itemView.getContext())
                     .load(listItemState.getPhoto())
-                    .transform(new CenterCrop(),new RoundedCorners(itemView.getContext().getResources().getDimensionPixelSize(R.dimen.item_restaurant_photo_radius)))
+                    .transform(new CenterCrop(), new RoundedCorners(itemView.getContext().getResources().getDimensionPixelSize(R.dimen.item_restaurant_photo_radius)))
                     .into(binding.ivRestaurantPhoto);
 
             if (listItemState.isRestaurantOpened() != null) {

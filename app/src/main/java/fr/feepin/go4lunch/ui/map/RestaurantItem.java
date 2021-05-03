@@ -8,8 +8,8 @@ import com.google.maps.android.clustering.ClusterItem;
 
 public class RestaurantItem implements ClusterItem {
 
-    private LatLng position;
-    private String restaurantId;
+    private final LatLng position;
+    private final String restaurantId;
     private boolean joined;
 
     public RestaurantItem(LatLng position, String restaurantId, boolean joined) {

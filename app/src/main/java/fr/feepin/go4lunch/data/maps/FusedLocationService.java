@@ -1,13 +1,11 @@
 package fr.feepin.go4lunch.data.maps;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Looper;
 
-import androidx.core.location.LocationManagerCompat;
 import androidx.datastore.preferences.core.MutablePreferences;
 import androidx.datastore.preferences.core.Preferences;
 import androidx.datastore.preferences.core.PreferencesKeys;
@@ -18,37 +16,33 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.Task;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
-import fr.feepin.go4lunch.utils.PermissionUtils;
 import io.reactivex.rxjava3.core.Single;
-
-import static fr.feepin.go4lunch.Constants.NO_LOCATION_PERMISSION_MESSAGE;
 
 @Singleton
 public class FusedLocationService implements LocationService {
 
-    private Context context;
-    private FusedLocationProviderClient fusedLocationProviderClient;
+    private final Context context;
+    private final FusedLocationProviderClient fusedLocationProviderClient;
     private Location lastKnownLocation;
-    private RxDataStore<Preferences> rxDatastore;
+    private final RxDataStore<Preferences> rxDatastore;
 
-    private Preferences.Key<Double> LATEST_LATITUDE = PreferencesKeys.doubleKey("latest_latitude");
-    private Preferences.Key<Double> LATEST_LONGITUDE = PreferencesKeys.doubleKey("latest_longitude");
+    private final Preferences.Key<Double> LATEST_LATITUDE = PreferencesKeys.doubleKey("latest_latitude");
+    private final Preferences.Key<Double> LATEST_LONGITUDE = PreferencesKeys.doubleKey("latest_longitude");
 
     @Inject
     public FusedLocationService(@ApplicationContext Context context, RxDataStore<Preferences> rxDataStore) {
         LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        fusedLocationProviderClient = new FusedLocationProviderClient(context);;
+        fusedLocationProviderClient = new FusedLocationProviderClient(context);
 
         this.rxDatastore = rxDataStore;
         this.context = context;
     }
-    
+
     @SuppressLint("MissingPermission")
     @Override
     public Single<Location> getCurrentPosition() {
@@ -61,7 +55,7 @@ public class FusedLocationService implements LocationService {
 
             fusedLocationProviderClient.requestLocationUpdates(
                     locationRequest,
-                    new LocationCallback(){
+                    new LocationCallback() {
                         @Override
                         public void onLocationResult(LocationResult locationResult) {
                             super.onLocationResult(locationResult);

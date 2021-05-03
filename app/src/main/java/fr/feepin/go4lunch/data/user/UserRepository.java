@@ -1,7 +1,5 @@
 package fr.feepin.go4lunch.data.user;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.util.List;
 
 import fr.feepin.go4lunch.data.user.models.UserInfo;

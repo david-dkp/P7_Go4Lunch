@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class WorkmatesItemDecoration extends DividerItemDecoration {
 
-    private int left;
+    private final int left;
 
     public WorkmatesItemDecoration(Context context, int orientation, int left) {
         super(context, orientation);

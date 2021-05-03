@@ -19,7 +19,7 @@ import fr.feepin.go4lunch.R;
 
 public class WorkmatesAdapter extends ListAdapter<WorkmateState, WorkmatesAdapter.ViewHolder> {
 
-    private OnWorkmateListener listener;
+    private final OnWorkmateListener listener;
 
     private static final DiffUtil.ItemCallback<WorkmateState> DIFF_CALLBACK = new DiffUtil.ItemCallback<WorkmateState>() {
         @Override

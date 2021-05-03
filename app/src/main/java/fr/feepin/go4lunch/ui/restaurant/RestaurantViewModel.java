@@ -57,26 +57,26 @@ public class RestaurantViewModel extends ViewModel {
             Place.Field.OPENING_HOURS
     );
 
-    private WorkManager workManager;
+    private final WorkManager workManager;
 
-    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    private UserRepository userRepository;
-    private MapsRepository mapsRepository;
+    private final UserRepository userRepository;
+    private final MapsRepository mapsRepository;
 
     //States
-    private MutableLiveData<Bitmap> restaurantPhoto = new MutableLiveData<>();
-    private MutableLiveData<Place> place = new MutableLiveData<>();
-    private MutableLiveData<List<UserInfo>> usersInfo = new MutableLiveData<>();
-    private MediatorLiveData<Integer> rating = new MediatorLiveData<>();
-    private MediatorLiveData<Boolean> liked = new MediatorLiveData<>();
-    private MediatorLiveData<Boolean> joined = new MediatorLiveData<>();
-    private MediatorLiveData<Boolean> alreadyVisited = new MediatorLiveData<>();
+    private final MutableLiveData<Bitmap> restaurantPhoto = new MutableLiveData<>();
+    private final MutableLiveData<Place> place = new MutableLiveData<>();
+    private final MutableLiveData<List<UserInfo>> usersInfo = new MutableLiveData<>();
+    private final MediatorLiveData<Integer> rating = new MediatorLiveData<>();
+    private final MediatorLiveData<Boolean> liked = new MediatorLiveData<>();
+    private final MediatorLiveData<Boolean> joined = new MediatorLiveData<>();
+    private final MediatorLiveData<Boolean> alreadyVisited = new MediatorLiveData<>();
 
     //Datas
-    private MutableLiveData<UserInfo> currentUserInfo = new MutableLiveData<>();
-    private MutableLiveData<List<VisitedRestaurant>> usersVisitedRestaurants = new MutableLiveData<>(Collections.emptyList());
-    private MutableLiveData<List<VisitedRestaurant>> currentUserVisitedRestaurants = new MutableLiveData<>(Collections.emptyList());
+    private final MutableLiveData<UserInfo> currentUserInfo = new MutableLiveData<>();
+    private final MutableLiveData<List<VisitedRestaurant>> usersVisitedRestaurants = new MutableLiveData<>(Collections.emptyList());
+    private final MutableLiveData<List<VisitedRestaurant>> currentUserVisitedRestaurants = new MutableLiveData<>(Collections.emptyList());
 
     private String placeId;
     private AutocompleteSessionToken sessionToken;

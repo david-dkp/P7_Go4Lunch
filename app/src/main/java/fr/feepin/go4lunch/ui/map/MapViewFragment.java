@@ -36,7 +36,6 @@ import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.maps.android.clustering.ClusterManager;
 
-
 import java.util.Arrays;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -152,7 +151,7 @@ public class MapViewFragment extends Fragment {
             clusterManager.clearItems();
 
             if (statesResource instanceof Resource.Error) {
-                Log.d("debug", "Error: "+statesResource.getMessage());
+                Log.d("debug", "Error: " + statesResource.getMessage());
                 return;
             }
 
@@ -160,7 +159,7 @@ public class MapViewFragment extends Fragment {
                 clusterManager.addItem(new RestaurantItem(restaurantState.getPosition(), restaurantState.getId(), restaurantState.isJoined()));
             }
             clusterManager.cluster();
-        } );
+        });
     }
 
     private Bitmap getBitmapFromVectorDrawable(int vectorId) {
@@ -196,7 +195,7 @@ public class MapViewFragment extends Fragment {
                         clusterManager,
                         getBitmapFromVectorDrawable(R.drawable.ic_restaurant_pin_not_joined),
                         getBitmapFromVectorDrawable(R.drawable.ic_restaurant_pin_joined)
-                        )
+                )
         );
 
         clusterManager.setOnClusterItemClickListener(item -> {

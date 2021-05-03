@@ -28,11 +28,11 @@ import io.reactivex.rxjava3.core.Single;
 @Singleton
 public class DefaultMapsRepository implements MapsRepository {
 
-    private LocationService locationService;
+    private final LocationService locationService;
 
-    private PlacesClient placesClient;
+    private final PlacesClient placesClient;
 
-    private PlacesApi placesApi;
+    private final PlacesApi placesApi;
 
     @Inject
     public DefaultMapsRepository(LocationService locationService, PlacesClient placesClient, PlacesApi placesApi) {
@@ -77,12 +77,12 @@ public class DefaultMapsRepository implements MapsRepository {
 
     @Override
     public Single<Place> getRestaurantDetails(String placeId, List<Place.Field> fields, @Nullable AutocompleteSessionToken token) {
-        return Single.create( e -> {
+        return Single.create(e -> {
 
             FetchPlaceRequest.Builder builder = FetchPlaceRequest.builder(
                     placeId,
                     fields
-                    );
+            );
 
             if (token != null) {
                 builder.setSessionToken(token);

@@ -7,8 +7,8 @@ public enum SortMethod {
     RATING(1, ListItemState.RATING_COMPARATOR),
     WORKMATES(2, ListItemState.WORKMATES_COMPARATOR);
 
-    private int position;
-    private Comparator<ListItemState> comparator;
+    private final int position;
+    private final Comparator<ListItemState> comparator;
 
     SortMethod(int position, Comparator<ListItemState> comparator) {
         this.position = position;

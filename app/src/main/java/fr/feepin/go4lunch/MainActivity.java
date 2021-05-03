@@ -1,31 +1,24 @@
 package fr.feepin.go4lunch;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.view.GravityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.bumptech.glide.Glide;
 import com.google.android.libraries.places.api.Places;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import fr.feepin.go4lunch.data.maps.FusedLocationService;
 import fr.feepin.go4lunch.databinding.ActivityMainBinding;
 import fr.feepin.go4lunch.databinding.HeaderNavBinding;
 import fr.feepin.go4lunch.ui.list.ListViewFragment;
@@ -34,8 +27,6 @@ import fr.feepin.go4lunch.ui.map.MapViewFragment;
 import fr.feepin.go4lunch.ui.restaurant.RestaurantActivity;
 import fr.feepin.go4lunch.ui.settings.SettingsActivity;
 import fr.feepin.go4lunch.ui.workmates.WorkmatesFragment;
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
 import static fr.feepin.go4lunch.Constants.EAT_NOTIFICATION_ID;
@@ -180,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
 
                     if (restaurantId.trim().equals("")) {
                         Toast toast = Toast.makeText(this, R.string.text_restaurant_not_chosen, Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.BOTTOM, 0, binding.botNav.getHeight() + binding.botNav.getHeight()/2);
+                        toast.setGravity(Gravity.BOTTOM, 0, binding.botNav.getHeight() + binding.botNav.getHeight() / 2);
                         toast.show();
                         break;
                     }

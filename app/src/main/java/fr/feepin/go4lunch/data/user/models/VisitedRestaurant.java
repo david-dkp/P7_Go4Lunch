@@ -16,8 +16,6 @@ public class VisitedRestaurant {
     public VisitedRestaurant() {
     }
 
-    ;
-
     public String getRestaurantId() {
         return restaurantId;
     }

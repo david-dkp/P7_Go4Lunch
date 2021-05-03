@@ -1,6 +1,6 @@
 package fr.feepin.go4lunch.data;
 
-public class Resource<T>{
+public class Resource<T> {
 
     private T data;
     private String message;

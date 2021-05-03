@@ -15,7 +15,7 @@ public class Constants {
 
     public static final String EXTRA_AUTOCOMPLETE_TOKEN = "EXTRA_AUTOCOMPLETE_TOKEN";
     public static final String EXTRA_RESTAURANT_ID = "EXTRA_RESTAURANT_ID";
-    
+
     //NotifyWorker
     public static final String NOTIFY_WORKER_TAG = "NOTIFY_WORKER_TAG";
     public static final String KEY_RESTAURANT_ID = "KEY_RESTAURANT_ID";

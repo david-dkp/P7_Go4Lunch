@@ -1,15 +1,10 @@
 package fr.feepin.go4lunch.data.user;
 
-import android.util.Log;
-import android.widget.TextView;
-
 import androidx.datastore.preferences.core.Preferences;
 import androidx.datastore.rxjava3.RxDataStore;
 
-import com.google.android.gms.common.internal.safeparcel.SafeParcelable;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -29,9 +24,9 @@ import io.reactivex.rxjava3.core.Single;
 @Singleton
 public class DefaultUserRepository implements UserRepository {
 
-    private FirebaseFirestore firebaseFirestore;
-    private RxDataStore<Preferences> rxDataStore;
-    private FirebaseAuth firebaseAuth;
+    private final FirebaseFirestore firebaseFirestore;
+    private final RxDataStore<Preferences> rxDataStore;
+    private final FirebaseAuth firebaseAuth;
 
     @Inject
     public DefaultUserRepository(RxDataStore<Preferences> rxDataStore, FirebaseAuth firebaseAuth) {

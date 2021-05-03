@@ -11,7 +11,7 @@ public class WorkmateState {
 
     private String restaurantName;
 
-    private String restaurantId;
+    private final String restaurantId;
 
     public WorkmateState(String restaurantId, String restaurantName, String photoUrl, String name) {
         this.restaurantId = restaurantId;
@@ -79,7 +79,7 @@ public class WorkmateState {
         public int compare(WorkmateState a, WorkmateState b) {
             if (a.getRestaurantId().equals("") && !b.getRestaurantId().equals("")) {
                 return 1;
-            } else if (!a.getRestaurantId().equals("") && b.getRestaurantId().equals("")){
+            } else if (!a.getRestaurantId().equals("") && b.getRestaurantId().equals("")) {
                 return -1;
             } else {
                 return 0;
