@@ -60,8 +60,7 @@ public class NotifyWorker extends Worker {
         String restaurantAddress = getInputData().getString(Constants.KEY_RESTAURANT_ADDRESS);
 
         if (ConnectivityUtils.hasInternetConnection(context)) {
-            return userRepository.getUsersInfoObservable()
-                    .first(Collections.emptyList())
+            return userRepository.getUsersInfo()
                     .flatMapObservable(Observable::fromIterable)
                     .filter(userInfo -> userInfo.getRestaurantChoiceId().equals(restaurantId))
                     .map(UserInfo::getName)
