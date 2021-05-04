@@ -130,9 +130,11 @@ public class MapViewFragment extends Fragment {
     private void setupPosition() {
         mainViewModel.getPosition().observe(getViewLifecycleOwner(), resource -> {
             if (resource instanceof Resource.Success) {
+                binding.progressBar.hide();
                 toggleLocationError(true);
                 animateCameraToPosition(resource.getData(), Constants.MAPS_MY_LOCATION_ZOOM_LEVEL);
             } else if (resource instanceof Resource.Error) {
+                binding.progressBar.hide();
                 if (resource.getMessage().equals(Constants.NO_LOCATION_PERMISSION_MESSAGE)) {
                     requestLocationPermission();
                 } else if (resource.getMessage().equals(Constants.LOCATION_DISABLED_MESSAGE)) {
@@ -141,6 +143,9 @@ public class MapViewFragment extends Fragment {
                     }
                     toggleLocationError(false);
                 }
+            } else {
+                binding.clLocationErrorContainer.setVisibility(View.INVISIBLE);
+                binding.progressBar.show();
             }
         });
     }

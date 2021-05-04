@@ -11,6 +11,16 @@
         android:layout_height="match_parent"
         />
 
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:indeterminate="true"
+        android:visibility="invisible"
+        app:hideAnimationBehavior="outward"
+        app:showAnimationBehavior="outward"
+        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/progressBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabMyLocation"
         android:layout_width="wrap_content"

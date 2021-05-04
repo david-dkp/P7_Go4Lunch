@@ -449,6 +449,7 @@ public class MainViewModel extends ViewModel {
                         });
             }
         } else {
+            position.setValue(new Resource.Loading<>(null, null));
             mapsRepository.getCurrentLocation()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())

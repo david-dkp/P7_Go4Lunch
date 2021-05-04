@@ -9,6 +9,7 @@
         android:indeterminate="true"
         android:visibility="invisible"
         app:hideAnimationBehavior="outward"
+        app:showAnimationBehavior="outward"
         app:layout_constraintTop_toTopOf="parent"
         android:id="@+id/progressBar"
         android:layout_width="match_parent"
