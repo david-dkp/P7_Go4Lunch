@@ -89,17 +89,17 @@ public class RestaurantViewModel extends ViewModel {
         this.userRepository = userRepository;
         this.mapsRepository = mapsRepository;
         workManager = WorkManager.getInstance(context);
-    }
-
-    public void setup(String placeId, AutocompleteSessionToken sessionToken) {
-        this.placeId = placeId;
-        this.sessionToken = sessionToken;
 
         setupRating();
         setupLiked();
         setupJoined();
         setupAlreadyVisited();
         setupCanJoin();
+    }
+
+    public void setup(String placeId, AutocompleteSessionToken sessionToken) {
+        this.placeId = placeId;
+        this.sessionToken = sessionToken;
 
         askPlace();
         askRating();
