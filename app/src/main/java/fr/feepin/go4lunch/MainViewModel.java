@@ -90,6 +90,7 @@ public class MainViewModel extends ViewModel {
 
     private Disposable runningListViewObservable;
     private Disposable runningPredictionsQueryObservable;
+    private Disposable runningMyLocationObservable;
 
     @Inject
     public MainViewModel(@ApplicationContext Context context, FirebaseAuth firebaseAuth, MapsRepository mapsRepository, UserRepository userRepository) {
@@ -418,8 +419,9 @@ public class MainViewModel extends ViewModel {
             return;
         }
 
-        if (!LocationManagerCompat.isLocationEnabled(locationManager)) {
+        if (runningMyLocationObservable != null) runningMyLocationObservable.dispose();
 
+        if (!LocationManagerCompat.isLocationEnabled(locationManager)) {
             Location latestKnown = mapsRepository.getLastKnownLocation();
 
             if (latestKnown != null) {
@@ -433,7 +435,7 @@ public class MainViewModel extends ViewModel {
                         .subscribe(new SingleObserver<LatLng>() {
                             @Override
                             public void onSubscribe(@NonNull Disposable d) {
-                                compositeDisposable.add(d);
+                                runningMyLocationObservable = d;
                             }
 
                             @Override
@@ -456,7 +458,7 @@ public class MainViewModel extends ViewModel {
                     .subscribe(new SingleObserver<Location>() {
                         @Override
                         public void onSubscribe(@NonNull Disposable d) {
-                            compositeDisposable.add(d);
+                            runningMyLocationObservable = d;
                         }
 
                         @Override
@@ -464,6 +466,7 @@ public class MainViewModel extends ViewModel {
                             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                             position.setValue(new Resource.Success<>(latLng, null));
                             getNearbyPlaces(latLng);
+                            Log.d("debug", "called");
                         }
 
                         @Override

@@ -28,6 +28,8 @@
         android:layout_margin="@dimen/map_view_myLocation_margin"
         android:contentDescription="@string/desc_my_location"
         android:src="@drawable/ic_my_location"
+        app:backgroundTint="?attr/colorSurface"
+        app:tint="?attr/colorOnSurface"
         app:fabSize="mini"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

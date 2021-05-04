@@ -9,7 +9,7 @@
         android:id="@+id/vStatusZone"
         android:layout_width="match_parent"
         android:layout_height="24dp"
-        android:background="?attr/colorPrimary"
+        android:background="?attr/colorPrimarySurface"
         app:layout_constraintTop_toTopOf="parent"
         />
 

@@ -36,9 +36,7 @@ public class FusedLocationService implements LocationService {
 
     @Inject
     public FusedLocationService(@ApplicationContext Context context, RxDataStore<Preferences> rxDataStore) {
-        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         fusedLocationProviderClient = new FusedLocationProviderClient(context);
-
         this.rxDatastore = rxDataStore;
         this.context = context;
     }
@@ -52,7 +50,6 @@ public class FusedLocationService implements LocationService {
             locationRequest.setInterval(10000);
             locationRequest.setFastestInterval(1000);
             locationRequest.setNumUpdates(1);
-
             fusedLocationProviderClient.requestLocationUpdates(
                     locationRequest,
                     new LocationCallback() {
