@@ -244,7 +244,7 @@ public class MapViewFragment extends Fragment {
             )
                     .setCountry("FR")
                     .setTypeFilter(TypeFilter.ESTABLISHMENT)
-                    .setLocationBias(RectangularBounds.newInstance(LatLngUtils.toBounds(
+                    .setLocationRestriction(RectangularBounds.newInstance(LatLngUtils.toBounds(
                             mainViewModel.getPosition().getValue().getData(),
                             Constants.PREDICTION_SEARCH_RADIUS
                     )))
