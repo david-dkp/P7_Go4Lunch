@@ -2,12 +2,10 @@ package fr.feepin.go4lunch;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
