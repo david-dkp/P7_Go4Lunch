@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import fr.feepin.go4lunch.Constants;
+import fr.feepin.go4lunch.data.Resource;
 import fr.feepin.go4lunch.data.maps.MapsRepository;
 import fr.feepin.go4lunch.data.user.UserRepository;
 import fr.feepin.go4lunch.data.user.models.UserInfo;
@@ -66,7 +67,7 @@ public class RestaurantViewModel extends ViewModel {
     private final MapsRepository mapsRepository;
 
     //States
-    private final MutableLiveData<Bitmap> restaurantPhoto = new MutableLiveData<>();
+    private final MutableLiveData<Resource<Bitmap>> restaurantPhoto = new MutableLiveData<>();
     private final MutableLiveData<Place> place = new MutableLiveData<>();
     private final MutableLiveData<List<UserInfo>> usersInfo = new MutableLiveData<>();
     private final MediatorLiveData<Integer> rating = new MediatorLiveData<>();
@@ -169,7 +170,11 @@ public class RestaurantViewModel extends ViewModel {
                         if (place.getPhotoMetadatas() != null) {
                             if (!place.getPhotoMetadatas().isEmpty()) {
                                 askPhoto(place.getPhotoMetadatas().get(0));
+                            } else {
+                                restaurantPhoto.setValue(new Resource.Error<>(null, null));
                             }
+                        } else {
+                            restaurantPhoto.setValue(new Resource.Error<>(null, null));
                         }
                     }
 
@@ -181,6 +186,7 @@ public class RestaurantViewModel extends ViewModel {
     }
 
     private void askPhoto(PhotoMetadata photoMetadata) {
+        restaurantPhoto.setValue(new Resource.Loading(null, null));
         mapsRepository.getRestaurantPhoto(photoMetadata)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -192,12 +198,12 @@ public class RestaurantViewModel extends ViewModel {
 
                     @Override
                     public void onSuccess(@NonNull FetchPhotoResponse fetchPhotoResponse) {
-                        restaurantPhoto.setValue(fetchPhotoResponse.getBitmap());
+                        restaurantPhoto.setValue(new Resource.Success<>(fetchPhotoResponse.getBitmap(), null));
                     }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-
+                        restaurantPhoto.setValue(new Resource.Error<>(null, null));
                     }
                 });
     }
@@ -400,7 +406,7 @@ public class RestaurantViewModel extends ViewModel {
         return rating;
     }
 
-    public LiveData<Bitmap> getRestaurantPhoto() {
+    public LiveData<Resource<Bitmap>> getRestaurantPhoto() {
         return restaurantPhoto;
     }
 

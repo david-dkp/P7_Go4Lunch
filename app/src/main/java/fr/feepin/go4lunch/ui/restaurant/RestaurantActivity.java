@@ -3,25 +3,17 @@ package fr.feepin.go4lunch.ui.restaurant;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.core.content.res.ColorStateListInflaterCompat;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.core.view.ViewCompat;
-import androidx.core.widget.TextViewCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.bumptech.glide.Glide;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
@@ -30,6 +22,7 @@ import com.google.android.libraries.places.api.model.Place;
 import dagger.hilt.android.AndroidEntryPoint;
 import fr.feepin.go4lunch.Constants;
 import fr.feepin.go4lunch.R;
+import fr.feepin.go4lunch.data.Resource;
 import fr.feepin.go4lunch.databinding.ActivityRestaurantBinding;
 
 @AndroidEntryPoint
@@ -125,18 +118,25 @@ public class RestaurantActivity extends AppCompatActivity {
 
         });
 
-        CircularProgressDrawable circularProgressDrawable = new CircularProgressDrawable(this);
-        circularProgressDrawable.setStrokeWidth(5f);
-        circularProgressDrawable.setCenterRadius(30f);
-        circularProgressDrawable.start();
-
         //Restaurant photo
         restaurantViewModel.getRestaurantPhoto().observe(this, photo -> {
-            Glide.with(this)
-                    .load(photo)
-                    .placeholder(circularProgressDrawable)
-                    .centerCrop()
-                    .into(binding.ivRestaurantPhoto);
+            if (photo instanceof Resource.Loading) {
+                binding.photoProgressBar.show();
+            } else if (photo instanceof Resource.Success) {
+                binding.photoProgressBar.hide();
+                Glide
+                        .with(this)
+                        .load(photo.getData())
+                        .error(R.color.gray)
+                        .centerCrop()
+                        .into(binding.ivRestaurantPhoto);
+
+            } else {
+                Glide
+                        .with(this)
+                        .load(R.color.gray)
+                        .into(binding.ivRestaurantPhoto);
+            }
         });
 
         //Workmates joining
