@@ -549,22 +549,22 @@ public class MainViewModel extends ViewModel {
 
     public void autoCompleteQuery(String query) {
         String cleanQuery = query.trim();
+
         if (sessionToken == null) {
             sessionToken = AutocompleteSessionToken.newInstance();
         }
 
-        if (runningListViewObservable != null) {
-            runningListViewObservable.dispose();
-        }
-
-        if (runningPredictionsQueryObservable != null) {
-            runningPredictionsQueryObservable.dispose();
-        }
-
         //Prevent excessive requests
         handler.postDelayed(() -> {
-            handler.removeCallbacksAndMessages(null);
+            if (runningListViewObservable != null) {
+                runningListViewObservable.dispose();
+            }
 
+            if (runningPredictionsQueryObservable != null) {
+                runningPredictionsQueryObservable.dispose();
+            }
+
+            handler.removeCallbacksAndMessages(null);
             if (cleanQuery.equals("")) {
                 if (autocompletePredictions.getValue() != null)
                     autocompletePredictions.setValue(null);

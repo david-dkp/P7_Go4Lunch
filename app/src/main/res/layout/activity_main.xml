@@ -15,7 +15,8 @@
         >
 
         <View
-            android:background="?attr/colorPrimary"
+            android:id="@+id/vStatusZone"
+            android:background="?attr/colorPrimarySurface"
             android:layout_width="match_parent"
             android:layout_height="24dp" />
 
@@ -50,10 +51,10 @@
         android:background="@color/orange_400"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/header_nav"
-        app:itemIconTint="?attr/colorSurface"
+        app:itemIconTint="?attr/colorOnPrimarySurface"
         app:itemTextAppearance="@style/TextAppearance.Go4Lunch.NavigationItem"
         app:itemHorizontalPadding="@dimen/drawer_item_horizontal_padding"
-        app:itemTextColor="?attr/colorSurface"
+        app:itemTextColor="?attr/colorOnPrimarySurface"
         app:menu="@menu/nav_view_menu"
         >
 
@@ -62,6 +63,7 @@
             android:layout_height="@dimen/drawer_app_logo_size"
             android:layout_gravity="bottom|center_horizontal"
             android:contentDescription="@string/desc_app_logo"
+            app:tint="?attr/colorOnPrimarySurface"
             android:src="@drawable/ic_soup"
             />
 

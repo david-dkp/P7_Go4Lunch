@@ -53,7 +53,7 @@ public class NotifyWorker extends Worker {
 
         boolean isNotificationEnabled = PreferenceManager.getDefaultSharedPreferences(context).getBoolean("notifications", true);
 
-        if (!isNotificationEnabled) return Result.success();
+        if (!isNotificationEnabled) return Result.failure();
 
         String restaurantId = getInputData().getString(Constants.KEY_RESTAURANT_ID);
         String restaurantName = getInputData().getString(Constants.KEY_RESTAURANT_NAME);
@@ -76,7 +76,6 @@ public class NotifyWorker extends Worker {
             notifyUser(restaurantName, restaurantAddress);
             return Result.success();
         }
-
     }
 
     private void notifyUser(String restaurantName, String restaurantAddress, List<String> workmatesJoining) {

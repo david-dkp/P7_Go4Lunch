@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,8 +25,20 @@ public class SettingsActivity extends AppCompatActivity {
 
         setupFragment();
 
+        ViewGroup.LayoutParams layoutParams = binding.vStatusZone.getLayoutParams();
+        layoutParams.height = getStatusBarHeight();
+        binding.vStatusZone.setLayoutParams(layoutParams);
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
     }
 
     private void setupFragment() {

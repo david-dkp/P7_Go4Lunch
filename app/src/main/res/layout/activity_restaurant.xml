@@ -22,6 +22,17 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:visibility="invisible"
+        android:indeterminate="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/ivRestaurantPhoto"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:id="@+id/photoProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"

@@ -2,9 +2,12 @@ package fr.feepin.go4lunch;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -106,12 +109,25 @@ public class MainActivity extends AppCompatActivity {
 
                 headerNavBinding.tvUserName.setText(firebaseUser.getDisplayName());
                 headerNavBinding.tvUserEmail.setText(firebaseUser.getEmail());
+
             }
         });
     }
 
     private void setupToolbar() {
+        ViewGroup.LayoutParams layoutParams = binding.vStatusZone.getLayoutParams();
+        layoutParams.height = getStatusBarHeight();
+        binding.vStatusZone.setLayoutParams(layoutParams);
         setSupportActionBar(binding.toolbar);
+    }
+
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
     }
 
     private void setupFragments() {

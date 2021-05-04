@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -42,6 +43,9 @@ public class RestaurantActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         //Setup toolbar
+        ViewGroup.LayoutParams layoutParams = binding.vStatusZone.getLayoutParams();
+        layoutParams.height = getStatusBarHeight();
+        binding.vStatusZone.setLayoutParams(layoutParams);
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("");
@@ -93,6 +97,15 @@ public class RestaurantActivity extends AppCompatActivity {
 
         setupWorkmatesList();
         setupObservers();
+    }
+
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
     }
 
     private void setupWorkmatesList() {
