@@ -69,6 +69,7 @@ public class ListItemAdapter extends ListAdapter<ListItemState, ListItemAdapter.
 
             Glide.with(itemView.getContext())
                     .load(listItemState.getPhoto())
+                    .error(R.color.gray)
                     .transform(new CenterCrop(), new RoundedCorners(itemView.getContext().getResources().getDimensionPixelSize(R.dimen.item_restaurant_photo_radius)))
                     .into(binding.ivRestaurantPhoto);
 
