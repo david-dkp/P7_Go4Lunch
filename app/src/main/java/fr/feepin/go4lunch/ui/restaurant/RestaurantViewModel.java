@@ -187,7 +187,7 @@ public class RestaurantViewModel extends ViewModel {
 
     private void askPhoto(PhotoMetadata photoMetadata) {
         restaurantPhoto.setValue(new Resource.Loading(null, null));
-        mapsRepository.getRestaurantPhoto(photoMetadata)
+        mapsRepository.getRestaurantPhoto(placeId, photoMetadata)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SingleObserver<FetchPhotoResponse>() {

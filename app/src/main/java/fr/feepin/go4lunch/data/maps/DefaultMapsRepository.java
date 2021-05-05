@@ -48,7 +48,7 @@ public class DefaultMapsRepository implements MapsRepository {
     }
 
     @Override
-    public Single<FetchPhotoResponse> getRestaurantPhoto(PhotoMetadata photoMetadata) {
+    public Single<FetchPhotoResponse> getRestaurantPhoto(String placeId, PhotoMetadata photoMetadata) {
         return Single.create(emitter -> {
             FetchPhotoRequest fetchPhotoRequest = FetchPhotoRequest.builder(photoMetadata)
                     .build();

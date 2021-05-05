@@ -19,7 +19,7 @@ public interface MapsRepository {
 
     Single<NearbySearchResponse> getNearbySearch(String apiKey, String location, int radius);
 
-    Single<FetchPhotoResponse> getRestaurantPhoto(PhotoMetadata photoMetadata);
+    Single<FetchPhotoResponse> getRestaurantPhoto(String placeId, PhotoMetadata photoMetadata);
 
     Single<FindAutocompletePredictionsResponse> getRestaurantsFromQuery(AutocompleteSessionToken token, String query, LatLng origin, LocationRestriction locationRestriction);
 

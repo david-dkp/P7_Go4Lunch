@@ -28,6 +28,7 @@ import fr.feepin.go4lunch.data.maps.DefaultMapsRepository;
 import fr.feepin.go4lunch.data.maps.FusedLocationService;
 import fr.feepin.go4lunch.data.maps.LocationService;
 import fr.feepin.go4lunch.data.maps.MapsRepository;
+import fr.feepin.go4lunch.data.maps.MapsRepositoryCaching;
 import fr.feepin.go4lunch.data.maps.PlacesApi;
 import fr.feepin.go4lunch.data.user.DefaultUserRepository;
 import fr.feepin.go4lunch.data.user.UserRepository;
@@ -84,13 +85,13 @@ abstract public class AppModule {
     }
 
     @Binds
-    public abstract LocationService bindsFusedLocationService(FusedLocationService fusedLocationService);
+    public abstract LocationService bindsLocationService(FusedLocationService fusedLocationService);
 
     @Binds
-    public abstract UserRepository bindsDefaultUserRepository(DefaultUserRepository defaultUserRepository);
+    public abstract UserRepository bindsUserRepository(DefaultUserRepository defaultUserRepository);
 
     @Binds
-    public abstract MapsRepository bindsDefaultMapsRepository(DefaultMapsRepository defaultMapsRepository);
+    public abstract MapsRepository bindsMapsRepository(MapsRepositoryCaching mapsRepositoryCaching);
 
     @Qualifier
     @Retention(RetentionPolicy.RUNTIME)

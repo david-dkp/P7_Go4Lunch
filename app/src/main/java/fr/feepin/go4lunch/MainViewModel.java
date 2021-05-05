@@ -217,6 +217,7 @@ public class MainViewModel extends ViewModel {
 
                                 if (photos != null) {
                                     singleFetchPhoto = mapsRepository.getRestaurantPhoto(
+                                            placeResponse.getPlaceId(),
                                             PhotoMetadata.builder(photos.get(0).getReference())
                                                     .setHeight(photos.get(0).getHeight())
                                                     .setWidth(photos.get(0).getWidth())
@@ -274,7 +275,7 @@ public class MainViewModel extends ViewModel {
                                                 if (place.getPhotoMetadatas() == null) {
                                                     photoSingle = Single.just(Optional.fromNullable(null));
                                                 } else {
-                                                    photoSingle = mapsRepository.getRestaurantPhoto(place.getPhotoMetadatas().get(0)).map(Optional::of);
+                                                    photoSingle = mapsRepository.getRestaurantPhoto(place.getId(), place.getPhotoMetadatas().get(0)).map(Optional::of);
                                                 }
 
                                                 return photoSingle
