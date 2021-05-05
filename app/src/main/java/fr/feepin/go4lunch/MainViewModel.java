@@ -559,23 +559,24 @@ public class MainViewModel extends ViewModel {
             sessionToken = AutocompleteSessionToken.newInstance();
         }
 
+        if (runningListViewObservable != null) {
+            runningListViewObservable.dispose();
+        }
+
+        if (runningPredictionsQueryObservable != null) {
+            runningPredictionsQueryObservable.dispose();
+        }
+
+        if (cleanQuery.equals("")) {
+            handler.removeCallbacksAndMessages(null);
+            if (autocompletePredictions.getValue() != null)
+                autocompletePredictions.setValue(null);
+            return;
+        }
+
         //Prevent excessive requests
         handler.postDelayed(() -> {
-            if (runningListViewObservable != null) {
-                runningListViewObservable.dispose();
-            }
-
-            if (runningPredictionsQueryObservable != null) {
-                runningPredictionsQueryObservable.dispose();
-            }
-
             handler.removeCallbacksAndMessages(null);
-            if (cleanQuery.equals("")) {
-                if (autocompletePredictions.getValue() != null)
-                    autocompletePredictions.setValue(null);
-                return;
-            }
-
             getPredictionsForQuery(cleanQuery);
         }, 400);
 
