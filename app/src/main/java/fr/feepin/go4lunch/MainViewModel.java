@@ -299,7 +299,7 @@ public class MainViewModel extends ViewModel {
                         if (throwable != null) {
                             throwable.printStackTrace();
                         }
-                        listViewState.setValue(new Resource.Success<>(new ListViewState(listItemStates, false), null));
+                        listViewState.setValue(new Resource.Success<>(new ListViewState(listItemStates != null ? listItemStates : Collections.emptyList(), false), null));
                     });
         }
     }
@@ -467,7 +467,6 @@ public class MainViewModel extends ViewModel {
                             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                             position.setValue(new Resource.Success<>(latLng, null));
                             getNearbyPlaces(latLng);
-                            Log.d("debug", "called");
                         }
 
                         @Override
