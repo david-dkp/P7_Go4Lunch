@@ -239,7 +239,7 @@ public class MapViewFragment extends Fragment {
 
         if (item.getItemId() == R.id.search) {
             Intent intent = new Autocomplete.IntentBuilder(
-                    AutocompleteActivityMode.FULLSCREEN,
+                    AutocompleteActivityMode.OVERLAY,
                     Arrays.asList(Place.Field.ID, Place.Field.LAT_LNG)
             )
                     .setCountry("FR")
