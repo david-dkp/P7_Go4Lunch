@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,7 +43,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 import fr.feepin.go4lunch.Constants;
 import fr.feepin.go4lunch.MainViewModel;
 import fr.feepin.go4lunch.R;
-import fr.feepin.go4lunch.contracts.LocationSettingsContract;
 import fr.feepin.go4lunch.data.Resource;
 import fr.feepin.go4lunch.databinding.FragmentMapViewBinding;
 import fr.feepin.go4lunch.ui.restaurant.RestaurantActivity;
@@ -74,8 +74,8 @@ public class MapViewFragment extends Fragment {
             }
     );
 
-    private final ActivityResultLauncher<Void> navigateToLocationSettingsLauncher = registerForActivityResult(
-            new LocationSettingsContract(),
+    private final ActivityResultLauncher<Intent> navigateToLocationSettingsLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 mainViewModel.askLocation();
             }
@@ -116,7 +116,7 @@ public class MapViewFragment extends Fragment {
         });
 
         binding.btnEnableLocation.setOnClickListener(v -> {
-            navigateToLocationSettingsLauncher.launch(null);
+            navigateToLocationSettingsLauncher.launch(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
         });
 
         return binding.getRoot();
