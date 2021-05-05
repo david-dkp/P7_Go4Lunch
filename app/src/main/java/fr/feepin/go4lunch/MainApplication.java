@@ -31,4 +31,5 @@ public class MainApplication extends MultiDexApplication implements Configuratio
                 .setWorkerFactory(hiltWorkerFactory)
                 .build();
     }
+
 }

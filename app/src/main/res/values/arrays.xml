@@ -5,4 +5,16 @@
         <item>Rating</item>
         <item>Workmates joining</item>
     </string-array>
+
+    <string-array name="array_theme">
+        <item>@string/pref_theme_light</item>
+        <item>@string/pref_theme_dark</item>
+        <item>@string/pref_theme_default</item>
+    </string-array>
+
+    <string-array name="array_theme_entryValues">
+        <item>light</item>
+        <item>dark</item>
+        <item>default</item>
+    </string-array>
 </resources>
