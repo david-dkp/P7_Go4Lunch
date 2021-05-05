@@ -1,4 +1,4 @@
- package fr.feepin.go4lunch.data.maps;
+package fr.feepin.go4lunch.data.maps;
 
 import android.graphics.Bitmap;
 import android.location.Location;
@@ -21,10 +21,10 @@ import fr.feepin.go4lunch.data.maps.models.NearbySearchResponse;
 import io.reactivex.rxjava3.core.Single;
 
 @Singleton
-public class MapsRepositoryCaching implements MapsRepository{
+public class MapsRepositoryCaching implements MapsRepository {
 
-    private DefaultMapsRepository defaultMapsRepository;
-    private PlacesPhotoCache placesPhotoCache;
+    private final DefaultMapsRepository defaultMapsRepository;
+    private final PlacesPhotoCache placesPhotoCache;
 
     @Inject
     public MapsRepositoryCaching(DefaultMapsRepository defaultMapsRepository, PlacesPhotoCache placesPhotoCache) {

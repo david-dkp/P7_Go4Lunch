@@ -24,7 +24,6 @@ import dagger.hilt.InstallIn;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import fr.feepin.go4lunch.Constants;
-import fr.feepin.go4lunch.data.maps.DefaultMapsRepository;
 import fr.feepin.go4lunch.data.maps.FusedLocationService;
 import fr.feepin.go4lunch.data.maps.LocationService;
 import fr.feepin.go4lunch.data.maps.MapsRepository;

@@ -3,7 +3,6 @@ package fr.feepin.go4lunch.data.maps;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Looper;
 
 import androidx.datastore.preferences.core.MutablePreferences;

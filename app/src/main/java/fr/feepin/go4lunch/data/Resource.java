@@ -1,11 +1,13 @@
 package fr.feepin.go4lunch.data;
 
+import javax.annotation.Nullable;
+
 public class Resource<T> {
 
     private T data;
     private String message;
 
-    public Resource(T data, String message) {
+    public Resource(@Nullable T data, @Nullable String message) {
         this.data = data;
         this.message = message;
     }
