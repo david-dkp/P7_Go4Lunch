@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="array_sorting_methods">
-        <item>Distance</item>
-        <item>Rating</item>
-        <item>Workmates joining</item>
+        <item>@string/text_sort_distance</item>
+        <item>@string/text_sort_rating</item>
+        <item>@string/text_sort_workmates</item>
     </string-array>
 
     <string-array name="array_theme">
