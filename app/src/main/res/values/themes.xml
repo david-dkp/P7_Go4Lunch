@@ -11,6 +11,9 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+
+        <item name="drawerBackgroundColor">@color/orange_300</item>
+
         <item name="android:windowTranslucentStatus">true</item>
 
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.Go4Lunch.MaterialAlertDialog</item>

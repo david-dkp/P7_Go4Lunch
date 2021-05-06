@@ -48,7 +48,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="?attr/colorPrimarySurface"
+        android:background="?attr/drawerBackgroundColor"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/header_nav"
         app:itemIconTint="?attr/colorOnPrimarySurface"
