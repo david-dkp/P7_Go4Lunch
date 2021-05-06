@@ -8,9 +8,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import androidx.work.BackoffPolicy;
+import androidx.work.Constraints;
 import androidx.work.Data;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.ExistingWorkPolicy;
+import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
@@ -37,6 +42,7 @@ import fr.feepin.go4lunch.data.user.models.UserInfo;
 import fr.feepin.go4lunch.data.user.models.VisitedRestaurant;
 import fr.feepin.go4lunch.utils.SingleEventData;
 import fr.feepin.go4lunch.workers.NotifyWorker;
+import fr.feepin.go4lunch.workers.VisitRestaurantWorker;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Completable;
@@ -355,8 +361,10 @@ public class RestaurantViewModel extends ViewModel {
 
                         if (isJoining) {
                             addNotifyWorker();
+                            addVisitRestaurantWorker();
                         } else {
                             workManager.cancelUniqueWork(Constants.NOTIFY_WORKER_TAG);
+                            workManager.cancelUniqueWork(Constants.VISIT_RESTAURANT_TAG);
                         }
 
                         joined.setValue(isJoining);
@@ -375,10 +383,10 @@ public class RestaurantViewModel extends ViewModel {
         Calendar currentCalendar = Calendar.getInstance();
         Calendar nextMiddayCalendar = Calendar.getInstance();
 
-        if (currentCalendar.get(Calendar.HOUR_OF_DAY) >= 12) {
-            nextMiddayCalendar.add(Calendar.DAY_OF_MONTH, 1);
+        if (currentCalendar.get(Calendar.HOUR_OF_DAY) >= Constants.HOUR_NOTIFICATION_FIRE_DELAY) {
+            nextMiddayCalendar.add(Calendar.DAY_OF_YEAR, 1);
         }
-        nextMiddayCalendar.set(Calendar.HOUR_OF_DAY, 12);
+        nextMiddayCalendar.set(Calendar.HOUR_OF_DAY, Constants.HOUR_NOTIFICATION_FIRE_DELAY);
 
         timeMillisFromNextMidday = nextMiddayCalendar.getTimeInMillis() - currentCalendar.getTimeInMillis();
 
@@ -388,11 +396,26 @@ public class RestaurantViewModel extends ViewModel {
                 .putString(Constants.KEY_RESTAURANT_NAME, place.getValue().getName())
                 .build();
 
-        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(NotifyWorker.class)
+        PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(NotifyWorker.class, 24, TimeUnit.HOURS)
                 .setInputData(data)
                 .setInitialDelay(timeMillisFromNextMidday, TimeUnit.MILLISECONDS)
                 .build();
-        workManager.enqueueUniqueWork(Constants.NOTIFY_WORKER_TAG, ExistingWorkPolicy.REPLACE, request);
+        workManager.enqueueUniquePeriodicWork(Constants.NOTIFY_WORKER_TAG, ExistingPeriodicWorkPolicy.REPLACE, request);
+    }
+
+    private void addVisitRestaurantWorker() {
+
+        Data data = new Data.Builder()
+                .putString(Constants.KEY_RESTAURANT_ID, placeId)
+                .build();
+
+        OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(VisitRestaurantWorker.class)
+                .setInputData(data)
+                .setInitialDelay(Constants.HOUR_VISIT_RESTAURANT_DELAY, TimeUnit.HOURS)
+                .setBackoffCriteria(BackoffPolicy.LINEAR, Constants.MINUTES_VISIT_RESTAURANT_BACKOFF_DELAY, TimeUnit.MINUTES)
+                .build();
+
+        workManager.enqueueUniqueWork(Constants.VISIT_RESTAURANT_TAG, ExistingWorkPolicy.REPLACE, oneTimeWorkRequest);
     }
 
     public LiveData<Place> getPlace() {
