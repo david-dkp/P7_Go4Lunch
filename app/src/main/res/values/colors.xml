@@ -13,6 +13,7 @@
 
     <color name="green">#69F0AF</color>
     <color name="blue">#4e71ba</color>
+    <color name="google_signIn_button">#BC4844</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
