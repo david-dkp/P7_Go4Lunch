@@ -5,6 +5,7 @@ import androidx.datastore.rxjava3.RxDataStore;
 
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -177,13 +178,28 @@ public class DefaultUserRepository implements UserRepository {
     @Override
     public Completable addRestaurantToVisited(String restaurantId) {
         return Completable.create(emitter -> {
-            Tasks.await(
+
+            QuerySnapshot snapshots = Tasks.await(
                     firebaseFirestore
                             .collection("users")
                             .document(firebaseAuth.getCurrentUser().getUid())
                             .collection("visited_restaurants")
-                            .add(new VisitedRestaurant(restaurantId, false))
+                            .whereEqualTo("restauranntId", restaurantId)
+                            .limit(1)
+                            .get()
             );
+
+            CollectionReference visitedRestaurantsCollection = firebaseFirestore.collection("users")
+                    .document(firebaseAuth.getCurrentUser().getUid())
+                    .collection("visited_restaurants");
+
+            if (snapshots.getDocuments().isEmpty()) {
+                Tasks.await(
+                        visitedRestaurantsCollection.add(new VisitedRestaurant(restaurantId, false))
+                );
+            } else {
+                Tasks.await(visitedRestaurantsCollection.document(snapshots.getDocuments().get(0).getId()).set(new VisitedRestaurant(restaurantId, false)));
+            }
 
             emitter.onComplete();
         });
