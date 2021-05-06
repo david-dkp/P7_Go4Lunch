@@ -21,6 +21,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.Fragment;
@@ -220,7 +221,11 @@ public class MapViewFragment extends Fragment {
     }
 
     private void setMapStyle() {
-        MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(getContext(), R.raw.map_style);
+        int nightMode = AppCompatDelegate.getDefaultNightMode();
+        MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(
+                getContext(),
+                nightMode == AppCompatDelegate.MODE_NIGHT_NO ? R.raw.map_style : R.raw.map_style_dark
+        );
         googleMap.setMapStyle(mapStyleOptions);
     }
 
