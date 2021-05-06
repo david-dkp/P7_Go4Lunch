@@ -15,6 +15,12 @@
         tools:src="@color/green"
         />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/scrimBackground"
+        />
+
     <ImageView
         android:id="@+id/ivLogo"
         android:layout_width="@dimen/login_logo_size"

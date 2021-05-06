@@ -15,6 +15,10 @@
         android:scaleType="centerCrop"
         tools:src="@color/black"
         />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/scrimBackground" />
 
     <TextView
         android:id="@+id/tvHeaderTitle"
