@@ -9,8 +9,8 @@ import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.work.Data;
-import androidx.work.ExistingPeriodicWorkPolicy;
-import androidx.work.PeriodicWorkRequest;
+import androidx.work.ExistingWorkPolicy;
+import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
 
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
@@ -35,6 +35,7 @@ import fr.feepin.go4lunch.data.maps.MapsRepository;
 import fr.feepin.go4lunch.data.user.UserRepository;
 import fr.feepin.go4lunch.data.user.models.UserInfo;
 import fr.feepin.go4lunch.data.user.models.VisitedRestaurant;
+import fr.feepin.go4lunch.utils.SingleEventData;
 import fr.feepin.go4lunch.workers.NotifyWorker;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
@@ -74,7 +75,7 @@ public class RestaurantViewModel extends ViewModel {
     private final MediatorLiveData<Boolean> liked = new MediatorLiveData<>();
     private final MediatorLiveData<Boolean> joined = new MediatorLiveData<>();
     private final MediatorLiveData<Boolean> alreadyVisited = new MediatorLiveData<>();
-    private final MediatorLiveData<Boolean> canJoin = new MediatorLiveData<>();
+    private final MutableLiveData<SingleEventData<Resource.Error<Void>>> notOpenError = new MutableLiveData();
 
     //Datas
     private final MutableLiveData<UserInfo> currentUserInfo = new MutableLiveData<>();
@@ -94,7 +95,6 @@ public class RestaurantViewModel extends ViewModel {
         setupLiked();
         setupJoined();
         setupAlreadyVisited();
-        setupCanJoin();
     }
 
     public void setup(String placeId, AutocompleteSessionToken sessionToken) {
@@ -144,12 +144,6 @@ public class RestaurantViewModel extends ViewModel {
             }
 
             alreadyVisited.setValue(false);
-        });
-    }
-
-    private void setupCanJoin() {
-        canJoin.addSource(place, place -> {
-            canJoin.setValue(place.isOpen());
         });
     }
 
@@ -332,6 +326,12 @@ public class RestaurantViewModel extends ViewModel {
     }
 
     public void joinOrLeaveRestaurant() {
+
+        if (!getPlace().getValue().isOpen()) {
+            notOpenError.setValue(new SingleEventData<>(new Resource.Error<>(null, null)));
+            return;
+        }
+
         Completable completable;
         boolean isJoining = !isJoined().getValue();
 
@@ -354,33 +354,7 @@ public class RestaurantViewModel extends ViewModel {
                     public void onComplete() {
 
                         if (isJoining) {
-                            long timeMillisFromNextMidday;
-
-                            Calendar currentCalendar = Calendar.getInstance();
-                            Calendar nextMiddayCalendar = Calendar.getInstance();
-
-                            if (currentCalendar.get(Calendar.HOUR_OF_DAY) >= 12) {
-                                nextMiddayCalendar.add(Calendar.DAY_OF_MONTH, 1);
-                            }
-                            nextMiddayCalendar.set(Calendar.HOUR_OF_DAY, 12);
-
-                            timeMillisFromNextMidday = nextMiddayCalendar.getTimeInMillis() - currentCalendar.getTimeInMillis();
-
-                            Data data = new Data.Builder()
-                                    .putString(Constants.KEY_RESTAURANT_ID, placeId)
-                                    .putString(Constants.KEY_RESTAURANT_ADDRESS, place.getValue().getAddress())
-                                    .putString(Constants.KEY_RESTAURANT_NAME, place.getValue().getName())
-                                    .build();
-
-                            PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(
-                                    NotifyWorker.class,
-                                    12,
-                                    TimeUnit.HOURS
-                            )
-                                    .setInputData(data)
-                                    .setInitialDelay(timeMillisFromNextMidday, TimeUnit.MILLISECONDS)
-                                    .build();
-                            workManager.enqueueUniquePeriodicWork(Constants.NOTIFY_WORKER_TAG, ExistingPeriodicWorkPolicy.REPLACE, request);
+                            addNotifyWorker();
                         } else {
                             workManager.cancelUniqueWork(Constants.NOTIFY_WORKER_TAG);
                         }
@@ -390,8 +364,35 @@ public class RestaurantViewModel extends ViewModel {
 
                     @Override
                     public void onError(@NonNull Throwable e) {
+                        e.printStackTrace();
                     }
                 });
+    }
+
+    private void addNotifyWorker() {
+        long timeMillisFromNextMidday;
+
+        Calendar currentCalendar = Calendar.getInstance();
+        Calendar nextMiddayCalendar = Calendar.getInstance();
+
+        if (currentCalendar.get(Calendar.HOUR_OF_DAY) >= 12) {
+            nextMiddayCalendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        nextMiddayCalendar.set(Calendar.HOUR_OF_DAY, 12);
+
+        timeMillisFromNextMidday = nextMiddayCalendar.getTimeInMillis() - currentCalendar.getTimeInMillis();
+
+        Data data = new Data.Builder()
+                .putString(Constants.KEY_RESTAURANT_ID, placeId)
+                .putString(Constants.KEY_RESTAURANT_ADDRESS, place.getValue().getAddress())
+                .putString(Constants.KEY_RESTAURANT_NAME, place.getValue().getName())
+                .build();
+
+        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(NotifyWorker.class)
+                .setInputData(data)
+                .setInitialDelay(timeMillisFromNextMidday, TimeUnit.MILLISECONDS)
+                .build();
+        workManager.enqueueUniqueWork(Constants.NOTIFY_WORKER_TAG, ExistingWorkPolicy.REPLACE, request);
     }
 
     public LiveData<Place> getPlace() {
@@ -422,8 +423,8 @@ public class RestaurantViewModel extends ViewModel {
         return alreadyVisited;
     }
 
-    public LiveData<Boolean> canJoin() {
-        return canJoin;
+    public LiveData<SingleEventData<Resource.Error<Void>>> getNotOpenError() {
+        return notOpenError;
     }
 
     @Override

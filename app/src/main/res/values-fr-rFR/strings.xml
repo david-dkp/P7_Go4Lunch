@@ -55,4 +55,5 @@
     <string name="pref_theme_default">Système par défaut</string>
     <string name="pref_theme_light">Mode clair</string>
     <string name="pref_theme_dark">Mode sombre</string>
+    <string name="text_restaurant_closed_cant_join">Le restaurant est fermé, tu ne peux pas rejoindre.</string>
 </resources>

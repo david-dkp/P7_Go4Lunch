@@ -184,8 +184,11 @@ public class RestaurantActivity extends AppCompatActivity {
             binding.fabJoinRestaurant.setActivated(isJoined);
         });
 
-        restaurantViewModel.canJoin().observe(this, canJoin -> {
-            binding.fabJoinRestaurant.setEnabled(canJoin);
+        //Not open error/can't join
+        restaurantViewModel.getNotOpenError().observe(this, errorSingleEventData -> {
+            if (errorSingleEventData.getData() != null) {
+                Toast.makeText(this, R.string.text_restaurant_closed_cant_join, Toast.LENGTH_LONG).show();
+            }
         });
     }
 
