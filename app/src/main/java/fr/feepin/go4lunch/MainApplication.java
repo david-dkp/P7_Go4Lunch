@@ -20,7 +20,7 @@ public class MainApplication extends MultiDexApplication implements Configuratio
     public void onCreate() {
         super.onCreate();
         RxJavaPlugins.setErrorHandler(throwable -> {
-
+            throwable.printStackTrace();
         });
     }
 

@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="orange_400">#FF8A50</color>
+    <color name="orange_200">#ffab91</color>
     <color name="orange_500">#FF5722</color>
-    <color name="orange_600">#DF4930</color>
-    <color name="orange_700">#C41B00</color>
+    <color name="orange_600">#f4501e</color>
+    <color name="orange_700">#e64919</color>
+    <color name="orange_800">#d84215</color>
+    <color name="orange_900">#bf350c</color>
 
     <color name="yellow">#F8E71C</color>
 

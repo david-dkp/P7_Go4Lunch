@@ -26,14 +26,12 @@ import io.reactivex.rxjava3.core.Single;
 public class DefaultUserRepository implements UserRepository {
 
     private final FirebaseFirestore firebaseFirestore;
-    private final RxDataStore<Preferences> rxDataStore;
     private final FirebaseAuth firebaseAuth;
 
     @Inject
-    public DefaultUserRepository(RxDataStore<Preferences> rxDataStore, FirebaseAuth firebaseAuth) {
+    public DefaultUserRepository(FirebaseAuth firebaseAuth) {
         firebaseFirestore = FirebaseFirestore.getInstance();
         this.firebaseAuth = firebaseAuth;
-        this.rxDataStore = rxDataStore;
     }
 
     @Override
@@ -184,7 +182,7 @@ public class DefaultUserRepository implements UserRepository {
                             .collection("users")
                             .document(firebaseAuth.getCurrentUser().getUid())
                             .collection("visited_restaurants")
-                            .whereEqualTo("restauranntId", restaurantId)
+                            .whereEqualTo("restaurantId", restaurantId)
                             .limit(1)
                             .get()
             );

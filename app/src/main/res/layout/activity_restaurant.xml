@@ -38,7 +38,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/vStatusZone"
-        app:navigationIconTint="?attr/colorOnPrimary"
+        app:navigationIconTint="?attr/colorOnPrimarySurface"
         />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -47,8 +47,8 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/restaurant_fab_marginRight"
         android:contentDescription="@string/desc_join_restaurant"
+        app:backgroundTint="?attr/colorSurface"
         android:src="@drawable/ic_check_circle"
-        app:backgroundTint="@color/fab_join_restaurant_background_color"
         app:layout_constraintBottom_toBottomOf="@id/ivRestaurantPhoto"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ivRestaurantPhoto"

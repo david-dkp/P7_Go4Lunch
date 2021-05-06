@@ -368,24 +368,24 @@ public class MainViewModel extends ViewModel {
                             public void onSuccess(@NonNull Place place) {
                                 ArrayList<WorkmateState> newStates = new ArrayList<>(workmateStates.getValue().getData());
                                 newStates.add(new WorkmateState(userInfo.getRestaurantChoiceId(), place.getName(), userInfo.getPhotoUrl(), userInfo.getName()));
-                                orderWorkmateStates(newStates);
+                                sortWorkmateStates(newStates);
                                 workmateStates.setValue(new Resource.Success<>(newStates, null));
                             }
 
                             @Override
                             public void onError(@NonNull Throwable e) {
-
+                                Log.d("debug", e.getMessage());
                             }
                         });
             }
         }
 
-        orderWorkmateStates(states);
+        sortWorkmateStates(states);
 
         workmateStates.setValue(new Resource.Success<>(states, null));
     }
 
-    private void orderWorkmateStates(List<WorkmateState> workmateStates) {
+    private void sortWorkmateStates(List<WorkmateState> workmateStates) {
         Collections.sort(workmateStates, WorkmateState.RESTAURANT_NOT_CHOSEN_COMPARATOR);
     }
 

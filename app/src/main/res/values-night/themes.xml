@@ -2,9 +2,9 @@
     <!-- Base application theme. -->
     <style name="Theme.Go4Lunch" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/orange_500</item>
+        <item name="colorPrimary">@color/orange_200</item>
         <item name="colorPrimaryVariant">@color/orange_700</item>
-        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnPrimary">@color/black</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">?attr/colorPrimary</item>
         <item name="colorOnSecondary">@color/black</item>
