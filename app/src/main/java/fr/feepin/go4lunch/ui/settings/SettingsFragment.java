@@ -1,12 +1,9 @@
 package fr.feepin.go4lunch.ui.settings;
 
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
 
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import fr.feepin.go4lunch.R;

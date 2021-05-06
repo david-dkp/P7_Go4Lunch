@@ -2,10 +2,8 @@ package fr.feepin.go4lunch;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -22,8 +20,6 @@ import androidx.preference.PreferenceManager;
 
 import com.bumptech.glide.Glide;
 import com.google.android.libraries.places.api.Places;
-
-import org.jetbrains.annotations.NotNull;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import fr.feepin.go4lunch.databinding.ActivityMainBinding;

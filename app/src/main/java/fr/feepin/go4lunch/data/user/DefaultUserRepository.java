@@ -1,8 +1,5 @@
 package fr.feepin.go4lunch.data.user;
 
-import androidx.datastore.preferences.core.Preferences;
-import androidx.datastore.rxjava3.RxDataStore;
-
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;

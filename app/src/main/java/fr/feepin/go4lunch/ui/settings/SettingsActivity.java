@@ -2,19 +2,13 @@ package fr.feepin.go4lunch.ui.settings;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.preference.PreferenceManager;
-
-import org.jetbrains.annotations.NotNull;
 
 import fr.feepin.go4lunch.R;
 import fr.feepin.go4lunch.databinding.ActivitySettingsBinding;

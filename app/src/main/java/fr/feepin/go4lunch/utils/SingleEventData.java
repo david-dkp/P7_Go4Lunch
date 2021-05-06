@@ -1,8 +1,8 @@
 package fr.feepin.go4lunch.utils;
 
-public class SingleEventData<T>{
+public class SingleEventData<T> {
 
-    private T data;
+    private final T data;
     private boolean hasBeenSeen = false;
 
     public SingleEventData(T data) {
