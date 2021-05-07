@@ -29,8 +29,12 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.api.model.TypeFilter;
@@ -64,6 +68,8 @@ public class MapViewFragment extends Fragment {
     private MainViewModel mainViewModel;
 
     private ClusterManager<RestaurantItem> clusterManager;
+
+    private Marker userLocationMarker;
 
     private final ActivityResultLauncher<Intent> autocompleteActivityLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -155,7 +161,6 @@ public class MapViewFragment extends Fragment {
 
         mainViewModel.getRestaurantStates().observe(getViewLifecycleOwner(), statesResource -> {
             clusterManager.clearItems();
-
             if (statesResource instanceof Resource.Error) {
                 Log.d("debug", "Error: " + statesResource.getMessage());
                 return;
@@ -193,6 +198,7 @@ public class MapViewFragment extends Fragment {
     }
 
     private void configGoogleMap() {
+
         clusterManager = new ClusterManager<>(getContext(), googleMap);
         clusterManager.setRenderer(
                 new RestaurantRenderer(
@@ -211,12 +217,23 @@ public class MapViewFragment extends Fragment {
 
         googleMap.setOnCameraIdleListener(clusterManager);
         googleMap.setOnMarkerClickListener(clusterManager);
+        googleMap.getUiSettings().setMapToolbarEnabled(false);
+
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromVectorDrawable(R.drawable.ic_user_location)));
+        markerOptions.visible(false);
+        markerOptions.position(new LatLng(0, 0));
+        markerOptions.flat(true);
+        markerOptions.anchor(0.5f, 0.5f);
+
+        userLocationMarker = googleMap.addMarker(markerOptions);
 
         setMapStyle();
-        googleMap.getUiSettings().setMapToolbarEnabled(false);
     }
 
     private void animateCameraToPosition(LatLng latLng, float zoom) {
+        userLocationMarker.setVisible(true);
+        userLocationMarker.setPosition(latLng);
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
 
