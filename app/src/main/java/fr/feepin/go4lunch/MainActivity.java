@@ -2,6 +2,7 @@ package fr.feepin.go4lunch;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -195,6 +196,9 @@ public class MainActivity extends AppCompatActivity {
                 R.string.desc_open_drawer,
                 R.string.desc_close_drawer
         );
+
+        toggle.getDrawerArrowDrawable().setColor(Color.WHITE);
+
         binding.getRoot().addDrawerListener(toggle);
         toggle.syncState();
         binding.navView.setNavigationItemSelectedListener(item -> {

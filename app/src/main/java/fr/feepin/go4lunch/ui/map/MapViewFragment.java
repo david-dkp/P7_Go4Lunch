@@ -211,6 +211,7 @@ public class MapViewFragment extends Fragment {
         );
 
         clusterManager.setOnClusterItemClickListener(item -> {
+            Log.d("debug", item.getRestaurantId());
             RestaurantActivity.navigate(getContext(), item.getRestaurantId());
             return true;
         });
@@ -232,6 +233,7 @@ public class MapViewFragment extends Fragment {
     }
 
     private void animateCameraToPosition(LatLng latLng, float zoom) {
+        if (latLng == null) return;
         userLocationMarker.setVisible(true);
         userLocationMarker.setPosition(latLng);
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
