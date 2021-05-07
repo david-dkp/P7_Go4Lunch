@@ -90,11 +90,13 @@
         android:ellipsize="marquee"
         android:singleLine="true"
         android:textAppearance="?attr/textAppearancePopupMenuHeader"
+        android:textColor="?attr/colorOnSurface"
         app:layout_constraintBottom_toTopOf="@id/tvClosingInfo"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@id/ivPerson"
         app:layout_constraintTop_toBottomOf="@id/tvRestaurantName"
         tools:text="French - 12 rue du Faubourg Poissonnière"
+        android:alpha=".5"
         />
 
     <TextView
@@ -103,6 +105,8 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/item_restaurant_padding"
         android:textAppearance="?attr/textAppearancePopupMenuHeader"
+        android:textColor="?attr/colorOnSurface"
+        android:alpha=".5"
         android:textStyle="italic"
         app:layout_constraintBottom_toBottomOf="@id/ivRestaurantPhoto"
         app:layout_constraintLeft_toLeftOf="parent"
