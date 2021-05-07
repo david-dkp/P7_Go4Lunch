@@ -41,6 +41,7 @@ import fr.feepin.go4lunch.data.maps.models.PlaceResponse;
 import fr.feepin.go4lunch.data.user.UserRepository;
 import fr.feepin.go4lunch.data.user.models.UserInfo;
 import fr.feepin.go4lunch.data.user.models.VisitedRestaurant;
+import fr.feepin.go4lunch.others.SchedulerProvider;
 import fr.feepin.go4lunch.ui.list.ListItemState;
 import fr.feepin.go4lunch.ui.list.ListViewState;
 import fr.feepin.go4lunch.ui.list.SortMethod;
@@ -48,7 +49,6 @@ import fr.feepin.go4lunch.ui.map.RestaurantState;
 import fr.feepin.go4lunch.ui.workmates.WorkmateState;
 import fr.feepin.go4lunch.utils.LatLngUtils;
 import fr.feepin.go4lunch.utils.PermissionUtils;
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
@@ -56,7 +56,6 @@ import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.core.SingleObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
-import io.reactivex.rxjava3.schedulers.Schedulers;
 
 @HiltViewModel
 public class MainViewModel extends ViewModel {
@@ -72,6 +71,7 @@ public class MainViewModel extends ViewModel {
     private final FirebaseAuth firebaseAuth;
     private final MapsRepository mapsRepository;
     private final UserRepository userRepository;
+    private final SchedulerProvider schedulerProvider;
 
     private MutableLiveData<FirebaseUser> currentUser;
 
@@ -93,12 +93,21 @@ public class MainViewModel extends ViewModel {
     private Disposable runningMyLocationObservable;
 
     @Inject
-    public MainViewModel(@ApplicationContext Context context, FirebaseAuth firebaseAuth, MapsRepository mapsRepository, UserRepository userRepository) {
+    public MainViewModel(@ApplicationContext Context context,
+                         FirebaseAuth firebaseAuth,
+                         MapsRepository mapsRepository,
+                         UserRepository userRepository,
+                         SchedulerProvider schedulerProvider
+    ) {
         this.context = context;
         this.firebaseAuth = firebaseAuth;
         this.mapsRepository = mapsRepository;
         this.userRepository = userRepository;
+        this.schedulerProvider = schedulerProvider;
+        setup();
+    }
 
+    public void setup() {
         setupRestaurantStates();
         setupListViewState();
         setupWorkmateStates();
@@ -152,8 +161,8 @@ public class MainViewModel extends ViewModel {
         });
 
         userRepository.getCurrentUserInfoObservable()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.ui())
                 .subscribe(new Observer<UserInfo>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
@@ -179,8 +188,8 @@ public class MainViewModel extends ViewModel {
 
     private void listenToUserInfos() {
         userRepository.getUsersInfoObservable()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.ui())
                 .subscribe(new Observer<List<UserInfo>>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
@@ -252,8 +261,8 @@ public class MainViewModel extends ViewModel {
                                                 }).toObservable());
                             }))
                     .toList()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(schedulerProvider.io())
+                    .observeOn(schedulerProvider.ui())
                     .subscribe((listItemStates, throwable) -> {
                         if (throwable != null) throwable.printStackTrace();
                         Collections.sort(listItemStates, sortMethod.getComparator());
@@ -293,8 +302,8 @@ public class MainViewModel extends ViewModel {
                                             }
                                     )))
                     .toList()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(schedulerProvider.io())
+                    .observeOn(schedulerProvider.ui())
                     .subscribe((listItemStates, throwable) -> {
                         if (throwable != null) {
                             throwable.printStackTrace();
@@ -356,8 +365,8 @@ public class MainViewModel extends ViewModel {
                 states.add(new WorkmateState(userInfo.getRestaurantChoiceId(), null, userInfo.getPhotoUrl(), userInfo.getName()));
             } else {
                 mapsRepository.getRestaurantDetails(userInfo.getRestaurantChoiceId(), Collections.singletonList(Place.Field.NAME), null)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(schedulerProvider.io())
+                        .observeOn(schedulerProvider.ui())
                         .subscribe(new SingleObserver<Place>() {
                             @Override
                             public void onSubscribe(@NonNull Disposable d) {
@@ -431,8 +440,8 @@ public class MainViewModel extends ViewModel {
                 getNearbyPlaces(latLng);
             } else {
                 mapsRepository.getLatestPositionFromPrefs()
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(schedulerProvider.io())
+                        .observeOn(schedulerProvider.ui())
                         .subscribe(new SingleObserver<LatLng>() {
                             @Override
                             public void onSubscribe(@NonNull Disposable d) {
@@ -454,8 +463,8 @@ public class MainViewModel extends ViewModel {
         } else {
             position.setValue(new Resource.Loading<>(null, null));
             mapsRepository.getCurrentLocation()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribeOn(schedulerProvider.io())
+                    .observeOn(schedulerProvider.ui())
                     .subscribe(new SingleObserver<Location>() {
                         @Override
                         public void onSubscribe(@NonNull Disposable d) {
@@ -480,8 +489,8 @@ public class MainViewModel extends ViewModel {
     private void getNearbyPlaces(LatLng latLng) {
 
         mapsRepository.getNearbySearch(BuildConfig.MAPS_API_KEY, latLng.latitude + "," + latLng.longitude, Constants.NEARBY_SEARCH_RADIUS)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.ui())
                 .subscribe(new SingleObserver<NearbySearchResponse>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
@@ -507,8 +516,8 @@ public class MainViewModel extends ViewModel {
                 position.getValue().getData(),
                 RectangularBounds.newInstance(LatLngUtils.toBounds(position.getValue().getData(), Constants.PREDICTION_SEARCH_RADIUS))
         )
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.ui())
                 .subscribe(new SingleObserver<FindAutocompletePredictionsResponse>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
