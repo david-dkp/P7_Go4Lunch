@@ -2,6 +2,7 @@ package fr.feepin.go4lunch.ui.map;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -240,10 +241,20 @@ public class MapViewFragment extends Fragment {
     }
 
     private void setMapStyle() {
+
         int nightMode = AppCompatDelegate.getDefaultNightMode();
+        boolean isNightMode;
+
+        if (nightMode != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) {
+            isNightMode = AppCompatDelegate.MODE_NIGHT_YES == nightMode;
+        } else {
+            int uiMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+            isNightMode = uiMode == Configuration.UI_MODE_NIGHT_YES;
+        }
+
         MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(
                 getContext(),
-                nightMode == AppCompatDelegate.MODE_NIGHT_NO ? R.raw.map_style : R.raw.map_style_dark
+                isNightMode  ? R.raw.map_style_dark : R.raw.map_style
         );
         googleMap.setMapStyle(mapStyleOptions);
     }
