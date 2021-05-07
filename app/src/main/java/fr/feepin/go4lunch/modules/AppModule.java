@@ -24,13 +24,15 @@ import dagger.hilt.InstallIn;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import fr.feepin.go4lunch.Constants;
-import fr.feepin.go4lunch.data.maps.FusedLocationService;
+import fr.feepin.go4lunch.data.maps.DefaultLocationService;
 import fr.feepin.go4lunch.data.maps.LocationService;
 import fr.feepin.go4lunch.data.maps.MapsRepository;
 import fr.feepin.go4lunch.data.maps.MapsRepositoryCaching;
 import fr.feepin.go4lunch.data.maps.PlacesApi;
 import fr.feepin.go4lunch.data.user.DefaultUserRepository;
 import fr.feepin.go4lunch.data.user.UserRepository;
+import fr.feepin.go4lunch.others.DefaultSchedulerProvider;
+import fr.feepin.go4lunch.others.SchedulerProvider;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -84,7 +86,10 @@ abstract public class AppModule {
     }
 
     @Binds
-    public abstract LocationService bindsLocationService(FusedLocationService fusedLocationService);
+    public abstract SchedulerProvider bindsSchedulerProvider(DefaultSchedulerProvider defaultSchedulerProvider);
+
+    @Binds
+    public abstract LocationService bindsLocationService(DefaultLocationService defaultLocationService);
 
     @Binds
     public abstract UserRepository bindsUserRepository(DefaultUserRepository defaultUserRepository);
