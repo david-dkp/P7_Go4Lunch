@@ -67,10 +67,16 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         //Load header image
-        Glide.with(this)
-                .load(R.raw.dinner)
-                .transform(new BlurTransformation(getResources().getInteger(R.integer.blur_radius)))
-                .into(headerNavBinding.ivHeader);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            Glide.with(this)
+                    .load(R.raw.dinner)
+                    .into(headerNavBinding.ivHeader);
+        } else {
+            Glide.with(this)
+                    .load(R.raw.dinner)
+                    .transform(new BlurTransformation(getResources().getInteger(R.integer.blur_radius)))
+                    .into(headerNavBinding.ivHeader);
+        }
 
         mainViewModel = new ViewModelProvider(this).get(MainViewModel.class);
 

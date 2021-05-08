@@ -2,6 +2,7 @@ package fr.feepin.go4lunch.ui.login;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -87,10 +88,16 @@ public class LoginActivity extends AppCompatActivity {
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        Glide.with(this)
-                .load(R.raw.dinner)
-                .transform(new BlurTransformation(getResources().getInteger(R.integer.blur_radius)))
-                .into(binding.ivLoginBackground);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            Glide.with(this)
+                    .load(R.raw.dinner)
+                    .into(binding.ivLoginBackground);
+        } else {
+            Glide.with(this)
+                    .load(R.raw.dinner)
+                    .transform(new BlurTransformation(getResources().getInteger(R.integer.blur_radius)))
+                    .into(binding.ivLoginBackground);
+        }
 
         setupFacebookSignIn();
         setupGoogleSignIn();
