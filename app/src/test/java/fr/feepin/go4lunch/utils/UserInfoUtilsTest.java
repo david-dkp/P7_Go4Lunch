@@ -16,13 +16,13 @@ public class UserInfoUtilsTest {
     @Test
     public void getUsersJoiningByRestaurantId() {
         List<UserInfo> userInfoList = Arrays.asList(
-                new UserInfo("Daviod", "", "8"),
-                new UserInfo("Daviod", "", "2"),
-                new UserInfo("Daviod", "", "4"),
-                new UserInfo("Daviod", "", "8"),
-                new UserInfo("Daviod", "", "1"),
-                new UserInfo("Daviod", "", "24"),
-                new UserInfo("Daviod", "", "8")
+                new UserInfo("David", "", "8"),
+                new UserInfo("David", "", "2"),
+                new UserInfo("David", "", "4"),
+                new UserInfo("David", "", "8"),
+                new UserInfo("David", "", "1"),
+                new UserInfo("David", "", "24"),
+                new UserInfo("David", "", "8")
         );
 
         int usersJoining = UserInfoUtils.calculateUsersJoiningByRestaurantId(userInfoList, "8");
