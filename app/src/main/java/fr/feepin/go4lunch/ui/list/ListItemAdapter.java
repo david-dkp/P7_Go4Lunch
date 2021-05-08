@@ -75,6 +75,8 @@ public class ListItemAdapter extends ListAdapter<ListItemState, ListItemAdapter.
 
             if (listItemState.isRestaurantOpened() != null) {
                 binding.tvClosingInfo.setText(listItemState.isRestaurantOpened() ? R.string.text_restaurant_opened : R.string.text_restaurant_closed);
+            } else {
+                binding.tvClosingInfo.setText(R.string.text_restaurant_opening_unknown);
             }
 
             binding.tvRestaurantName.setText(listItemState.getRestaurantName());

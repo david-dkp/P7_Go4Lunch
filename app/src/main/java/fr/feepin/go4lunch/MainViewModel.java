@@ -160,6 +160,7 @@ public class MainViewModel extends ViewModel {
         currentUser = new MutableLiveData<>(firebaseAuth.getCurrentUser());
         firebaseAuth.addAuthStateListener(newAuth -> {
             currentUser.postValue(newAuth.getCurrentUser());
+            Log.d("debug", (newAuth == firebaseAuth)+" ");
         });
 
         userRepository.getCurrentUserInfoObservable()

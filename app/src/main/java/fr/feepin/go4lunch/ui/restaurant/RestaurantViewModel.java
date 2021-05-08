@@ -157,6 +157,7 @@ public class RestaurantViewModel extends ViewModel {
 
                     @Override
                     public void onSuccess(@NonNull Place place) {
+                        Log.d("debug", place.toString());
                         RestaurantViewModel.this.sessionToken = null;
                         RestaurantViewModel.this.place.setValue(place);
                         if (place.getPhotoMetadatas() != null) {
@@ -325,7 +326,7 @@ public class RestaurantViewModel extends ViewModel {
 
     public void joinOrLeaveRestaurant() {
 
-        if (!getPlace().getValue().isOpen()) {
+        if (getPlace().getValue().getOpeningHours() != null && !getPlace().getValue().isOpen()) {
             notOpenError.setValue(new SingleEventData<>(new Resource.Error<>(null, null)));
             return;
         }

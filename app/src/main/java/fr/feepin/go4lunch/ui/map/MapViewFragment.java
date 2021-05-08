@@ -59,7 +59,7 @@ import static android.app.Activity.RESULT_OK;
 @AndroidEntryPoint
 public class MapViewFragment extends Fragment {
 
-    public static final String TAG = "MAP_VIEW_TAG";
+    public static final String TAG = "MapViewFragment";
 
     private FragmentMapViewBinding binding;
 

@@ -64,4 +64,5 @@
     <string name="text_sort_rating">Rating</string>
     <string name="text_sort_workmates">Workmates joining</string>
     <string name="text_restaurant_closed_cant_join">Restaurant is closed, you can\'t join.</string>
+    <string name="text_restaurant_opening_unknown">Unknown</string>
 </resources>
