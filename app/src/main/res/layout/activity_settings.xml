@@ -22,6 +22,7 @@
         />
 
     <androidx.fragment.app.FragmentContainerView
+        android:background="?attr/colorSurface"
         android:id="@+id/fragmentContainer"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintLeft_toLeftOf="parent"

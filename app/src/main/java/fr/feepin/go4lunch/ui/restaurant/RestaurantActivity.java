@@ -3,8 +3,12 @@ package fr.feepin.go4lunch.ui.restaurant;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -12,6 +16,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.core.widget.ImageViewCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -175,8 +181,30 @@ public class RestaurantActivity extends AppCompatActivity {
         });
 
         //Joining info
+
+        TypedValue typedValue = new TypedValue();
+
+        TypedArray a = obtainStyledAttributes(typedValue.data, new int[] { R.attr.colorOnSurface });
+        int colorPrimary = a.getColor(0, 0);
+        a.recycle();
+
         restaurantViewModel.isJoined().observe(this, isJoined -> {
             binding.fabJoinRestaurant.setActivated(isJoined);
+
+            //ColorStateList not working below API lvl 21 need to do manually
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                if (isJoined) {
+                    ImageViewCompat.setImageTintList(
+                            binding.fabJoinRestaurant,
+                            ColorStateList.valueOf(ResourcesCompat.getColor(getResources(), R.color.green, getTheme()))
+                    );
+                } else {
+                    ImageViewCompat.setImageTintList(
+                            binding.fabJoinRestaurant,
+                            ColorStateList.valueOf(colorPrimary)
+                    );
+                }
+            }
         });
 
         //Not open error/can't join

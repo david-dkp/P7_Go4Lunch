@@ -11,16 +11,13 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        
+        <item name="android:colorBackground">?attr/colorSurface</item>
 
         <item name="drawerBackgroundColor">?attr/colorSurface</item>
 
         <item name="android:windowTranslucentStatus">true</item>
 
-        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Go4Lunch.MaterialAlertDialog</item>
-    </style>
-
-    <style name="ThemeOverlay.Go4Lunch.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
-        <item name="colorSecondary">?attr/colorPrimary</item>
     </style>
 
     <style name="TextAppearance.Go4Lunch.NavigationItem" parent="TextAppearance.MaterialComponents.Body2">

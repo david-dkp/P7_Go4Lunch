@@ -14,7 +14,7 @@ android {
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
-
+        
         multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -98,8 +98,9 @@ dependencies {
     implementation "com.squareup.retrofit2:adapter-rxjava3:$retrofit_version"
 
     //OkHttp
-    implementation('com.squareup.okhttp3:okhttp') { version { strictly '3.12.12'  } }
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.12.12'
+    def okhttp_version = "3.12.12"
+    implementation('com.squareup.okhttp3:okhttp') { version { strictly okhttp_version  } }
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
 
     //Dagger Hilt
     implementation "com.google.dagger:hilt-android:$hilt_version"
