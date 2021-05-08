@@ -184,7 +184,7 @@ public class RestaurantActivity extends AppCompatActivity {
 
         TypedValue typedValue = new TypedValue();
 
-        TypedArray a = obtainStyledAttributes(typedValue.data, new int[] { R.attr.colorOnSurface });
+        TypedArray a = obtainStyledAttributes(typedValue.data, new int[]{R.attr.colorOnSurface});
         int colorPrimary = a.getColor(0, 0);
         a.recycle();
 

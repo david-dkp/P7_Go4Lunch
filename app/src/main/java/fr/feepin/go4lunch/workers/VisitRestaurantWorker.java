@@ -17,7 +17,7 @@ import fr.feepin.go4lunch.data.user.UserRepository;
 @HiltWorker
 public class VisitRestaurantWorker extends Worker {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @AssistedInject
     public VisitRestaurantWorker(

@@ -8,10 +8,11 @@ import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 @Singleton
-public class DefaultSchedulerProvider implements SchedulerProvider{
+public class DefaultSchedulerProvider implements SchedulerProvider {
 
     @Inject
-    public DefaultSchedulerProvider() {}
+    public DefaultSchedulerProvider() {
+    }
 
     @Override
     public Scheduler io() {

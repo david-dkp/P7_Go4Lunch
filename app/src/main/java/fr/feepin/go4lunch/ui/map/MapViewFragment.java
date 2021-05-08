@@ -30,7 +30,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
@@ -254,7 +253,7 @@ public class MapViewFragment extends Fragment {
 
         MapStyleOptions mapStyleOptions = MapStyleOptions.loadRawResourceStyle(
                 getContext(),
-                isNightMode  ? R.raw.map_style_dark : R.raw.map_style
+                isNightMode ? R.raw.map_style_dark : R.raw.map_style
         );
         googleMap.setMapStyle(mapStyleOptions);
     }
