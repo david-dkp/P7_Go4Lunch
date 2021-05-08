@@ -134,16 +134,4 @@ dependencies {
     //Preferences
     def preferences_version = "1.1.1"
     implementation "androidx.preference:preference:$preferences_version"
-
-    //Mockito
-    def mockito_version = "3.0.0"
-    testImplementation "org.mockito:mockito-core:$mockito_version"
-
-    //PowerMockito
-    def power_mockito_version = "2.0.9"
-    testImplementation "org.powermock:powermock-module-junit4:$power_mockito_version"
-    testImplementation "org.powermock:powermock-api-mockito2:$power_mockito_version"
-
-    //Core testing
-    testImplementation "androidx.arch.core:core-testing:2.1.0"
 }
