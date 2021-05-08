@@ -49,6 +49,7 @@ import fr.feepin.go4lunch.ui.map.RestaurantState;
 import fr.feepin.go4lunch.ui.workmates.WorkmateState;
 import fr.feepin.go4lunch.utils.LatLngUtils;
 import fr.feepin.go4lunch.utils.PermissionUtils;
+import fr.feepin.go4lunch.utils.UserInfoUtils;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
@@ -241,7 +242,7 @@ public class MainViewModel extends ViewModel {
                                         .flatMapObservable(fetchPhotoResponseOptional -> userRepository.getVisitedRestaurants(placeResponse.getPlaceId())
                                                 .map(visitedRestaurants -> {
                                                     int rating = calculateRating(visitedRestaurants);
-                                                    int usersJoining = calculateUsersJoining(userInfos, placeResponse.getPlaceId());
+                                                    int usersJoining = UserInfoUtils.calculateUsersJoiningByRestaurantId(userInfos, placeResponse.getPlaceId());
                                                     int distance = (int) SphericalUtil.computeDistanceBetween(
                                                             placeResponse.getGeometry().getLocation().toMapsLatLng(), getPosition().getValue().getData()
                                                     );
@@ -294,7 +295,7 @@ public class MainViewModel extends ViewModel {
                                                                         place.getAddress(),
                                                                         place.isOpen(),
                                                                         (int) SphericalUtil.computeDistanceBetween(position.getValue().getData(), place.getLatLng()),
-                                                                        calculateUsersJoining(userInfos, place.getId()),
+                                                                        UserInfoUtils.calculateUsersJoiningByRestaurantId(userInfos, place.getId()),
                                                                         calculateRating(visitedRestaurants),
                                                                         fetchPhotoResponseOptional.isPresent() ? fetchPhotoResponseOptional.get().getBitmap() : null,
                                                                         place.getId()
@@ -311,18 +312,6 @@ public class MainViewModel extends ViewModel {
                         listViewState.setValue(new Resource.Success<>(new ListViewState(listItemStates != null ? listItemStates : Collections.emptyList(), false), null));
                     });
         }
-    }
-
-    private int calculateUsersJoining(List<UserInfo> userInfos, String placeId) {
-        int usersJoining = 0;
-
-        for (UserInfo userInfo : userInfos) {
-            if (userInfo.getRestaurantChoiceId().equals(placeId)) {
-                usersJoining++;
-            }
-        }
-
-        return usersJoining;
     }
 
     private int calculateRating(List<VisitedRestaurant> visitedRestaurants) {
