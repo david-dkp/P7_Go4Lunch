@@ -68,6 +68,7 @@ public class ListViewFragment extends Fragment {
             if (listViewState instanceof Resource.Success) {
                 binding.progressBar.hide();
                 listItemAdapter.submitList(new ArrayList<>(listViewState.getData().getListItemStates()));
+                binding.rvRestaurants.smoothScrollToPosition(0);
             } else if (listViewState instanceof Resource.Loading) {
                 binding.progressBar.show();
             }
