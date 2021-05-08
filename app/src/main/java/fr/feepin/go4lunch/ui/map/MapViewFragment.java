@@ -211,7 +211,6 @@ public class MapViewFragment extends Fragment {
         );
 
         clusterManager.setOnClusterItemClickListener(item -> {
-            Log.d("debug", item.getRestaurantId());
             RestaurantActivity.navigate(getContext(), item.getRestaurantId());
             return true;
         });

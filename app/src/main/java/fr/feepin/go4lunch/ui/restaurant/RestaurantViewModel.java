@@ -157,7 +157,6 @@ public class RestaurantViewModel extends ViewModel {
 
                     @Override
                     public void onSuccess(@NonNull Place place) {
-                        Log.d("debug", place.toString());
                         RestaurantViewModel.this.sessionToken = null;
                         RestaurantViewModel.this.place.setValue(place);
                         if (place.getPhotoMetadatas() != null) {
