@@ -8,10 +8,8 @@
     <dimen name="item_restaurant_rating_marginRight">10dp</dimen>
     <dimen name="item_restaurant_distance_marginRight">25dp</dimen>
 
-
     <dimen name="item_workmate_height">95dp</dimen>
     <dimen name="item_workmate_photo_margin">15dp</dimen>
-
 
     <dimen name="header_nav_height">220dp</dimen>
     <dimen name="header_nav_title_marginTop">50dp</dimen>
@@ -25,7 +23,6 @@
     <dimen name="login_app_description_text_size">13sp</dimen>
     <dimen name="login_button_height">70dp</dimen>
     <dimen name="login_button_marginHorizontal">50dp</dimen>
-    <dimen name="login_button_logo_size">40dp</dimen>
     <dimen name="map_view_myLocation_margin">15dp</dimen>
     <dimen name="drawer_app_logo_size">110dp</dimen>
     <dimen name="header_nav_marginBottom">20dp</dimen>
