@@ -50,6 +50,7 @@ import fr.feepin.go4lunch.ui.workmates.WorkmateState;
 import fr.feepin.go4lunch.utils.LatLngUtils;
 import fr.feepin.go4lunch.utils.PermissionUtils;
 import fr.feepin.go4lunch.utils.UserInfoUtils;
+import fr.feepin.go4lunch.utils.VisitedRestaurantUtils;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
@@ -241,7 +242,7 @@ public class MainViewModel extends ViewModel {
                                 return singleFetchPhoto.onErrorReturn(throwable -> Optional.absent())
                                         .flatMapObservable(fetchPhotoResponseOptional -> userRepository.getVisitedRestaurants(placeResponse.getPlaceId())
                                                 .map(visitedRestaurants -> {
-                                                    int rating = calculateRating(visitedRestaurants);
+                                                    int rating = VisitedRestaurantUtils.calculateRating(visitedRestaurants);
                                                     int usersJoining = UserInfoUtils.calculateUsersJoiningByRestaurantId(userInfos, placeResponse.getPlaceId());
                                                     int distance = (int) SphericalUtil.computeDistanceBetween(
                                                             placeResponse.getGeometry().getLocation().toMapsLatLng(), getPosition().getValue().getData()
@@ -296,7 +297,7 @@ public class MainViewModel extends ViewModel {
                                                                         place.isOpen(),
                                                                         (int) SphericalUtil.computeDistanceBetween(position.getValue().getData(), place.getLatLng()),
                                                                         UserInfoUtils.calculateUsersJoiningByRestaurantId(userInfos, place.getId()),
-                                                                        calculateRating(visitedRestaurants),
+                                                                        VisitedRestaurantUtils.calculateRating(visitedRestaurants),
                                                                         fetchPhotoResponseOptional.isPresent() ? fetchPhotoResponseOptional.get().getBitmap() : null,
                                                                         place.getId()
                                                                 )).toObservable());
@@ -312,18 +313,6 @@ public class MainViewModel extends ViewModel {
                         listViewState.setValue(new Resource.Success<>(new ListViewState(listItemStates != null ? listItemStates : Collections.emptyList(), false), null));
                     });
         }
-    }
-
-    private int calculateRating(List<VisitedRestaurant> visitedRestaurants) {
-        int likes = 0;
-
-        for (VisitedRestaurant visitedRestaurant : visitedRestaurants) {
-            if (visitedRestaurant.isLiked()) likes++;
-        }
-
-        int rating = Math.round(((float) likes / (float) visitedRestaurants.size()) * 3f);
-
-        return rating;
     }
 
     private void updateRestaurantsState(List<PlaceResponse> places, List<UserInfo> usersInfo) {

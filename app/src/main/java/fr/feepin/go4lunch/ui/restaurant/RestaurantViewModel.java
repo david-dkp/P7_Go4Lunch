@@ -39,6 +39,7 @@ import fr.feepin.go4lunch.data.user.UserRepository;
 import fr.feepin.go4lunch.data.user.models.UserInfo;
 import fr.feepin.go4lunch.data.user.models.VisitedRestaurant;
 import fr.feepin.go4lunch.utils.SingleEventData;
+import fr.feepin.go4lunch.utils.VisitedRestaurantUtils;
 import fr.feepin.go4lunch.workers.NotifyWorker;
 import fr.feepin.go4lunch.workers.VisitRestaurantWorker;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
@@ -114,14 +115,7 @@ public class RestaurantViewModel extends ViewModel {
 
     private void setupRating() {
         rating.addSource(usersVisitedRestaurants, visitedRestaurants -> {
-            int likes = 0;
-
-            for (VisitedRestaurant visitedRestaurant : visitedRestaurants) {
-                if (visitedRestaurant.isLiked()) likes++;
-            }
-
-            int rating = Math.round(((float) likes / (float) visitedRestaurants.size()) * 3f);
-            this.rating.setValue(rating);
+            this.rating.setValue(VisitedRestaurantUtils.calculateRating(visitedRestaurants));
         });
     }
 
