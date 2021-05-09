@@ -215,7 +215,7 @@ public class MainViewModel extends ViewModel {
     }
 
     private void updateListViewState(List<PlaceResponse> placeResponses, FindAutocompletePredictionsResponse autocompletePredictionsResponse, ListItemStateSortMethod listItemStateSortMethod) {
-        listViewState.setValue(new Resource.Loading(new ListViewState(listViewState.getValue().getData().getListItemStates(), true, false), null));
+        listViewState.setValue(new Resource.Loading(new ListViewState(listViewState.getValue().getData().getListItemStates(), false, false), null));
 
         if (autocompletePredictionsResponse == null) {
             //If we don't use autocomplete, we use NearbySearch data "placeResponses"
@@ -317,7 +317,7 @@ public class MainViewModel extends ViewModel {
                         }
 
                         Collections.sort(itemStates, listItemStateSortMethod.getComparator());
-                        listViewState.postValue(new Resource.Success<>(new ListViewState(itemStates, true, true), null));
+                        listViewState.postValue(new Resource.Success<>(new ListViewState(itemStates, false, true), null));
 
                         return Observable
                                 .fromIterable(pairs)

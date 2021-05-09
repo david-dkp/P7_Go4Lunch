@@ -2,6 +2,7 @@ package fr.feepin.go4lunch.ui.list;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.transition.TransitionManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -78,6 +79,8 @@ public class ListViewFragment extends Fragment {
 
             if (sortMenuItem != null) {
                 sortMenuItem.setEnabled(listViewState.getData().isSortable());
+                TransitionManager.beginDelayedTransition(getActivity().findViewById(R.id.toolbar));
+                sortMenuItem.setVisible(listViewState.getData().isSortable());
             }
 
         });
