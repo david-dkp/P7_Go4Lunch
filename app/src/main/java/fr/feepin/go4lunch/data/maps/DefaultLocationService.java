@@ -54,32 +54,38 @@ public class DefaultLocationService implements LocationService {
     @Override
     public Single<Location> getCurrentPosition() {
         return Single.create(e -> {
+            LocationListener locationListener = new LocationListener() {
+                @Override
+                public void onLocationChanged(@NonNull Location location) {
+                    locationManager.removeUpdates(this);
+                    lastKnownLocation = location;
+                    saveLocationInPrefs(lastKnownLocation);
+                    e.onSuccess(location);
+                }
+
+                @Override
+                public void onProviderEnabled(@NonNull String provider) {
+
+                }
+
+                @Override
+                public void onProviderDisabled(@NonNull String provider) {
+
+                }
+
+                @Override
+                public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                }
+            };
+
+            e.setCancellable(() -> {
+                locationManager.removeUpdates(locationListener);
+            });
+
             locationManager.requestSingleUpdate(
                     provider,
-                    new LocationListener() {
-                        @Override
-                        public void onLocationChanged(@NonNull Location location) {
-                            locationManager.removeUpdates(this);
-                            lastKnownLocation = location;
-                            saveLocationInPrefs(lastKnownLocation);
-                            e.onSuccess(location);
-                        }
-
-                        @Override
-                        public void onProviderEnabled(@NonNull String provider) {
-
-                        }
-
-                        @Override
-                        public void onProviderDisabled(@NonNull String provider) {
-
-                        }
-
-                        @Override
-                        public void onStatusChanged(String provider, int status, Bundle extras) {
-
-                        }
-                    },
+                    locationListener,
                     Looper.getMainLooper()
             );
         });

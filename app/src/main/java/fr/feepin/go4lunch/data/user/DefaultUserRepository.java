@@ -6,6 +6,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.List;
@@ -64,7 +65,8 @@ public class DefaultUserRepository implements UserRepository {
     @Override
     public Observable<UserInfo> getCurrentUserInfoObservable() {
         return Observable.create(emitter -> {
-            firebaseFirestore
+
+            ListenerRegistration listenerRegistration = firebaseFirestore
                     .collection("users")
                     .document(firebaseAuth.getCurrentUser().getUid())
                     .addSnapshotListener((snapshot, error) -> {
@@ -74,6 +76,8 @@ public class DefaultUserRepository implements UserRepository {
                             emitter.onNext(snapshot.toObject(UserInfo.class));
                         }
                     });
+
+            emitter.setCancellable(listenerRegistration::remove);
         });
     }
 
@@ -81,16 +85,17 @@ public class DefaultUserRepository implements UserRepository {
     public Observable<List<UserInfo>> getUsersInfoObservable() {
         return Observable.create(e -> {
 
-            firebaseFirestore.collection("users")
+            ListenerRegistration listenerRegistration = firebaseFirestore.collection("users")
                     .whereNotEqualTo(FieldPath.documentId(), firebaseAuth.getCurrentUser().getUid())
                     .addSnapshotListener((command, error) -> {
                         if (error != null) {
-                            e.onError(error);
+                            e.tryOnError(error);
                         } else {
                             e.onNext(command.toObjects(UserInfo.class));
                         }
                     });
 
+            e.setCancellable(listenerRegistration::remove);
         });
     }
 

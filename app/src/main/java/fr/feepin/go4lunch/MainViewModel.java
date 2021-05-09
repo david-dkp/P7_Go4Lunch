@@ -19,7 +19,6 @@ import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.maps.android.SphericalUtil;
@@ -52,7 +51,6 @@ import fr.feepin.go4lunch.utils.VisitedRestaurantUtils;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Observer;
-import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.core.SingleObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
@@ -62,7 +60,6 @@ public class MainViewModel extends ViewModel {
 
     private final Context context;
     private final Handler handler = new Handler();
-    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private AutocompleteSessionToken sessionToken;
 
@@ -83,14 +80,13 @@ public class MainViewModel extends ViewModel {
     private final MediatorLiveData<Resource<List<WorkmateState>>> workmateStates = new MediatorLiveData<>();
 
     //Datas
-    private final MutableLiveData<FindAutocompletePredictionsResponse> autocompletePredictions = new MutableLiveData<>();
     private final MutableLiveData<List<PlaceResponse>> placesResponse = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<List<UserInfo>> userInfos = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<ListItemStateSortMethod> listItemStateSortMethod = new MutableLiveData<>(ListItemStateSortMethod.DISTANCE);
+    private final MutableLiveData<String> autocompleteQuery = new MutableLiveData<>("");
 
-    private Disposable runningListViewObservable;
-    private Disposable runningPredictionsQueryObservable;
-    private Disposable runningMyLocationObservable;
+    private final CompositeDisposable runningDisposables = new CompositeDisposable();
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     @Inject
     public MainViewModel(@ApplicationContext Context context,
@@ -123,11 +119,12 @@ public class MainViewModel extends ViewModel {
         listViewState.setValue(new Resource.Success<>(new ListViewState(Collections.emptyList(), true, false), null));
 
         listViewState.addSource(placesResponse, placeResponses -> {
-            updateListViewState(placeResponses, autocompletePredictions.getValue(), listItemStateSortMethod.getValue());
+            updateListViewState(placeResponses, autocompleteQuery.getValue(), listItemStateSortMethod.getValue());
         });
 
-        listViewState.addSource(autocompletePredictions, autocompletePredictions -> {
-            updateListViewState(placesResponse.getValue(), autocompletePredictions, listItemStateSortMethod.getValue());
+
+        listViewState.addSource(autocompleteQuery, s -> {
+            updateListViewState(placesResponse.getValue(), s, listItemStateSortMethod.getValue());
         });
 
         listViewState.addSource(listItemStateSortMethod, listItemStateSortMethod -> {
@@ -214,38 +211,39 @@ public class MainViewModel extends ViewModel {
                 });
     }
 
-    private void updateListViewState(List<PlaceResponse> placeResponses, FindAutocompletePredictionsResponse autocompletePredictionsResponse, ListItemStateSortMethod listItemStateSortMethod) {
+    private void updateListViewState(List<PlaceResponse> placeResponses, String query, ListItemStateSortMethod listItemStateSortMethod) {
         listViewState.setValue(new Resource.Loading(new ListViewState(listViewState.getValue().getData().getListItemStates(), false, false), null));
+        handler.removeCallbacksAndMessages(null);
+        runningDisposables.clear();
 
-        if (autocompletePredictionsResponse == null) {
+        if (query.equals("")) {
             //If we don't use autocomplete, we use NearbySearch data "placeResponses"
-            runningListViewObservable = Single.just(userInfos.getValue())
-                    //We load all the text required first
-                    .flatMapObservable(userInfos -> Observable.fromIterable(placeResponses)
-                            .flatMap(placeResponse -> userRepository.getVisitedRestaurants(placeResponse.getPlaceId())
-                                    .map(visitedRestaurants -> {
-                                        int rating = VisitedRestaurantUtils.calculateRating(visitedRestaurants);
-                                        int usersJoining = UserInfoUtils.calculateUsersJoiningByRestaurantId(userInfos, placeResponse.getPlaceId());
-                                        int distance = (int) SphericalUtil.computeDistanceBetween(
-                                                placeResponse.getGeometry().getLocation().toMapsLatLng(), getPosition().getValue().getData()
-                                        );
+            runningDisposables.add(Observable.fromIterable(placeResponses)
+                    .flatMap(placeResponse -> userRepository
+                            .getVisitedRestaurants(placeResponse.getPlaceId())
+                            .map(visitedRestaurants -> {
+                                int rating = VisitedRestaurantUtils.calculateRating(visitedRestaurants);
+                                int usersJoining = UserInfoUtils.calculateUsersJoiningByRestaurantId(userInfos.getValue(), placeResponse.getPlaceId());
+                                int distance = (int) SphericalUtil.computeDistanceBetween(
+                                        placeResponse.getGeometry().getLocation().toMapsLatLng(), getPosition().getValue().getData()
+                                );
 
-                                        PlaceResponse.OpeningHours openingHours = placeResponse.getOpeningHours();
+                                PlaceResponse.OpeningHours openingHours = placeResponse.getOpeningHours();
 
-                                        List<PlaceResponse.Photo> photos = placeResponse.getPhotos();
+                                List<PlaceResponse.Photo> photos = placeResponse.getPhotos();
 
-                                        //Return the ListItemState and the photos to keep them on track
-                                        return Pair.create(new ListItemState(
-                                                placeResponse.getName(),
-                                                placeResponse.getVicinity(),
-                                                openingHours != null ? openingHours.isOpenNow() : null,
-                                                distance,
-                                                usersJoining,
-                                                rating,
-                                                null,
-                                                placeResponse.getPlaceId()
-                                        ), photos);
-                                    }).toObservable()))
+                                //Return the ListItemState and the photos to keep them on track
+                                return Pair.create(new ListItemState(
+                                        placeResponse.getName(),
+                                        placeResponse.getVicinity(),
+                                        openingHours != null ? openingHours.isOpenNow() : null,
+                                        distance,
+                                        usersJoining,
+                                        rating,
+                                        null,
+                                        placeResponse.getPlaceId()
+                                ), photos);
+                            }).toObservable())
                     .toList() //Waiting for all data to be loaded
                     //Post the List<ListItemState> in the adapter then we load photos.
                     .flatMapObservable(pairs -> {
@@ -274,71 +272,78 @@ public class MainViewModel extends ViewModel {
                                             .doAfterSuccess(photoResponse -> {
                                                 listItemStateListPair.first.setPhoto(photoResponse.getBitmap());
                                                 listViewState.getValue().getData().setScrollToFirst(false);
-                                                listViewState.postValue(listViewState.getValue());
+                                                listViewState.postValue(new Resource.Success<>(listViewState.getValue().getData(), null));
                                             })
                                             .toObservable();
                                 });
                     })
                     .subscribeOn(schedulerProvider.io())
                     .observeOn(schedulerProvider.ui())
-                    .subscribe();
+                    .subscribe());
         } else {
-            //Else if we use autocomplete, request the Places because AutocompletePrediction has not all the fields we want
-            runningListViewObservable = Single.just(userInfos.getValue())
-                    .flatMapObservable(userInfos -> Observable
-                            .fromIterable(autocompletePredictionsResponse.getAutocompletePredictions())
-                            //Getting all required fields for Place
-                            .flatMap(autocompletePrediction -> mapsRepository.getRestaurantDetails(
-                                    autocompletePrediction.getPlaceId(),
-                                    Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.UTC_OFFSET, Place.Field.LAT_LNG, Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS),
-                                    sessionToken
-                            )
-                                    //Getting VisitedRestaurants to calculate rating
-                                    .flatMapObservable(place -> userRepository.getVisitedRestaurants(place.getId())
-                                            .map(visitedRestaurants -> Pair.create(new ListItemState(
-                                                    place.getName(),
-                                                    place.getAddress(),
-                                                    place.isOpen(),
-                                                    (int) SphericalUtil.computeDistanceBetween(position.getValue().getData(), place.getLatLng()),
-                                                    UserInfoUtils.calculateUsersJoiningByRestaurantId(userInfos, place.getId()),
-                                                    VisitedRestaurantUtils.calculateRating(visitedRestaurants),
-                                                    null,
-                                                    place.getId()
-                                            ), place.getPhotoMetadatas())).toObservable()
-                                    )))
-                    .toList() //Waiting for the data to be loaded
-                    //Post the List<ListItemState> in the adapter then we load photos.
-                    .flatMapObservable(pairs -> {
+            handler.postDelayed(() -> {
+                //Else if we use autocomplete, request the Places because AutocompletePrediction has not all the fields we want
+                runningDisposables.add(mapsRepository.getRestaurantsFromQuery(
+                        sessionToken,
+                        query,
+                        position.getValue().getData(),
+                        RectangularBounds.newInstance(LatLngUtils.toBounds(position.getValue().getData(), Constants.PREDICTION_SEARCH_RADIUS)
+                        ))
+                        .flatMapObservable(findAutocompletePredictionsResponse -> Observable.fromIterable(findAutocompletePredictionsResponse.getAutocompletePredictions()))
+                        //Getting all required fields for Place
+                        .flatMap(autocompletePrediction -> mapsRepository.getRestaurantDetails(
+                                autocompletePrediction.getPlaceId(),
+                                Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.UTC_OFFSET, Place.Field.LAT_LNG, Place.Field.PHOTO_METADATAS, Place.Field.OPENING_HOURS),
+                                sessionToken
+                        )
+                                //Getting VisitedRestaurants to calculate rating
+                                .flatMapObservable(place -> userRepository.getVisitedRestaurants(place.getId())
+                                        .map(visitedRestaurants -> Pair.create(new ListItemState(
+                                                place.getName(),
+                                                place.getAddress(),
+                                                place.isOpen(),
+                                                (int) SphericalUtil.computeDistanceBetween(position.getValue().getData(), place.getLatLng()),
+                                                UserInfoUtils.calculateUsersJoiningByRestaurantId(userInfos.getValue(), place.getId()),
+                                                VisitedRestaurantUtils.calculateRating(visitedRestaurants),
+                                                null,
+                                                place.getId()
+                                        ), place.getPhotoMetadatas())).toObservable()
+                                ))
+                        .toList() //Waiting for the data to be loaded
+                        //Post the List<ListItemState> in the adapter then we load photos.
+                        .flatMapObservable(pairs -> {
 
-                        ArrayList<ListItemState> itemStates = new ArrayList<>();
+                            ArrayList<ListItemState> itemStates = new ArrayList<>();
 
-                        for (Pair<ListItemState, List<PhotoMetadata>> pair : pairs) {
-                            itemStates.add(pair.first);
-                        }
+                            for (Pair<ListItemState, List<PhotoMetadata>> pair : pairs) {
+                                itemStates.add(pair.first);
+                            }
 
-                        Collections.sort(itemStates, listItemStateSortMethod.getComparator());
-                        listViewState.postValue(new Resource.Success<>(new ListViewState(itemStates, false, true), null));
+                            Collections.sort(itemStates, listItemStateSortMethod.getComparator());
+                            listViewState.postValue(new Resource.Success<>(new ListViewState(itemStates, false, true), null));
 
-                        return Observable
-                                .fromIterable(pairs)
-                                .filter(listItemStateListPair -> listItemStateListPair.second != null)
-                                .flatMap(listItemStateListPair -> {
-                                    PhotoMetadata photo = listItemStateListPair.second.get(0);
-                                    return mapsRepository.getRestaurantPhoto(
-                                            listItemStateListPair.first.getId(),
-                                            photo
-                                    )
-                                            .doAfterSuccess(photoResponse -> {
-                                                listItemStateListPair.first.setPhoto(photoResponse.getBitmap());
-                                                listViewState.getValue().getData().setScrollToFirst(false);
-                                                listViewState.postValue(listViewState.getValue());
-                                            })
-                                            .toObservable();
-                                });
-                    })
-                    .subscribeOn(schedulerProvider.io())
-                    .observeOn(schedulerProvider.ui())
-                    .subscribe();
+                            return Observable
+                                    .fromIterable(pairs)
+                                    .filter(listItemStateListPair -> listItemStateListPair.second != null)
+                                    .flatMap(listItemStateListPair -> {
+                                        PhotoMetadata photo = listItemStateListPair.second.get(0);
+                                        return mapsRepository.getRestaurantPhoto(
+                                                listItemStateListPair.first.getId(),
+                                                photo
+                                        )
+                                                .doAfterSuccess(photoResponse -> {
+                                                    listItemStateListPair.first.setPhoto(photoResponse.getBitmap());
+                                                    listViewState.getValue().getData().setScrollToFirst(false);
+                                                    listViewState.postValue(new Resource.Success<>(listViewState.getValue().getData(), null));
+                                                })
+                                                .toObservable();
+                                    });
+                        })
+                        .subscribeOn(schedulerProvider.io())
+                        .observeOn(schedulerProvider.ui())
+                        .subscribe());
+            }, 400);
+
         }
     }
 
@@ -429,8 +434,6 @@ public class MainViewModel extends ViewModel {
             return;
         }
 
-        if (runningMyLocationObservable != null) runningMyLocationObservable.dispose();
-
         if (!LocationManagerCompat.isLocationEnabled(locationManager)) {
             Location latestKnown = mapsRepository.getLastKnownLocation();
 
@@ -445,7 +448,7 @@ public class MainViewModel extends ViewModel {
                         .subscribe(new SingleObserver<LatLng>() {
                             @Override
                             public void onSubscribe(@NonNull Disposable d) {
-                                runningMyLocationObservable = d;
+                                runningDisposables.add(d);
                             }
 
                             @Override
@@ -468,7 +471,7 @@ public class MainViewModel extends ViewModel {
                     .subscribe(new SingleObserver<Location>() {
                         @Override
                         public void onSubscribe(@NonNull Disposable d) {
-                            runningMyLocationObservable = d;
+                            //runningDisposables.add(d);
                         }
 
                         @Override
@@ -494,7 +497,7 @@ public class MainViewModel extends ViewModel {
                 .subscribe(new SingleObserver<NearbySearchResponse>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
-                        compositeDisposable.add(d);
+                        runningDisposables.add(d);
                     }
 
                     @Override
@@ -505,33 +508,6 @@ public class MainViewModel extends ViewModel {
                     @Override
                     public void onError(@NonNull Throwable e) {
                         Log.d("debug", "nearby error: " + e.getMessage());
-                    }
-                });
-    }
-
-    private void getPredictionsForQuery(String query) {
-        mapsRepository.getRestaurantsFromQuery(
-                sessionToken,
-                query,
-                position.getValue().getData(),
-                RectangularBounds.newInstance(LatLngUtils.toBounds(position.getValue().getData(), Constants.PREDICTION_SEARCH_RADIUS))
-        )
-                .subscribeOn(schedulerProvider.io())
-                .observeOn(schedulerProvider.ui())
-                .subscribe(new SingleObserver<FindAutocompletePredictionsResponse>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                        runningPredictionsQueryObservable = d;
-                    }
-
-                    @Override
-                    public void onSuccess(@NonNull FindAutocompletePredictionsResponse findAutocompletePredictionsResponse) {
-                        autocompletePredictions.setValue(findAutocompletePredictionsResponse);
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        Log.d("debug", e.getMessage());
                     }
                 });
     }
@@ -560,34 +536,9 @@ public class MainViewModel extends ViewModel {
         sessionToken = null;
     }
 
-    public void autoCompleteQuery(String query) {
+    public void autocompleteQuery(String query) {
         String cleanQuery = query.trim();
-
-        if (sessionToken == null) {
-            sessionToken = AutocompleteSessionToken.newInstance();
-        }
-
-        if (runningListViewObservable != null) {
-            runningListViewObservable.dispose();
-        }
-
-        if (runningPredictionsQueryObservable != null) {
-            runningPredictionsQueryObservable.dispose();
-        }
-
-        if (cleanQuery.equals("")) {
-            handler.removeCallbacksAndMessages(null);
-            if (autocompletePredictions.getValue() != null)
-                autocompletePredictions.setValue(null);
-            return;
-        }
-
-        //Prevent excessive requests
-        handler.postDelayed(() -> {
-            handler.removeCallbacksAndMessages(null);
-            getPredictionsForQuery(cleanQuery);
-        }, 400);
-
+        autocompleteQuery.setValue(cleanQuery);
     }
 
     public LiveData<FirebaseUser> getCurrentUser() {
@@ -626,5 +577,6 @@ public class MainViewModel extends ViewModel {
     protected void onCleared() {
         super.onCleared();
         compositeDisposable.dispose();
+        runningDisposables.dispose();
     }
 }
