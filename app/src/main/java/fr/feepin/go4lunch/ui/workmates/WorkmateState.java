@@ -53,10 +53,10 @@ public class WorkmateState {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WorkmateState that = (WorkmateState) o;
-        return Objects.equals(photoUrl, that.photoUrl) &&
-                Objects.equals(name, that.name) &&
-                Objects.equals(restaurantName, that.restaurantName) &&
-                Objects.equals(restaurantId, that.restaurantId);
+        return photoUrl.equals(that.photoUrl) &&
+                name.equals(that.name) &&
+                restaurantName.equals(that.restaurantName) &&
+                restaurantId.equals(that.restaurantId);
     }
 
     @Override

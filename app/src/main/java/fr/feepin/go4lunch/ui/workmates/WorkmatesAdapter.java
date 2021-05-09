@@ -41,7 +41,7 @@ public class WorkmatesAdapter extends ListAdapter<WorkmateState, WorkmatesAdapte
     @Override
     public int getItemViewType(int position) {
         WorkmateState workmateState = getItem(position);
-        if (workmateState.getRestaurantName() == null) {
+        if (workmateState.getRestaurantName().equals("")) {
             return NotDecidedViewHolder.VIEW_TYPE;
         } else {
             return DecidedViewHolder.VIEW_TYPE;

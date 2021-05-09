@@ -363,7 +363,7 @@ public class MainViewModel extends ViewModel {
                 .flatMap(userInfo -> {
 
                     if (userInfo.getRestaurantChoiceId().equals("")) {
-                        return Observable.just(new WorkmateState(null, null, userInfo.getPhotoUrl(), userInfo.getName()));
+                        return Observable.just(new WorkmateState("", "", userInfo.getPhotoUrl(), userInfo.getName()));
                     } else {
                         PlaceResponse placeResponse = getPlaceFromId(userInfo.getRestaurantChoiceId());
                         if (placeResponse != null) {
@@ -378,6 +378,12 @@ public class MainViewModel extends ViewModel {
                     }
                 })
                 .toList()
+                .map(workmateStates -> {
+                    if (!workmateStates.isEmpty()) {
+                        Collections.sort(workmateStates, WorkmateState.RESTAURANT_NOT_CHOSEN_COMPARATOR);
+                    }
+                    return workmateStates;
+                })
                 .subscribeOn(schedulerProvider.io())
                 .observeOn(schedulerProvider.ui())
                 .subscribe((workmateStates, throwable) -> {
