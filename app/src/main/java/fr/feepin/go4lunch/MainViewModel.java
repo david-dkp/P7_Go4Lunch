@@ -272,6 +272,7 @@ public class MainViewModel extends ViewModel {
                                             .doAfterSuccess(photoResponse -> {
                                                 listItemStateListPair.first.setPhoto(photoResponse.getBitmap());
                                                 listViewState.getValue().getData().setScrollToFirst(false);
+                                                listViewState.getValue().getData().setSortable(true);
                                                 listViewState.postValue(new Resource.Success<>(listViewState.getValue().getData(), null));
                                             })
                                             .toObservable();
