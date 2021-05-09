@@ -53,7 +53,7 @@
 
     <TextView
         android:id="@+id/tvRestaurantName"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/restaurant_restaurant_name_margin"
         android:ellipsize="marquee"
@@ -64,6 +64,7 @@
         android:textAppearance="?attr/textAppearanceHeadline5"
         android:textColor="?attr/colorOnPrimary"
         app:layout_constraintLeft_toLeftOf="@id/vDescriptionContainer"
+        app:layout_constraintRight_toLeftOf="@id/fabJoinRestaurant"
         app:layout_constraintTop_toTopOf="@id/vDescriptionContainer"
         tools:text="Le Zinc"
         />
@@ -81,7 +82,7 @@
 
     <TextView
         android:id="@+id/tvRestaurantAddress"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ellipsize="marquee"
         android:focusable="true"
@@ -91,6 +92,7 @@
         android:textAppearance="?attr/textAppearanceBody2"
         android:textColor="?attr/colorOnPrimary"
         app:layout_constraintLeft_toLeftOf="@id/tvRestaurantName"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvRestaurantName"
         tools:text="French restaurant - 12 rue du Faubourg Poissonnière"
         />
@@ -176,13 +178,13 @@
         android:id="@+id/rvWorkmates"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:background="?attr/colorSurface"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/vSeparation"
         app:layout_constraintVertical_bias="0.0"
         tools:itemCount="2"
         tools:layout_editor_absoluteX="-131dp"
         tools:listitem="@layout/item_workmate_joining"
-        android:background="?attr/colorSurface"
         />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
