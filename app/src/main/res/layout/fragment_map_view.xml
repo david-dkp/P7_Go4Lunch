@@ -12,14 +12,15 @@
         />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progressBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:indeterminate="true"
         android:visibility="invisible"
         app:hideAnimationBehavior="outward"
-        app:showAnimationBehavior="outward"
         app:layout_constraintTop_toTopOf="parent"
-        android:id="@+id/progressBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        app:showAnimationBehavior="outward"
+        />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabMyLocation"
@@ -29,48 +30,49 @@
         android:contentDescription="@string/desc_my_location"
         android:src="@drawable/ic_my_location"
         app:backgroundTint="?attr/colorSurface"
-        app:tint="?attr/colorOnSurface"
         app:fabSize="mini"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:tint="?attr/colorOnSurface"
         />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:background="@drawable/location_error_background"
-        android:layout_margin="@dimen/map_view_location_error_margin"
-        app:layout_constraintTop_toTopOf="parent"
+        android:id="@+id/clLocationErrorContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/clLocationErrorContainer"
+        android:layout_margin="@dimen/map_view_location_error_margin"
+        android:background="@drawable/location_error_background"
+        android:paddingHorizontal="@dimen/map_view_location_error_paddingHorizontal"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Light"
         android:visibility="invisible"
         app:elevation="20dp"
-        android:paddingHorizontal="@dimen/map_view_location_error_paddingHorizontal"
+        app:layout_constraintTop_toTopOf="parent"
         >
 
         <TextView
-            app:layout_constraintRight_toLeftOf="@id/btnEnableLocation"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:singleLine="true"
-            android:ellipsize="end"
             android:id="@+id/tvLocationErrorMessage"
-            android:textAppearance="?attr/textAppearanceBody1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
             android:text="@string/text_location_error"
+            android:textAppearance="?attr/textAppearanceBody1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/btnEnableLocation"
+            app:layout_constraintTop_toTopOf="parent"
             />
 
         <Button
-            style="@style/Widget.AppCompat.Button.Borderless.Colored"
-            android:textColor="?attr/colorPrimary"
             android:id="@+id/btnEnableLocation"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/text_enable" />
+            android:text="@string/text_enable"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

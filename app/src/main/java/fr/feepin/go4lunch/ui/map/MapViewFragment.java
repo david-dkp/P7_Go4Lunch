@@ -151,7 +151,7 @@ public class MapViewFragment extends Fragment {
                     toggleLocationError(false);
                 }
             } else {
-                binding.clLocationErrorContainer.setVisibility(View.INVISIBLE);
+                toggleLocationError(true);
                 binding.progressBar.show();
             }
         });
