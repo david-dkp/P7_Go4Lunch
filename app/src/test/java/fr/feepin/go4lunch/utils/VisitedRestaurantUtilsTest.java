@@ -25,7 +25,7 @@ public class VisitedRestaurantUtilsTest {
                 new VisitedRestaurant("1", false),
                 new VisitedRestaurant("1", true),
                 new VisitedRestaurant("1", false)
-                );
+        );
 
         int rating = VisitedRestaurantUtils.calculateRating(visitedRestaurantList);
 

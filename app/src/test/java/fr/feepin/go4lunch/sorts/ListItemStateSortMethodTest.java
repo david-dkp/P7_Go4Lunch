@@ -20,7 +20,7 @@ public class ListItemStateSortMethodTest {
                 new ListItemState(null, null, null, 145, 0, 0, null, null),
                 new ListItemState(null, null, null, 678, 0, 0, null, null),
                 new ListItemState(null, null, null, 432, 0, 0, null, null)
-                );
+        );
 
         List<ListItemState> expectedSortedList = Arrays.asList(
                 new ListItemState(null, null, null, 145, 0, 0, null, null),
