@@ -41,8 +41,8 @@ import fr.feepin.go4lunch.data.user.UserRepository;
 import fr.feepin.go4lunch.data.user.models.UserInfo;
 import fr.feepin.go4lunch.others.SchedulerProvider;
 import fr.feepin.go4lunch.ui.list.ListItemState;
-import fr.feepin.go4lunch.ui.list.ListViewState;
 import fr.feepin.go4lunch.ui.list.ListItemStateSortMethod;
+import fr.feepin.go4lunch.ui.list.ListViewState;
 import fr.feepin.go4lunch.ui.map.RestaurantState;
 import fr.feepin.go4lunch.ui.workmates.WorkmateState;
 import fr.feepin.go4lunch.utils.LatLngUtils;
@@ -359,44 +359,33 @@ public class MainViewModel extends ViewModel {
 
     private void updateWorkmateStates(List<UserInfo> userInfos) {
 
-        ArrayList<WorkmateState> states = new ArrayList<>();
+        Observable.fromIterable(userInfos)
+                .flatMap(userInfo -> {
 
-        for (UserInfo userInfo : userInfos) {
-            PlaceResponse placeResponse = getPlaceFromId(userInfo.getRestaurantChoiceId());
-
-            if (placeResponse != null) {
-                states.add(new WorkmateState(userInfo.getRestaurantChoiceId(), placeResponse.getName(), userInfo.getPhotoUrl(), userInfo.getName()));
-            } else if (userInfo.getRestaurantChoiceId().equals("")) {
-                states.add(new WorkmateState(userInfo.getRestaurantChoiceId(), null, userInfo.getPhotoUrl(), userInfo.getName()));
-            } else {
-                mapsRepository.getRestaurantDetails(userInfo.getRestaurantChoiceId(), Collections.singletonList(Place.Field.NAME), null)
-                        .subscribeOn(schedulerProvider.io())
-                        .observeOn(schedulerProvider.ui())
-                        .subscribe(new SingleObserver<Place>() {
-                            @Override
-                            public void onSubscribe(@NonNull Disposable d) {
-                                compositeDisposable.add(d);
-                            }
-
-                            @Override
-                            public void onSuccess(@NonNull Place place) {
-                                ArrayList<WorkmateState> newStates = new ArrayList<>(workmateStates.getValue().getData());
-                                newStates.add(new WorkmateState(userInfo.getRestaurantChoiceId(), place.getName(), userInfo.getPhotoUrl(), userInfo.getName()));
-                                sortWorkmateStates(newStates);
-                                workmateStates.setValue(new Resource.Success<>(newStates, null));
-                            }
-
-                            @Override
-                            public void onError(@NonNull Throwable e) {
-                                Log.d("debug", e.getMessage());
-                            }
-                        });
-            }
-        }
-
-        sortWorkmateStates(states);
-
-        workmateStates.setValue(new Resource.Success<>(states, null));
+                    if (userInfo.getRestaurantChoiceId().equals("")) {
+                        return Observable.just(new WorkmateState(null, null, userInfo.getPhotoUrl(), userInfo.getName()));
+                    } else {
+                        PlaceResponse placeResponse = getPlaceFromId(userInfo.getRestaurantChoiceId());
+                        if (placeResponse != null) {
+                            return Observable.just(new WorkmateState(placeResponse.getPlaceId(), placeResponse.getName(), userInfo.getPhotoUrl(), userInfo.getName()));
+                        } else {
+                            return mapsRepository.getRestaurantDetails(userInfo.getRestaurantChoiceId(), Collections.singletonList(Place.Field.NAME), null)
+                                    .map(place -> {
+                                        return new WorkmateState(userInfo.getRestaurantChoiceId(), place.getName(), userInfo.getPhotoUrl(), userInfo.getName());
+                                    })
+                                    .toObservable();
+                        }
+                    }
+                })
+                .toList()
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.ui())
+                .subscribe((workmateStates, throwable) -> {
+                    if (throwable != null) {
+                        Log.d("debug", throwable.getMessage());
+                    }
+                    MainViewModel.this.workmateStates.setValue(new Resource.Success<>(workmateStates, null));
+                });
     }
 
     private void sortWorkmateStates(List<WorkmateState> workmateStates) {

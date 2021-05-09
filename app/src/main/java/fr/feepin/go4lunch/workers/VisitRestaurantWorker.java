@@ -14,6 +14,9 @@ import dagger.assisted.AssistedInject;
 import fr.feepin.go4lunch.Constants;
 import fr.feepin.go4lunch.data.user.UserRepository;
 
+/**
+ * A worker that add the restaurantId (stored in inputData) to user's visited_restaurants collection*
+ */
 @HiltWorker
 public class VisitRestaurantWorker extends Worker {
 

@@ -27,6 +27,10 @@ import io.reactivex.rxjava3.core.Observable;
 
 import static fr.feepin.go4lunch.Constants.EAT_NOTIFICATION_ID;
 
+/**
+ * A Worker that notify the user on where he eats and with who
+ */
+
 @HiltWorker
 public class NotifyWorker extends Worker {
 
