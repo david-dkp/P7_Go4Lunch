@@ -11,7 +11,7 @@ import java.util.List;
 import fr.feepin.go4lunch.ui.list.ListItemState;
 
 @RunWith(JUnit4.class)
-public class SortMethodTest {
+public class ListItemStateSortMethodTest {
 
     @Test
     public void sortByDistance() {
