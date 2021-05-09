@@ -8,9 +8,12 @@ public class ListViewState {
 
     private boolean isSortable;
 
-    public ListViewState(List<ListItemState> listItemStates, boolean isSortable) {
+    private boolean scrollToFirst;
+
+    public ListViewState(List<ListItemState> listItemStates, boolean isSortable, boolean scrollToFirst) {
         this.listItemStates = listItemStates;
         this.isSortable = isSortable;
+        this.scrollToFirst = scrollToFirst;
     }
 
     public List<ListItemState> getListItemStates() {
@@ -27,5 +30,13 @@ public class ListViewState {
 
     public void setSortable(boolean sortable) {
         isSortable = sortable;
+    }
+
+    public boolean isScrollToFirst() {
+        return scrollToFirst;
+    }
+
+    public void setScrollToFirst(boolean scrollToFirst) {
+        this.scrollToFirst = scrollToFirst;
     }
 }

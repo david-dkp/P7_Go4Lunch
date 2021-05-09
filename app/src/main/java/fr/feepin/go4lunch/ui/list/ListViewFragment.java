@@ -1,6 +1,5 @@
 package fr.feepin.go4lunch.ui.list;
 
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -20,8 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-
-import java.util.ArrayList;
 
 import fr.feepin.go4lunch.MainViewModel;
 import fr.feepin.go4lunch.R;
@@ -66,9 +63,15 @@ public class ListViewFragment extends Fragment {
 
         mainViewModel.getListViewState().observe(getViewLifecycleOwner(), listViewState -> {
             if (listViewState instanceof Resource.Success) {
+                binding.swipeRefreshLayout.setRefreshing(false);
                 binding.progressBar.hide();
-                listItemAdapter.submitList(new ArrayList<>(listViewState.getData().getListItemStates()));
-                binding.rvRestaurants.smoothScrollToPosition(0);
+                listItemAdapter.submitList(listViewState.getData().getListItemStates());
+                listItemAdapter.notifyDataSetChanged();
+
+                if (listViewState.getData().isScrollToFirst()) {
+                    binding.rvRestaurants.smoothScrollToPosition(0);
+                }
+
             } else if (listViewState instanceof Resource.Loading) {
                 binding.progressBar.show();
             }
@@ -77,6 +80,11 @@ public class ListViewFragment extends Fragment {
                 sortMenuItem.setEnabled(listViewState.getData().isSortable());
             }
 
+        });
+
+        //Refreshing
+        binding.swipeRefreshLayout.setOnRefreshListener(() -> {
+            mainViewModel.askLocation();
         });
     }
 
@@ -110,22 +118,19 @@ public class ListViewFragment extends Fragment {
         if (item.getItemId() == R.id.sort) {
             new MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.title_sort_by)
-                    .setSingleChoiceItems(R.array.array_sorting_methods, mainViewModel.getSortMethod().getValue().getPosition(), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            switch (which) {
-                                case 0:
-                                    mainViewModel.setSortMethod(SortMethod.DISTANCE);
-                                    break;
-                                case 1:
-                                    mainViewModel.setSortMethod(SortMethod.RATING);
-                                    break;
-                                case 2:
-                                    mainViewModel.setSortMethod(SortMethod.WORKMATES);
-                                    break;
-                            }
-                            dialog.dismiss();
+                    .setSingleChoiceItems(R.array.array_sorting_methods, mainViewModel.getListItemStateSortMethod().getValue().getPosition(), (dialog, which) -> {
+                        switch (which) {
+                            case 0:
+                                mainViewModel.setListItemStateSortMethod(ListItemStateSortMethod.DISTANCE);
+                                break;
+                            case 1:
+                                mainViewModel.setListItemStateSortMethod(ListItemStateSortMethod.RATING);
+                                break;
+                            case 2:
+                                mainViewModel.setListItemStateSortMethod(ListItemStateSortMethod.WORKMATES);
+                                break;
                         }
+                        dialog.dismiss();
                     })
                     .create()
                     .show();

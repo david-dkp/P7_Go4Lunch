@@ -115,18 +115,19 @@ public class ListItemState {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ListItemState that = (ListItemState) o;
-        return restaurantOpened == that.restaurantOpened &&
-                distance == that.distance &&
+        return distance == that.distance &&
                 workmatesJoining == that.workmatesJoining &&
                 rating == that.rating &&
                 Objects.equals(restaurantName, that.restaurantName) &&
                 Objects.equals(restaurantAddress, that.restaurantAddress) &&
-                Objects.equals(photo, that.photo);
+                Objects.equals(restaurantOpened, that.restaurantOpened) &&
+                Objects.equals(photo, that.photo) &&
+                Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(restaurantName, restaurantAddress, restaurantOpened, distance, workmatesJoining, rating, photo);
+        return Objects.hash(restaurantName, restaurantAddress, restaurantOpened, distance, workmatesJoining, rating, photo, id);
     }
 
     public static final Comparator<ListItemState> DISTANCE_COMPARATOR = (a, b) -> {
