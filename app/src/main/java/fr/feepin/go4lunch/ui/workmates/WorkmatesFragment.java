@@ -1,5 +1,6 @@
 package fr.feepin.go4lunch.ui.workmates;
 
+import android.graphics.drawable.InsetDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -60,7 +62,9 @@ public class WorkmatesFragment extends Fragment {
 
         int leftOffset = getContext().getResources().getDimensionPixelSize(R.dimen.item_workmate_height);
 
-        binding.rvWorkmates.addItemDecoration(new WorkmatesItemDecoration(getContext(), linearLayoutManager.getOrientation(), leftOffset));
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(getContext(), linearLayoutManager.getOrientation());
+        dividerItemDecoration.setDrawable(new InsetDrawable(dividerItemDecoration.getDrawable(), leftOffset, 0, 0, 0));
+        binding.rvWorkmates.addItemDecoration(dividerItemDecoration);
     }
 
     private void setupObservers() {
