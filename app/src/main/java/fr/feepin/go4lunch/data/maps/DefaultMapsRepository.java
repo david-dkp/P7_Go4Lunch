@@ -1,6 +1,7 @@
 package fr.feepin.go4lunch.data.maps;
 
 import android.location.Location;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Tasks;
@@ -53,8 +54,14 @@ public class DefaultMapsRepository implements MapsRepository {
             FetchPhotoRequest fetchPhotoRequest = FetchPhotoRequest.builder(photoMetadata)
                     .build();
 
-            FetchPhotoResponse fetchPhotoResponse = Tasks.await(placesClient.fetchPhoto(fetchPhotoRequest));
-            emitter.onSuccess(fetchPhotoResponse);
+            placesClient.fetchPhoto(fetchPhotoRequest).addOnCompleteListener(command -> {
+                if (command.isSuccessful()) {
+                    emitter.onSuccess(command.getResult());
+                } else {
+                    emitter.tryOnError(command.getException());
+                }
+            });
+
         });
     }
 
@@ -78,7 +85,6 @@ public class DefaultMapsRepository implements MapsRepository {
     @Override
     public Single<Place> getRestaurantDetails(String placeId, List<Place.Field> fields, @Nullable AutocompleteSessionToken token) {
         return Single.create(e -> {
-
             FetchPlaceRequest.Builder builder = FetchPlaceRequest.builder(
                     placeId,
                     fields

@@ -1,5 +1,7 @@
 package fr.feepin.go4lunch.data.user;
 
+import android.util.Log;
+
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
@@ -36,15 +38,18 @@ public class DefaultUserRepository implements UserRepository {
     public Single<List<VisitedRestaurant>> getVisitedRestaurants(String restaurantId) {
         return Single.create(e -> {
 
-            QuerySnapshot querySnapshot = Tasks.await(
-                    firebaseFirestore
-                            .collectionGroup("visited_restaurants")
-                            .whereEqualTo("restaurantId", restaurantId).get()
-            );
+            firebaseFirestore
+                    .collectionGroup("visited_restaurants")
+                    .whereEqualTo("restaurantId", restaurantId)
+                    .get()
+                    .addOnCompleteListener(command -> {
+                        if (command.isSuccessful()) {
+                            e.onSuccess(command.getResult().toObjects(VisitedRestaurant.class));
+                        } else {
+                            e.tryOnError(command.getException());
+                        }
+                    });
 
-            e.onSuccess(
-                    querySnapshot.toObjects(VisitedRestaurant.class)
-            );
         });
     }
 
