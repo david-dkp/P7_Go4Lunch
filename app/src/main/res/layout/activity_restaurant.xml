@@ -53,7 +53,7 @@
 
     <TextView
         android:id="@+id/tvRestaurantName"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/restaurant_restaurant_name_margin"
         android:ellipsize="marquee"
@@ -63,10 +63,12 @@
         android:singleLine="true"
         android:textAppearance="?attr/textAppearanceHeadline5"
         android:textColor="?attr/colorOnPrimary"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintLeft_toLeftOf="@id/vDescriptionContainer"
         app:layout_constraintRight_toLeftOf="@id/fabJoinRestaurant"
         app:layout_constraintTop_toTopOf="@id/vDescriptionContainer"
-        tools:text="Le Zinc"
+        tools:text="Le Zinc est un nom trs long royhaaaa"
         />
 
     <LinearLayout
@@ -97,7 +99,7 @@
         tools:text="French restaurant - 12 rue du Faubourg Poissonnière"
         />
 
-    <androidx.appcompat.widget.AppCompatTextView
+    <TextView
         android:id="@+id/tvCall"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
