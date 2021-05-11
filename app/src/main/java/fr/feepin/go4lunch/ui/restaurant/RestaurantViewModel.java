@@ -325,13 +325,14 @@ public class RestaurantViewModel extends ViewModel {
 
     public void joinOrLeaveRestaurant() {
 
-        if (getPlace().getValue().getOpeningHours() != null && !getPlace().getValue().isOpen()) {
+        boolean isJoining = !isJoined().getValue();
+
+        if (getPlace().getValue().getOpeningHours() != null && !getPlace().getValue().isOpen() && isJoining) {
             notOpenError.setValue(new SingleEventData<>(new Resource.Error<>(null, null)));
             return;
         }
 
         Completable completable;
-        boolean isJoining = !isJoined().getValue();
 
         if (!isJoining) {
             completable = userRepository.leaveRestaurant();
