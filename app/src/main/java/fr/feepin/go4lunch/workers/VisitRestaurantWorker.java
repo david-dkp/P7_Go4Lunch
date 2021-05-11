@@ -39,6 +39,7 @@ public class VisitRestaurantWorker extends Worker {
 
         String restaurantId = getInputData().getString(Constants.KEY_RESTAURANT_ID);
         userRepository.addRestaurantToVisited(restaurantId).blockingAwait();
+        userRepository.leaveRestaurant().blockingAwait();
 
         return Result.success();
     }
