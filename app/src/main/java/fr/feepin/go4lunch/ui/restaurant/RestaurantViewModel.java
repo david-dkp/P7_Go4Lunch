@@ -375,10 +375,10 @@ public class RestaurantViewModel extends ViewModel {
         Calendar currentCalendar = Calendar.getInstance();
         Calendar nextMiddayCalendar = Calendar.getInstance();
 
-        if (currentCalendar.get(Calendar.HOUR_OF_DAY) >= Constants.HOUR_NOTIFICATION_FIRE_DELAY) {
+        if (currentCalendar.get(Calendar.HOUR_OF_DAY) >= Constants.HOUR_NOTIFICATION_FIRE) {
             nextMiddayCalendar.add(Calendar.DAY_OF_YEAR, 1);
         }
-        nextMiddayCalendar.set(Calendar.HOUR_OF_DAY, Constants.HOUR_NOTIFICATION_FIRE_DELAY);
+        nextMiddayCalendar.set(Calendar.HOUR_OF_DAY, Constants.HOUR_NOTIFICATION_FIRE);
 
         timeMillisFromNextMidday = nextMiddayCalendar.getTimeInMillis() - currentCalendar.getTimeInMillis();
 

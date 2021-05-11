@@ -24,7 +24,7 @@ public class Constants {
     public static final String EAT_NOTIFICATION_ID = "EAT_NOTIFICATION_ID";
 
     public static final String VISIT_RESTAURANT_TAG = "VISIT_RESTAURANT_TAG";
-    public static final int HOUR_NOTIFICATION_FIRE_DELAY = 12;
+    public static final int HOUR_NOTIFICATION_FIRE = 12;
     public static final int HOUR_VISIT_RESTAURANT_DELAY = 2;
 
     public static final int MINUTES_VISIT_RESTAURANT_BACKOFF_DELAY = 30;
