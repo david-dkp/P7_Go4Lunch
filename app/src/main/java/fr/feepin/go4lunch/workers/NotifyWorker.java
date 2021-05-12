@@ -12,6 +12,8 @@ import androidx.preference.PreferenceManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -40,8 +42,8 @@ public class NotifyWorker extends Worker {
 
     @AssistedInject
     public NotifyWorker(
-            @Assisted @NonNull Context appContext,
-            @Assisted @NonNull WorkerParameters workerParams,
+            @Assisted @NonNull @NotNull Context appContext,
+            @Assisted @NonNull @NotNull WorkerParameters workerParams,
             MapsRepository mapsRepository,
             UserRepository userRepository
     ) {
@@ -73,7 +75,7 @@ public class NotifyWorker extends Worker {
                         notifyUser(restaurantName, restaurantAddress, names);
                     })
                     .doOnError(throwable -> {
-
+                        throwable.printStackTrace();
                     })
                     .map(strings -> Result.success()).blockingGet();
         } else {
