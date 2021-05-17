@@ -377,7 +377,7 @@ public class RestaurantViewModel extends ViewModel {
         Calendar nextMiddayCalendar = Calendar.getInstance();
 
         if (currentCalendar.get(Calendar.HOUR_OF_DAY) >= Constants.HOUR_NOTIFICATION_FIRE) {
-            nextMiddayCalendar.add(Calendar.DAY_OF_YEAR, 1);
+            return;
         }
         nextMiddayCalendar.set(Calendar.HOUR_OF_DAY, Constants.HOUR_NOTIFICATION_FIRE);
 
@@ -389,11 +389,11 @@ public class RestaurantViewModel extends ViewModel {
                 .putString(Constants.KEY_RESTAURANT_NAME, place.getValue().getName())
                 .build();
 
-        PeriodicWorkRequest request = new PeriodicWorkRequest.Builder(NotifyWorker.class, 24, TimeUnit.HOURS)
+        OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(NotifyWorker.class)
                 .setInputData(data)
                 .setInitialDelay(timeMillisFromNextMidday, TimeUnit.MILLISECONDS)
                 .build();
-        workManager.enqueueUniquePeriodicWork(Constants.NOTIFY_WORKER_TAG, ExistingPeriodicWorkPolicy.REPLACE, request);
+        workManager.enqueueUniqueWork(Constants.NOTIFY_WORKER_TAG, ExistingWorkPolicy.REPLACE, request);
     }
 
     private void addVisitRestaurantWorker() {

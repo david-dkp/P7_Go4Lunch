@@ -4,6 +4,7 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.hilt.work.HiltWorker;
+import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -21,6 +22,7 @@ import fr.feepin.go4lunch.data.user.UserRepository;
 public class VisitRestaurantWorker extends Worker {
 
     private final UserRepository userRepository;
+    private final WorkManager workManager;
 
     @AssistedInject
     public VisitRestaurantWorker(
@@ -30,6 +32,7 @@ public class VisitRestaurantWorker extends Worker {
     ) {
         super(context, workerParams);
         this.userRepository = userRepository;
+        this.workManager = WorkManager.getInstance(context);
     }
 
     @NonNull
@@ -40,6 +43,8 @@ public class VisitRestaurantWorker extends Worker {
         String restaurantId = getInputData().getString(Constants.KEY_RESTAURANT_ID);
         userRepository.addRestaurantToVisited(restaurantId).blockingAwait();
         userRepository.leaveRestaurant().blockingAwait();
+
+        workManager.cancelUniqueWork(Constants.NOTIFY_WORKER_TAG);
 
         return Result.success();
     }
