@@ -1,8 +1,13 @@
-package fr.feepin.go4lunch.data.user.models;
+package fr.feepin.go4lunch.data.models.domain;
+
+import com.google.firebase.firestore.DocumentId;
 
 import java.util.Objects;
 
 public class UserInfo {
+
+    @DocumentId
+    private String id;
 
     private String name;
 
@@ -17,6 +22,14 @@ public class UserInfo {
     }
 
     public UserInfo() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {

@@ -1,8 +1,13 @@
-package fr.feepin.go4lunch.data.user.models;
+package fr.feepin.go4lunch.data.models.domain;
+
+import com.google.firebase.firestore.DocumentId;
 
 import java.util.Objects;
 
 public class VisitedRestaurant {
+
+    @DocumentId
+    private String id;
 
     private String restaurantId;
 
@@ -16,20 +21,20 @@ public class VisitedRestaurant {
     public VisitedRestaurant() {
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public String getRestaurantId() {
         return restaurantId;
     }
 
-    public void setRestaurantId(String restaurantId) {
-        this.restaurantId = restaurantId;
-    }
-
     public boolean isLiked() {
         return liked;
-    }
-
-    public void setLiked(boolean liked) {
-        this.liked = liked;
     }
 
     @Override

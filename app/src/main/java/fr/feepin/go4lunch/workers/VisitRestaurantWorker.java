@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import fr.feepin.go4lunch.Constants;
-import fr.feepin.go4lunch.data.user.UserRepository;
+import fr.feepin.go4lunch.data.UserRepository;
 
 /**
  * A worker that add the restaurantId (stored in inputData) to user's visited_restaurants collection*

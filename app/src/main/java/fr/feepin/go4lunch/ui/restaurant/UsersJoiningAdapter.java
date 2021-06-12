@@ -16,7 +16,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 
 import fr.feepin.go4lunch.R;
-import fr.feepin.go4lunch.data.user.models.UserInfo;
+import fr.feepin.go4lunch.data.models.domain.UserInfo;
 
 public class UsersJoiningAdapter extends ListAdapter<UserInfo, UsersJoiningAdapter.ViewHolder> {
 

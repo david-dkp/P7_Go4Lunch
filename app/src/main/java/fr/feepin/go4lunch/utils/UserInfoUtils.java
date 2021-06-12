@@ -2,7 +2,7 @@ package fr.feepin.go4lunch.utils;
 
 import java.util.List;
 
-import fr.feepin.go4lunch.data.user.models.UserInfo;
+import fr.feepin.go4lunch.data.models.domain.UserInfo;
 
 public class UserInfoUtils {
 

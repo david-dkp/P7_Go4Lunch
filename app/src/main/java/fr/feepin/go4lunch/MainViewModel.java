@@ -35,11 +35,11 @@ import javax.inject.Inject;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import fr.feepin.go4lunch.data.Resource;
-import fr.feepin.go4lunch.data.maps.MapsRepository;
-import fr.feepin.go4lunch.data.maps.models.NearbySearchResponse;
-import fr.feepin.go4lunch.data.maps.models.PlaceResponse;
-import fr.feepin.go4lunch.data.user.UserRepository;
-import fr.feepin.go4lunch.data.user.models.UserInfo;
+import fr.feepin.go4lunch.data.MapsRepository;
+import fr.feepin.go4lunch.data.models.dtos.NearbySearchDto;
+import fr.feepin.go4lunch.data.models.dtos.NearbySearchResultDto;
+import fr.feepin.go4lunch.data.UserRepository;
+import fr.feepin.go4lunch.data.models.domain.UserInfo;
 import fr.feepin.go4lunch.others.SchedulerProvider;
 import fr.feepin.go4lunch.ui.list.ListItemState;
 import fr.feepin.go4lunch.ui.list.ListItemStateSortMethod;
@@ -83,7 +83,7 @@ public class MainViewModel extends ViewModel {
     private final MediatorLiveData<Resource<List<WorkmateState>>> workmateStates = new MediatorLiveData<>();
 
     //Datas
-    private final MutableLiveData<List<PlaceResponse>> placesResponse = new MutableLiveData<>(Collections.emptyList());
+    private final MutableLiveData<List<NearbySearchResultDto>> placesResponse = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<List<UserInfo>> userInfos = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<ListItemStateSortMethod> listItemStateSortMethod = new MutableLiveData<>(ListItemStateSortMethod.DISTANCE);
     private final MutableLiveData<String> autocompleteQuery = new MutableLiveData<>("");
@@ -149,29 +149,29 @@ public class MainViewModel extends ViewModel {
                     if (s.equals("")) {
                         //If we don't use autocomplete, we use NearbySearch data "placeResponses"
                         return Observable.fromIterable(placesResponse.getValue())
-                                .flatMap(placeResponse -> userRepository
-                                        .getVisitedRestaurants(placeResponse.getPlaceId())
+                                .flatMap(nearbySearchResultDto -> userRepository
+                                        .getVisitedRestaurants(nearbySearchResultDto.getPlaceId())
                                         .map(visitedRestaurants -> {
                                             int rating = VisitedRestaurantUtils.calculateRating(visitedRestaurants);
-                                            int usersJoining = UserInfoUtils.calculateUsersJoiningByRestaurantId(userInfos.getValue(), placeResponse.getPlaceId());
+                                            int usersJoining = UserInfoUtils.calculateUsersJoiningByRestaurantId(userInfos.getValue(), nearbySearchResultDto.getPlaceId());
                                             int distance = (int) SphericalUtil.computeDistanceBetween(
-                                                    placeResponse.getGeometry().getLocation().toMapsLatLng(), getPosition().getValue().getData()
+                                                    nearbySearchResultDto.getGeometry().getLocation().toMapsLatLng(), getPosition().getValue().getData()
                                             );
 
-                                            PlaceResponse.OpeningHours openingHours = placeResponse.getOpeningHours();
+                                            NearbySearchResultDto.OpeningHours openingHours = nearbySearchResultDto.getOpeningHours();
 
-                                            List<PlaceResponse.Photo> photos = placeResponse.getPhotos();
+                                            List<NearbySearchResultDto.Photo> photos = nearbySearchResultDto.getPhotos();
 
                                             //Return the ListItemState and the photos to keep them on track
                                             return Pair.create(new ListItemState(
-                                                    placeResponse.getName(),
-                                                    placeResponse.getVicinity(),
+                                                    nearbySearchResultDto.getName(),
+                                                    nearbySearchResultDto.getVicinity(),
                                                     openingHours != null ? openingHours.isOpenNow() : null,
                                                     distance,
                                                     usersJoining,
                                                     rating,
                                                     null,
-                                                    placeResponse.getPlaceId()
+                                                    nearbySearchResultDto.getPlaceId()
                                             ), photos);
                                         })
                                         .subscribeOn(schedulerProvider.io())
@@ -183,7 +183,7 @@ public class MainViewModel extends ViewModel {
 
                                     ArrayList<ListItemState> itemStates = new ArrayList<>();
 
-                                    for (Pair<ListItemState, List<PlaceResponse.Photo>> pair : pairs) {
+                                    for (Pair<ListItemState, List<NearbySearchResultDto.Photo>> pair : pairs) {
                                         itemStates.add(pair.first);
                                     }
 
@@ -194,7 +194,7 @@ public class MainViewModel extends ViewModel {
                                             .filter(listItemStateListPair -> listItemStateListPair.second != null)
                                             .subscribeOn(schedulerProvider.io())
                                             .flatMap(listItemStateListPair -> {
-                                                PlaceResponse.Photo photo = listItemStateListPair.second.get(0);
+                                                NearbySearchResultDto.Photo photo = listItemStateListPair.second.get(0);
                                                 return mapsRepository.getRestaurantPhoto(
                                                         listItemStateListPair.first.getId(),
                                                         PhotoMetadata.builder(photo.getReference())
@@ -378,14 +378,14 @@ public class MainViewModel extends ViewModel {
                 });
     }
 
-    private void updateRestaurantsState(List<PlaceResponse> places, List<UserInfo> usersInfo) {
+    private void updateRestaurantsState(List<NearbySearchResultDto> places, List<UserInfo> usersInfo) {
         ArrayList<RestaurantState> restaurantsState = new ArrayList<>();
 
-        for (PlaceResponse placeResponse : places) {
+        for (NearbySearchResultDto nearbySearchResultDto : places) {
             RestaurantState restaurantState = new RestaurantState(
-                    placeResponse.getPlaceId(),
-                    placeResponse.getGeometry().getLocation().toMapsLatLng(),
-                    restaurantJoined(placeResponse.getPlaceId(), usersInfo)
+                    nearbySearchResultDto.getPlaceId(),
+                    nearbySearchResultDto.getGeometry().getLocation().toMapsLatLng(),
+                    restaurantJoined(nearbySearchResultDto.getPlaceId(), usersInfo)
             );
             restaurantsState.add(restaurantState);
         }
@@ -401,9 +401,9 @@ public class MainViewModel extends ViewModel {
                     if (userInfo.getRestaurantChoiceId().equals("")) {
                         return Observable.just(new WorkmateState("", "", userInfo.getPhotoUrl(), userInfo.getName()));
                     } else {
-                        PlaceResponse placeResponse = getPlaceFromId(userInfo.getRestaurantChoiceId());
-                        if (placeResponse != null) {
-                            return Observable.just(new WorkmateState(placeResponse.getPlaceId(), placeResponse.getName(), userInfo.getPhotoUrl(), userInfo.getName()));
+                        NearbySearchResultDto nearbySearchResultDto = getPlaceFromId(userInfo.getRestaurantChoiceId());
+                        if (nearbySearchResultDto != null) {
+                            return Observable.just(new WorkmateState(nearbySearchResultDto.getPlaceId(), nearbySearchResultDto.getName(), userInfo.getPhotoUrl(), userInfo.getName()));
                         } else {
                             return mapsRepository.getRestaurantDetails(userInfo.getRestaurantChoiceId(), Collections.singletonList(Place.Field.NAME), null)
                                     .map(place -> {
@@ -434,10 +434,10 @@ public class MainViewModel extends ViewModel {
         Collections.sort(workmateStates, WorkmateState.RESTAURANT_NOT_CHOSEN_COMPARATOR);
     }
 
-    private PlaceResponse getPlaceFromId(String id) {
-        for (PlaceResponse placeResponse : placesResponse.getValue()) {
-            if (placeResponse.getPlaceId().equals(id)) {
-                return placeResponse;
+    private NearbySearchResultDto getPlaceFromId(String id) {
+        for (NearbySearchResultDto nearbySearchResultDto : placesResponse.getValue()) {
+            if (nearbySearchResultDto.getPlaceId().equals(id)) {
+                return nearbySearchResultDto;
             }
         }
 
@@ -525,15 +525,15 @@ public class MainViewModel extends ViewModel {
         mapsRepository.getNearbySearch(BuildConfig.MAPS_API_KEY, latLng.latitude + "," + latLng.longitude, Constants.NEARBY_SEARCH_RADIUS)
                 .subscribeOn(schedulerProvider.io())
                 .observeOn(schedulerProvider.ui())
-                .subscribe(new SingleObserver<NearbySearchResponse>() {
+                .subscribe(new SingleObserver<NearbySearchDto>() {
                     @Override
                     public void onSubscribe(@NonNull Disposable d) {
                         compositeDisposable.add(d);
                     }
 
                     @Override
-                    public void onSuccess(@NonNull NearbySearchResponse nearbySearchResponse) {
-                        placesResponse.setValue(nearbySearchResponse.getResults());
+                    public void onSuccess(@NonNull NearbySearchDto nearbySearchDto) {
+                        placesResponse.setValue(nearbySearchDto.getResults());
                     }
 
                     @Override
@@ -544,17 +544,17 @@ public class MainViewModel extends ViewModel {
     }
 
     public void addRestaurant(Place place) {
-        PlaceResponse placeResponse = new PlaceResponse(
+        NearbySearchResultDto nearbySearchResultDto = new NearbySearchResultDto(
                 place.getId(),
-                new PlaceResponse.Geometry(PlaceResponse.LatLng.fromMapsLatLng(place.getLatLng())),
+                new NearbySearchResultDto.Geometry(NearbySearchResultDto.LatLng.fromMapsLatLng(place.getLatLng())),
                 null,
                 null,
                 null,
                 null
         );
 
-        ArrayList<PlaceResponse> newPlaces = new ArrayList<>(placesResponse.getValue());
-        newPlaces.add(placeResponse);
+        ArrayList<NearbySearchResultDto> newPlaces = new ArrayList<>(placesResponse.getValue());
+        newPlaces.add(nearbySearchResultDto);
 
         placesResponse.setValue(newPlaces);
     }

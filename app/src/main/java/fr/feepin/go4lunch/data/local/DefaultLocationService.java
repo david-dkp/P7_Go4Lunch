@@ -1,4 +1,4 @@
-package fr.feepin.go4lunch.data.maps;
+package fr.feepin.go4lunch.data.local;
 
 import android.annotation.SuppressLint;
 import android.content.Context;

@@ -1,7 +1,7 @@
-package fr.feepin.go4lunch.data.maps;
+package fr.feepin.go4lunch.data;
 
+import android.graphics.Bitmap;
 import android.location.Location;
-import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.Tasks;
@@ -23,7 +23,10 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import fr.feepin.go4lunch.data.maps.models.NearbySearchResponse;
+import fr.feepin.go4lunch.data.local.LocationService;
+import fr.feepin.go4lunch.data.models.dtos.NearbySearchDto;
+import fr.feepin.go4lunch.data.remote.apis.PlacesApi;
+import fr.feepin.go4lunch.data.remote.caches.PlacesPhotoCache;
 import io.reactivex.rxjava3.core.Single;
 
 @Singleton
@@ -35,21 +38,31 @@ public class DefaultMapsRepository implements MapsRepository {
 
     private final PlacesApi placesApi;
 
+    private final PlacesPhotoCache placesPhotoCache;
+
     @Inject
-    public DefaultMapsRepository(LocationService locationService, PlacesClient placesClient, PlacesApi placesApi) {
+    public DefaultMapsRepository(LocationService locationService, PlacesClient placesClient, PlacesApi placesApi, PlacesPhotoCache placesPhotoCache) {
         this.locationService = locationService;
         this.placesClient = placesClient;
         this.placesApi = placesApi;
+        this.placesPhotoCache = placesPhotoCache;
     }
 
     @Override
-    public Single<NearbySearchResponse> getNearbySearch(String apiKey, String location, int radius) {
+    public Single<NearbySearchDto> getNearbySearch(String apiKey, String location, int radius) {
 
         return placesApi.getNearbySearch(apiKey, location, radius, "restaurant");
     }
 
     @Override
     public Single<FetchPhotoResponse> getRestaurantPhoto(String placeId, PhotoMetadata photoMetadata) {
+
+        Bitmap photo = placesPhotoCache.getPlacePhoto(placeId);
+
+        if (photo != null) {
+
+        }
+
         return Single.create(emitter -> {
             FetchPhotoRequest fetchPhotoRequest = FetchPhotoRequest.builder(photoMetadata)
                     .build();

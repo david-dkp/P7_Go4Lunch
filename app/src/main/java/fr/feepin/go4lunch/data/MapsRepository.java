@@ -1,4 +1,4 @@
-package fr.feepin.go4lunch.data.maps;
+package fr.feepin.go4lunch.data;
 
 import android.location.Location;
 
@@ -12,12 +12,12 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 
 import java.util.List;
 
-import fr.feepin.go4lunch.data.maps.models.NearbySearchResponse;
+import fr.feepin.go4lunch.data.models.dtos.NearbySearchDto;
 import io.reactivex.rxjava3.core.Single;
 
 public interface MapsRepository {
 
-    Single<NearbySearchResponse> getNearbySearch(String apiKey, String location, int radius);
+    Single<NearbySearchDto> getNearbySearch(String apiKey, String location, int radius);
 
     Single<FetchPhotoResponse> getRestaurantPhoto(String placeId, PhotoMetadata photoMetadata);
 

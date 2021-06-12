@@ -1,24 +1,24 @@
-package fr.feepin.go4lunch.data.maps.models;
+package fr.feepin.go4lunch.data.models.dtos;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class NearbySearchResponse {
+public class NearbySearchDto {
 
     @Expose
     private String status;
 
     @SerializedName("results")
     @Expose
-    private List<PlaceResponse> results;
+    private List<NearbySearchResultDto> results;
 
     @SerializedName("error_message")
     @Expose
     private String errorMessage;
 
-    public NearbySearchResponse(String status, List<PlaceResponse> results, String errorMessage) {
+    public NearbySearchDto(String status, List<NearbySearchResultDto> results, String errorMessage) {
         this.status = status;
         this.results = results;
         this.errorMessage = errorMessage;
@@ -32,11 +32,11 @@ public class NearbySearchResponse {
         this.status = status;
     }
 
-    public List<PlaceResponse> getResults() {
+    public List<NearbySearchResultDto> getResults() {
         return results;
     }
 
-    public void setResults(List<PlaceResponse> results) {
+    public void setResults(List<NearbySearchResultDto> results) {
         this.results = results;
     }
 

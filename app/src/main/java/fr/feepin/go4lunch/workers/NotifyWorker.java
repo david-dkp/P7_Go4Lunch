@@ -21,9 +21,9 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import fr.feepin.go4lunch.Constants;
 import fr.feepin.go4lunch.R;
-import fr.feepin.go4lunch.data.maps.MapsRepository;
-import fr.feepin.go4lunch.data.user.UserRepository;
-import fr.feepin.go4lunch.data.user.models.UserInfo;
+import fr.feepin.go4lunch.data.MapsRepository;
+import fr.feepin.go4lunch.data.UserRepository;
+import fr.feepin.go4lunch.data.models.domain.UserInfo;
 import fr.feepin.go4lunch.utils.ConnectivityUtils;
 import io.reactivex.rxjava3.core.Observable;
 

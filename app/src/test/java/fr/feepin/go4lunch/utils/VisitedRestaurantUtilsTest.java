@@ -8,7 +8,7 @@ import org.junit.runners.JUnit4;
 import java.util.Arrays;
 import java.util.List;
 
-import fr.feepin.go4lunch.data.user.models.VisitedRestaurant;
+import fr.feepin.go4lunch.data.models.domain.VisitedRestaurant;
 
 @RunWith(JUnit4.class)
 public class VisitedRestaurantUtilsTest {
