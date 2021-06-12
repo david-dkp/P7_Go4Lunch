@@ -3,7 +3,6 @@ package fr.feepin.go4lunch.data;
 import java.util.List;
 
 import fr.feepin.go4lunch.data.models.domain.UserInfo;
-import fr.feepin.go4lunch.data.models.domain.VisitedRestaurant;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;

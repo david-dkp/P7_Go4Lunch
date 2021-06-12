@@ -118,13 +118,6 @@ public class NearbySearchResultDto {
             return lng;
         }
 
-        public com.google.android.gms.maps.model.LatLng toMapsLatLng() {
-            return new com.google.android.gms.maps.model.LatLng(getLat(), getLng());
-        }
-
-        public static LatLng fromMapsLatLng(com.google.android.gms.maps.model.LatLng mapsLatLng) {
-            return new LatLng(mapsLatLng.latitude, mapsLatLng.longitude);
-        }
     }
 
     public class Photo {

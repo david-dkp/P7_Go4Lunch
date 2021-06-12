@@ -4,7 +4,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 
-public class NearRestaurant {
+public class NearPlace {
 
     private final String placeId;
 
@@ -18,7 +18,7 @@ public class NearRestaurant {
 
     private final boolean isOpen;
 
-    public NearRestaurant(String placeId, LatLng latLng, String name, List<Photo> photos, String address, boolean isOpen) {
+    public NearPlace(String placeId, LatLng latLng, String name, List<Photo> photos, String address, boolean isOpen) {
         this.placeId = placeId;
         this.latLng = latLng;
         this.name = name;
