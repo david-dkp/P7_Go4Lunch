@@ -1,14 +1,15 @@
 package fr.feepin.go4lunch.data;
 
 import android.graphics.Bitmap;
-import android.location.Location;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.Tasks;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
-import com.google.android.libraries.places.api.model.LocationRestriction;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
 import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.FetchPhotoRequest;
 import com.google.android.libraries.places.api.net.FetchPhotoResponse;
@@ -23,10 +24,16 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import fr.feepin.go4lunch.Constants;
 import fr.feepin.go4lunch.data.local.LocationService;
-import fr.feepin.go4lunch.data.models.dtos.NearbySearchDto;
+import fr.feepin.go4lunch.data.models.domain.NearPlace;
+import fr.feepin.go4lunch.data.models.domain.PlacePrediction;
+import fr.feepin.go4lunch.data.models.dtos.NearbySearchResultDto;
+import fr.feepin.go4lunch.data.models.mappers.Mapper;
 import fr.feepin.go4lunch.data.remote.apis.PlacesApi;
 import fr.feepin.go4lunch.data.remote.caches.PlacesPhotoCache;
+import fr.feepin.go4lunch.utils.LatLngUtils;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 
 @Singleton
@@ -40,63 +47,82 @@ public class DefaultMapsRepository implements MapsRepository {
 
     private final PlacesPhotoCache placesPhotoCache;
 
+    private final Mapper<NearbySearchResultDto, NearPlace> nearbySearchMapper;
+
+    private final Mapper<AutocompletePrediction, PlacePrediction> autocompleteMapper;
+
     @Inject
-    public DefaultMapsRepository(LocationService locationService, PlacesClient placesClient, PlacesApi placesApi, PlacesPhotoCache placesPhotoCache) {
+    public DefaultMapsRepository(Mapper<NearbySearchResultDto, NearPlace> nearbySearchMapper, Mapper<AutocompletePrediction, PlacePrediction> autocompleteMapper, LocationService locationService, PlacesClient placesClient, PlacesApi placesApi, PlacesPhotoCache placesPhotoCache) {
         this.locationService = locationService;
         this.placesClient = placesClient;
         this.placesApi = placesApi;
         this.placesPhotoCache = placesPhotoCache;
+        this.nearbySearchMapper = nearbySearchMapper;
+        this.autocompleteMapper = autocompleteMapper;
     }
 
     @Override
-    public Single<NearbySearchDto> getNearbySearch(String apiKey, String location, int radius) {
-
-        return placesApi.getNearbySearch(apiKey, location, radius, "restaurant");
+    public Single<List<NearPlace>> getNearPlaces(String apiKey, String location, int radius) {
+        return placesApi
+                .getNearbySearch(apiKey, location, radius, "restaurant")
+                .flatMapObservable(nearbySearchDto -> Observable
+                        .fromIterable(nearbySearchDto.getResults())
+                        .map(nearbySearchMapper::toEntity))
+                .toList();
     }
 
     @Override
-    public Single<FetchPhotoResponse> getRestaurantPhoto(String placeId, PhotoMetadata photoMetadata) {
+    public Single<Bitmap> getPlacePhoto(String placeId, NearPlace.Photo photo) {
 
-        Bitmap photo = placesPhotoCache.getPlacePhoto(placeId);
+        Bitmap cachedBitmap = placesPhotoCache.getPlacePhoto(placeId);
 
-        if (photo != null) {
-
-        }
+        if (cachedBitmap != null) return Single.just(cachedBitmap);
 
         return Single.create(emitter -> {
+            PhotoMetadata photoMetadata = PhotoMetadata.builder(photo.getReference())
+                    .setWidth(photo.getWidth())
+                    .setHeight(photo.getHeight())
+                    .build();
+
             FetchPhotoRequest fetchPhotoRequest = FetchPhotoRequest.builder(photoMetadata)
                     .build();
 
-            placesClient.fetchPhoto(fetchPhotoRequest).addOnCompleteListener(command -> {
-                if (command.isSuccessful()) {
-                    emitter.onSuccess(command.getResult());
-                } else {
-                    emitter.tryOnError(command.getException());
-                }
-            });
+            FetchPhotoResponse fetchPhotoResponse = Tasks.await(placesClient.fetchPhoto(fetchPhotoRequest));
 
+            Bitmap bitmap = fetchPhotoResponse.getBitmap();
+
+            placesPhotoCache.storePhoto(placeId, bitmap);
+
+            emitter.onSuccess(bitmap);
         });
     }
 
     @Override
-    public Single<FindAutocompletePredictionsResponse> getRestaurantsFromQuery(AutocompleteSessionToken token, String query, LatLng origin, LocationRestriction locationRestriction) {
+    public Single<List<PlacePrediction>> getPlacePredictionsFromQuery(AutocompleteSessionToken token, String query, LatLng origin) {
+        LatLngBounds latLngBounds = LatLngUtils.toBounds(origin, Constants.PREDICTION_SEARCH_RADIUS);
         FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
                 .setSessionToken(token)
                 .setCountry("FR")
                 .setOrigin(origin)
-                .setLocationRestriction(locationRestriction)
+                .setLocationRestriction(RectangularBounds.newInstance(latLngBounds))
                 .setTypeFilter(TypeFilter.ESTABLISHMENT)
                 .setQuery(query)
                 .build();
 
-        return Single.create(e -> {
+        Single<List<AutocompletePrediction>> autocompletePredictions = Single.create(e -> {
             FindAutocompletePredictionsResponse findAutocompletePredictionsResponse = Tasks.await(placesClient.findAutocompletePredictions(request));
-            e.onSuccess(findAutocompletePredictionsResponse);
+            e.onSuccess(findAutocompletePredictionsResponse.getAutocompletePredictions());
         });
+
+        return autocompletePredictions
+                .flatMapObservable(Observable::fromIterable)
+                .map(autocompleteMapper::toEntity)
+                .toList()
+                ;
     }
 
     @Override
-    public Single<Place> getRestaurantDetails(String placeId, List<Place.Field> fields, @Nullable AutocompleteSessionToken token) {
+    public Single<Place> getPlace(String placeId, List<Place.Field> fields, @Nullable AutocompleteSessionToken token) {
         return Single.create(e -> {
             FetchPlaceRequest.Builder builder = FetchPlaceRequest.builder(
                     placeId,
@@ -116,17 +142,7 @@ public class DefaultMapsRepository implements MapsRepository {
     }
 
     @Override
-    public Location getLastKnownLocation() {
-        return locationService.getLastKnownPosition();
-    }
-
-    @Override
-    public Single<Location> getCurrentLocation() {
-        return locationService.getCurrentPosition();
-    }
-
-    @Override
-    public Single<LatLng> getLatestPositionFromPrefs() {
-        return locationService.getLatestPositionFromPrefs();
+    public Single<LatLng> getLocation() {
+        return locationService.getLocation();
     }
 }
