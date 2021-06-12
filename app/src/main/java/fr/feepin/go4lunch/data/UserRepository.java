@@ -9,7 +9,7 @@ import io.reactivex.rxjava3.core.Single;
 
 public interface UserRepository {
 
-    Observable<UserInfo> getUserInfoObservable(String userId);
+    Observable<UserInfo> getUserInfoObservable();
 
     Single<List<UserInfo>> getUsersInfo();
 

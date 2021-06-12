@@ -4,10 +4,17 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import fr.feepin.go4lunch.data.models.domain.NearPlace;
 import fr.feepin.go4lunch.data.models.dtos.NearbySearchResultDto;
 
+@Singleton
 public class NearbyPlaceMapper implements Mapper<NearbySearchResultDto, NearPlace> {
+
+    @Inject
+    public NearbyPlaceMapper() {}
 
     @Override
     public NearPlace toEntity(NearbySearchResultDto nearbySearchResultDto) {
