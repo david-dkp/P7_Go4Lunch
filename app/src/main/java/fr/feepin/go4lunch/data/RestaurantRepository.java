@@ -14,7 +14,9 @@ public interface RestaurantRepository {
 
     Completable setRestaurantRating(String restaurantId, boolean liked);
 
-    Completable setRestaurantJoining(String restaurantId, boolean joining);
+    Completable setRestaurantChoice(String restaurantId);
+
+    Completable leaveRestaurant();
 
     Completable addVisitedRestaurant(String restaurantId);
 
