@@ -25,7 +25,11 @@ import dagger.hilt.InstallIn;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import fr.feepin.go4lunch.Constants;
+import fr.feepin.go4lunch.DefaultPositionSharedRepository;
 import fr.feepin.go4lunch.data.DefaultMapsRepository;
+import fr.feepin.go4lunch.data.DefaultRestaurantRepository;
+import fr.feepin.go4lunch.data.PositionSharedRepository;
+import fr.feepin.go4lunch.data.RestaurantRepository;
 import fr.feepin.go4lunch.data.local.DefaultLocationService;
 import fr.feepin.go4lunch.data.local.LocationService;
 import fr.feepin.go4lunch.data.MapsRepository;
@@ -105,10 +109,16 @@ abstract public class AppModule {
     public abstract LocationService bindsLocationService(DefaultLocationService defaultLocationService);
 
     @Binds
+    public abstract RestaurantRepository bindsRestaurantRepository(DefaultRestaurantRepository defaultRestaurantRepository);
+
+    @Binds
     public abstract UserRepository bindsUserRepository(DefaultUserRepository defaultUserRepository);
 
     @Binds
     public abstract MapsRepository bindsMapsRepository(DefaultMapsRepository defaultMapsRepository);
+
+    @Binds
+    public abstract PositionSharedRepository bindsPositionSharedRepository(DefaultPositionSharedRepository defaultPositionSharedRepository);
 
     @Qualifier
     @Retention(RetentionPolicy.RUNTIME)
