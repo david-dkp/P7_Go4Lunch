@@ -14,7 +14,7 @@ import io.reactivex.rxjava3.core.Single;
 
 public interface MapsRepository {
 
-    Single<List<NearPlace>> getNearPlaces(String apiKey, String location, int radius);
+    Single<List<NearPlace>> getNearPlaces(String apiKey, LatLng location, int radius);
 
     Single<Bitmap> getPlacePhoto(String placeId, NearPlace.Photo photo);
 

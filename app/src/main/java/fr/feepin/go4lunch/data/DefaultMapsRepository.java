@@ -40,15 +40,12 @@ import io.reactivex.rxjava3.core.Single;
 public class DefaultMapsRepository implements MapsRepository {
 
     private final LocationService locationService;
-
     private final PlacesClient placesClient;
-
     private final PlacesApi placesApi;
 
     private final PlacesPhotoCache placesPhotoCache;
 
     private final Mapper<NearbySearchResultDto, NearPlace> nearbySearchMapper;
-
     private final Mapper<AutocompletePrediction, PlacePrediction> autocompleteMapper;
 
     @Inject
@@ -62,9 +59,9 @@ public class DefaultMapsRepository implements MapsRepository {
     }
 
     @Override
-    public Single<List<NearPlace>> getNearPlaces(String apiKey, String location, int radius) {
+    public Single<List<NearPlace>> getNearPlaces(String apiKey, LatLng location, int radius) {
         return placesApi
-                .getNearbySearch(apiKey, location, radius, "restaurant")
+                .getNearbySearch(apiKey, location.latitude + "," + location.longitude, radius, "restaurant")
                 .flatMapObservable(nearbySearchDto -> Observable
                         .fromIterable(nearbySearchDto.getResults())
                         .map(nearbySearchMapper::toEntity))
