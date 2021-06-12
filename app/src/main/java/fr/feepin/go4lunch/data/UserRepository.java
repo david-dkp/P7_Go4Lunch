@@ -10,25 +10,10 @@ import io.reactivex.rxjava3.core.Single;
 
 public interface UserRepository {
 
-    Single<List<VisitedRestaurant>> getVisitedRestaurants(String restaurantId);
-
-    Observable<UserInfo> getCurrentUserInfoObservable();
-
-    Single<UserInfo> getCurrentUserInfo();
-
-    Single<List<VisitedRestaurant>> getCurrentUserVisitedRestaurants();
-
-    Observable<List<UserInfo>> getUsersInfoObservable();
+    Observable<UserInfo> getUserInfoObservable(String userId);
 
     Single<List<UserInfo>> getUsersInfo();
 
-    Completable setRestaurantRating(String restaurantId, boolean liked);
+    Completable addUserInfo(UserInfo userInfo);
 
-    Completable joinRestaurant(String restaurantId);
-
-    Completable leaveRestaurant();
-
-    Completable registerUserInfo(UserInfo userInfo);
-
-    Completable addRestaurantToVisited(String restaurantId);
 }
