@@ -1,6 +1,7 @@
 package fr.feepin.go4lunch.data;
 
 import android.graphics.Bitmap;
+import android.util.Pair;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -28,9 +29,12 @@ import fr.feepin.go4lunch.Constants;
 import fr.feepin.go4lunch.data.local.LocationService;
 import fr.feepin.go4lunch.data.models.domain.NearPlace;
 import fr.feepin.go4lunch.data.models.domain.PlacePrediction;
+import fr.feepin.go4lunch.data.models.dtos.NearbySearchDto;
 import fr.feepin.go4lunch.data.models.dtos.NearbySearchResultDto;
 import fr.feepin.go4lunch.data.models.mappers.Mapper;
 import fr.feepin.go4lunch.data.remote.apis.PlacesApi;
+import fr.feepin.go4lunch.data.remote.caches.AutocompleteCache;
+import fr.feepin.go4lunch.data.remote.caches.NearbySearchCache;
 import fr.feepin.go4lunch.data.remote.caches.PlacesPhotoCache;
 import fr.feepin.go4lunch.utils.LatLngUtils;
 import io.reactivex.rxjava3.core.Observable;
@@ -43,29 +47,52 @@ public class DefaultMapsRepository implements MapsRepository {
     private final PlacesClient placesClient;
     private final PlacesApi placesApi;
 
+    private final AutocompleteCache autocompleteCache;
+    private final NearbySearchCache nearbySearchCache;
     private final PlacesPhotoCache placesPhotoCache;
 
     private final Mapper<NearbySearchResultDto, NearPlace> nearbySearchMapper;
     private final Mapper<AutocompletePrediction, PlacePrediction> autocompleteMapper;
 
     @Inject
-    public DefaultMapsRepository(Mapper<NearbySearchResultDto, NearPlace> nearbySearchMapper, Mapper<AutocompletePrediction, PlacePrediction> autocompleteMapper, LocationService locationService, PlacesClient placesClient, PlacesApi placesApi, PlacesPhotoCache placesPhotoCache) {
+    public DefaultMapsRepository(
+            Mapper<NearbySearchResultDto, NearPlace> nearbySearchMapper,
+            Mapper<AutocompletePrediction, PlacePrediction> autocompleteMapper,
+            LocationService locationService,
+            PlacesClient placesClient,
+            PlacesApi placesApi,
+            AutocompleteCache autocompleteCache,
+            NearbySearchCache nearbySearchCache,
+            PlacesPhotoCache placesPhotoCache) {
         this.locationService = locationService;
         this.placesClient = placesClient;
         this.placesApi = placesApi;
         this.placesPhotoCache = placesPhotoCache;
         this.nearbySearchMapper = nearbySearchMapper;
         this.autocompleteMapper = autocompleteMapper;
+        this.autocompleteCache = autocompleteCache;
+        this.nearbySearchCache = nearbySearchCache;
     }
 
     @Override
     public Single<List<NearPlace>> getNearPlaces(String apiKey, LatLng location, int radius) {
-        return placesApi
-                .getNearbySearch(apiKey, location.latitude + "," + location.longitude, radius, "restaurant")
-                .flatMapObservable(nearbySearchDto -> Observable
-                        .fromIterable(nearbySearchDto.getResults())
-                        .map(nearbySearchMapper::toEntity))
-                .toList();
+
+        Single<NearbySearchDto> nearbySearchSingle;
+
+        NearbySearchDto cachedNearbySearch = nearbySearchCache.getNearbySearch(location);
+
+        if (cachedNearbySearch != null) {
+            nearbySearchSingle = Single.just(cachedNearbySearch);
+        } else {
+            nearbySearchSingle = placesApi.getNearbySearch(apiKey, location.latitude + "," + location.longitude, radius, "restaurant")
+                    .doOnSuccess(nearbySearch -> nearbySearchCache.cacheNearbySearch(location, nearbySearch));
+        }
+
+            return nearbySearchSingle
+                    .flatMapObservable(nearbySearchDto -> Observable
+                            .fromIterable(nearbySearchDto.getResults())
+                            .map(nearbySearchMapper::toEntity))
+                    .toList();
     }
 
     @Override
@@ -96,23 +123,31 @@ public class DefaultMapsRepository implements MapsRepository {
 
     @Override
     public Single<List<PlacePrediction>> getPlacePredictionsFromQuery(AutocompleteSessionToken token, String query, LatLng origin) {
-        LatLngBounds latLngBounds = LatLngUtils.toBounds(origin, Constants.PREDICTION_SEARCH_RADIUS);
-        FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
-                .setSessionToken(token)
-                .setCountry("FR")
-                .setOrigin(origin)
-                .setLocationRestriction(RectangularBounds.newInstance(latLngBounds))
-                .setTypeFilter(TypeFilter.ESTABLISHMENT)
-                .setQuery(query)
-                .build();
+        Single<FindAutocompletePredictionsResponse> autocompleteSingle;
 
-        Single<List<AutocompletePrediction>> autocompletePredictions = Single.create(e -> {
-            FindAutocompletePredictionsResponse findAutocompletePredictionsResponse = Tasks.await(placesClient.findAutocompletePredictions(request));
-            e.onSuccess(findAutocompletePredictionsResponse.getAutocompletePredictions());
-        });
+        FindAutocompletePredictionsResponse cachedAutocomplete = autocompleteCache.getAutocompleteResponse(Pair.create(query, origin));
 
-        return autocompletePredictions
-                .flatMapObservable(Observable::fromIterable)
+        if (cachedAutocomplete != null) {
+            autocompleteSingle = Single.just(cachedAutocomplete);
+        } else {
+            LatLngBounds latLngBounds = LatLngUtils.toBounds(origin, Constants.PREDICTION_SEARCH_RADIUS);
+            FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
+                    .setSessionToken(token)
+                    .setCountry("FR")
+                    .setOrigin(origin)
+                    .setLocationRestriction(RectangularBounds.newInstance(latLngBounds))
+                    .setTypeFilter(TypeFilter.ESTABLISHMENT)
+                    .setQuery(query)
+                    .build();
+
+            autocompleteSingle = Single.create(e -> {
+                FindAutocompletePredictionsResponse findAutocompletePredictionsResponse = Tasks.await(placesClient.findAutocompletePredictions(request));
+                e.onSuccess(findAutocompletePredictionsResponse);
+            });
+        }
+
+        return autocompleteSingle
+                .flatMapObservable(findAutocompletePredictionsResponse -> Observable.fromIterable(findAutocompletePredictionsResponse.getAutocompletePredictions()))
                 .map(autocompleteMapper::toEntity)
                 .toList()
                 ;

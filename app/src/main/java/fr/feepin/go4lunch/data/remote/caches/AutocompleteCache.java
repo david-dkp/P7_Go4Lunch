@@ -7,12 +7,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
-public class AutocompletePredictionsCache {
+@Singleton
+public class AutocompleteCache {
 
     private final LruCache<Pair<String, LatLng>, FindAutocompletePredictionsResponse> cache;
 
-    public AutocompletePredictionsCache() {
+    @Inject
+    public AutocompleteCache() {
         final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
         final int cacheSize = maxMemory / 8;
 
