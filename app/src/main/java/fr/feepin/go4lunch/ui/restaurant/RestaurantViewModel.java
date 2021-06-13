@@ -17,7 +17,7 @@ import androidx.work.WorkManager;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.net.FetchPhotoResponse;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,10 +32,12 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import fr.feepin.go4lunch.Constants;
 import fr.feepin.go4lunch.data.Resource;
-import fr.feepin.go4lunch.data.MapsRepository;
-import fr.feepin.go4lunch.data.UserRepository;
 import fr.feepin.go4lunch.data.models.domain.UserInfo;
 import fr.feepin.go4lunch.data.models.domain.VisitedRestaurant;
+import fr.feepin.go4lunch.data.repos.data.MapsRepository;
+import fr.feepin.go4lunch.data.repos.data.RestaurantRepository;
+import fr.feepin.go4lunch.data.repos.data.UserRepository;
+import fr.feepin.go4lunch.others.SchedulerProvider;
 import fr.feepin.go4lunch.utils.SingleEventData;
 import fr.feepin.go4lunch.utils.VisitedRestaurantUtils;
 import fr.feepin.go4lunch.workers.NotifyWorker;
@@ -44,8 +46,6 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.CompletableObserver;
-import io.reactivex.rxjava3.core.Observer;
-import io.reactivex.rxjava3.core.SingleObserver;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -68,7 +68,9 @@ public class RestaurantViewModel extends ViewModel {
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     private final UserRepository userRepository;
+    private final RestaurantRepository restaurantRepository;
     private final MapsRepository mapsRepository;
+    private final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
 
     //States
     private final MutableLiveData<Resource<Bitmap>> restaurantPhoto = new MutableLiveData<>();
@@ -78,20 +80,25 @@ public class RestaurantViewModel extends ViewModel {
     private final MediatorLiveData<Boolean> liked = new MediatorLiveData<>();
     private final MediatorLiveData<Boolean> joined = new MediatorLiveData<>();
     private final MediatorLiveData<Boolean> alreadyVisited = new MediatorLiveData<>();
-    private final MutableLiveData<SingleEventData<Resource.Error<Void>>> notOpenError = new MutableLiveData();
+    private final MutableLiveData<SingleEventData<Resource.Error<Void>>> notOpenError = new MutableLiveData<>();
 
     //Datas
     private final MutableLiveData<UserInfo> currentUserInfo = new MutableLiveData<>();
     private final MutableLiveData<List<VisitedRestaurant>> usersVisitedRestaurants = new MutableLiveData<>(Collections.emptyList());
     private final MutableLiveData<List<VisitedRestaurant>> currentUserVisitedRestaurants = new MutableLiveData<>(Collections.emptyList());
 
+    private SchedulerProvider schedulerProvider;
+
     private String placeId;
     private AutocompleteSessionToken sessionToken;
 
     @Inject
-    public RestaurantViewModel(@ApplicationContext Context context, UserRepository userRepository, MapsRepository mapsRepository) {
+    public RestaurantViewModel(@ApplicationContext Context context, UserRepository userRepository, RestaurantRepository restaurantRepository, MapsRepository mapsRepository, SchedulerProvider schedulerProvider) {
         this.userRepository = userRepository;
+        this.restaurantRepository = restaurantRepository;
         this.mapsRepository = mapsRepository;
+        this.schedulerProvider = schedulerProvider;
+
         workManager = WorkManager.getInstance(context);
 
         setupRating();
@@ -144,17 +151,13 @@ public class RestaurantViewModel extends ViewModel {
     }
 
     private void askPlace() {
-        mapsRepository.getRestaurantDetails(placeId, REQUIRED_PLACE_FIELDS, this.sessionToken)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SingleObserver<Place>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                        compositeDisposable.add(d);
-                    }
-
-                    @Override
-                    public void onSuccess(@NonNull Place place) {
+        Disposable disposable = mapsRepository.getPlace(placeId, REQUIRED_PLACE_FIELDS, this.sessionToken)
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.ui())
+                .subscribe((place, throwable) -> {
+                    if (throwable != null) {
+                        throwable.printStackTrace();
+                    } else {
                         RestaurantViewModel.this.sessionToken = null;
                         RestaurantViewModel.this.place.setValue(place);
                         if (place.getPhotoMetadatas() != null) {
@@ -167,158 +170,100 @@ public class RestaurantViewModel extends ViewModel {
                             restaurantPhoto.setValue(new Resource.Error<>(null, null));
                         }
                     }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-
-                    }
                 });
+
+        compositeDisposable.add(disposable);
     }
 
     private void askPhoto(PhotoMetadata photoMetadata) {
-        restaurantPhoto.setValue(new Resource.Loading(null, null));
-        mapsRepository.getRestaurantPhoto(placeId, photoMetadata)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SingleObserver<FetchPhotoResponse>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                        compositeDisposable.add(d);
-                    }
+        restaurantPhoto.setValue(new Resource.Loading<>(null, null));
 
-                    @Override
-                    public void onSuccess(@NonNull FetchPhotoResponse fetchPhotoResponse) {
-                        restaurantPhoto.setValue(new Resource.Success<>(fetchPhotoResponse.getBitmap(), null));
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        restaurantPhoto.setValue(new Resource.Error<>(null, null));
+        Disposable disposable = mapsRepository.getPlacePhoto(placeId, photoMetadata)
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.ui())
+                .subscribe((bitmap, throwable) -> {
+                    if (throwable != null) {
+                        throwable.printStackTrace();
+                        restaurantPhoto.setValue(new Resource.Error<>(bitmap, null));
+                    } else {
+                        restaurantPhoto.setValue(new Resource.Success<>(bitmap, null));
                     }
                 });
+
+        compositeDisposable.add(disposable);
     }
 
     private void askRating() {
-        userRepository.getVisitedRestaurants(placeId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SingleObserver<List<VisitedRestaurant>>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                        compositeDisposable.add(d);
-                    }
+        Disposable disposable = restaurantRepository.getVisitedRestaurantsByRestaurantId(placeId)
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.ui())
+                .subscribe((visitedRestaurants, throwable) -> {
 
-                    @Override
-                    public void onSuccess(@NonNull List<VisitedRestaurant> visitedRestaurants) {
+                    if (throwable != null) {
+                        throwable.printStackTrace();
+                    } else {
                         usersVisitedRestaurants.setValue(visitedRestaurants);
                     }
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-
-                    }
                 });
+
+        compositeDisposable.add(disposable);
     }
 
     private void askUsersInfo() {
-        userRepository.getUsersInfoObservable()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<List<UserInfo>>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                        compositeDisposable.add(d);
-                    }
+        Disposable disposable = userRepository.getUsersInfo()
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.ui())
+                .subscribe((userInfos, throwable) -> {
 
-                    @Override
-                    public void onNext(@NonNull List<UserInfo> usersInfo) {
-                        ArrayList<UserInfo> users = new ArrayList();
+                    if (throwable != null) throwable.printStackTrace();
 
-                        for (UserInfo userInfo : usersInfo) {
-                            if (userInfo.getRestaurantChoiceId().equals(placeId)) {
-                                users.add(userInfo);
-                            }
+                    ArrayList<UserInfo> users = new ArrayList<>();
+
+                    for (UserInfo userInfo : userInfos) {
+                        if (userInfo.getRestaurantChoiceId().equals(placeId)) {
+                            users.add(userInfo);
                         }
-
-                        RestaurantViewModel.this.usersInfo.setValue(users);
                     }
 
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
+                    usersInfo.setValue(users);
                 });
+
+        compositeDisposable.add(disposable);
     }
 
     private void askCurrentUserInfo() {
-        userRepository.getCurrentUserInfo()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SingleObserver<UserInfo>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                        compositeDisposable.add(d);
-                    }
+        Disposable disposable = userRepository.getUserInfoObservable()
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.ui())
+                .subscribe(currentUserInfo::setValue);
 
-                    @Override
-                    public void onSuccess(@NonNull UserInfo userInfo) {
-                        RestaurantViewModel.this.currentUserInfo.setValue(userInfo);
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-
-                    }
-                });
+        compositeDisposable.add(disposable);
     }
 
     private void askCurrentUserVisitedRestaurants() {
-        userRepository.getCurrentUserVisitedRestaurants()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SingleObserver<List<VisitedRestaurant>>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                        compositeDisposable.add(d);
-                    }
-
-                    @Override
-                    public void onSuccess(@NonNull List<VisitedRestaurant> visitedRestaurants) {
+        Disposable disposable = restaurantRepository.getUserVisitedRestaurants(firebaseAuth.getCurrentUser().getUid())
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.ui())
+                .subscribe((visitedRestaurants, throwable) -> {
+                    if (throwable != null) {
+                        throwable.printStackTrace();
+                    } else {
                         currentUserVisitedRestaurants.setValue(visitedRestaurants);
                     }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        Log.d("debug", e.getMessage());
-                    }
                 });
+
+        compositeDisposable.add(disposable);
     }
 
     public void rateRestaurant() {
-        userRepository.setRestaurantRating(placeId, !liked.getValue())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new CompletableObserver() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                        compositeDisposable.add(d);
-                    }
+        Disposable disposable = restaurantRepository.setRestaurantRating(placeId, !liked.getValue())
+                .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.ui())
+                .doOnError(Throwable::printStackTrace)
+                .subscribe(() -> liked.setValue(!liked.getValue()));
 
-                    @Override
-                    public void onComplete() {
-                        liked.setValue(!liked.getValue());
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        Log.d("debug", "error: " + e.getMessage());
-                    }
-                });
+        compositeDisposable.add(disposable);
     }
 
     public void joinOrLeaveRestaurant() {
@@ -333,39 +278,28 @@ public class RestaurantViewModel extends ViewModel {
         Completable completable;
 
         if (!isJoining) {
-            completable = userRepository.leaveRestaurant();
+            completable = restaurantRepository.leaveRestaurant();
         } else {
-            completable = userRepository.joinRestaurant(placeId);
+            completable = restaurantRepository.setRestaurantChoice(placeId);
         }
 
-        completable
+        Disposable disposable = completable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new CompletableObserver() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-                        compositeDisposable.add(d);
+                .doOnError(Throwable::printStackTrace)
+                .subscribe(() -> {
+                    if (isJoining) {
+                        addNotifyWorker();
+                        addVisitRestaurantWorker();
+                    } else {
+                        workManager.cancelUniqueWork(Constants.NOTIFY_WORKER_TAG);
+                        workManager.cancelUniqueWork(Constants.VISIT_RESTAURANT_TAG);
                     }
 
-                    @Override
-                    public void onComplete() {
-
-                        if (isJoining) {
-                            addNotifyWorker();
-                            addVisitRestaurantWorker();
-                        } else {
-                            workManager.cancelUniqueWork(Constants.NOTIFY_WORKER_TAG);
-                            workManager.cancelUniqueWork(Constants.VISIT_RESTAURANT_TAG);
-                        }
-
-                        joined.setValue(isJoining);
-                    }
-
-                    @Override
-                    public void onError(@NonNull Throwable e) {
-                        e.printStackTrace();
-                    }
+                    joined.setValue(isJoining);
                 });
+
+        compositeDisposable.add(disposable);
     }
 
     private void addNotifyWorker() {
