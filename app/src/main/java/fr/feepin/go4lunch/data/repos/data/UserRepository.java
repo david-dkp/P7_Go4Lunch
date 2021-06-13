@@ -1,4 +1,4 @@
-package fr.feepin.go4lunch.data;
+package fr.feepin.go4lunch.data.repos.data;
 
 import java.util.List;
 

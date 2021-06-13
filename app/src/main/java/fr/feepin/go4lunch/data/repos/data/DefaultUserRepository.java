@@ -1,4 +1,4 @@
-package fr.feepin.go4lunch.data;
+package fr.feepin.go4lunch.data.repos.data;
 
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
@@ -14,7 +14,6 @@ import fr.feepin.go4lunch.data.models.domain.UserInfo;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.subjects.PublishSubject;
 
 @Singleton
 public class DefaultUserRepository implements UserRepository {

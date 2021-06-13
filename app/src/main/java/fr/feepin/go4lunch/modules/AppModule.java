@@ -25,14 +25,12 @@ import dagger.hilt.InstallIn;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import fr.feepin.go4lunch.Constants;
-import fr.feepin.go4lunch.DefaultPositionSharedRepository;
-import fr.feepin.go4lunch.data.DefaultMapsRepository;
-import fr.feepin.go4lunch.data.DefaultRestaurantRepository;
-import fr.feepin.go4lunch.data.PositionSharedRepository;
-import fr.feepin.go4lunch.data.RestaurantRepository;
+import fr.feepin.go4lunch.data.repos.data.DefaultMapsRepository;
+import fr.feepin.go4lunch.data.repos.data.DefaultRestaurantRepository;
+import fr.feepin.go4lunch.data.repos.data.RestaurantRepository;
 import fr.feepin.go4lunch.data.local.DefaultLocationService;
 import fr.feepin.go4lunch.data.local.LocationService;
-import fr.feepin.go4lunch.data.MapsRepository;
+import fr.feepin.go4lunch.data.repos.data.MapsRepository;
 import fr.feepin.go4lunch.data.models.domain.NearPlace;
 import fr.feepin.go4lunch.data.models.domain.PlacePrediction;
 import fr.feepin.go4lunch.data.models.dtos.NearbySearchResultDto;
@@ -40,8 +38,10 @@ import fr.feepin.go4lunch.data.models.mappers.AutocompletePredictionMapper;
 import fr.feepin.go4lunch.data.models.mappers.Mapper;
 import fr.feepin.go4lunch.data.models.mappers.NearbyPlaceMapper;
 import fr.feepin.go4lunch.data.remote.apis.PlacesApi;
-import fr.feepin.go4lunch.data.DefaultUserRepository;
-import fr.feepin.go4lunch.data.UserRepository;
+import fr.feepin.go4lunch.data.repos.data.DefaultUserRepository;
+import fr.feepin.go4lunch.data.repos.data.UserRepository;
+import fr.feepin.go4lunch.data.repos.shared.DefaultSharedNearPlacesRepository;
+import fr.feepin.go4lunch.data.repos.shared.SharedNearPlacesRepository;
 import fr.feepin.go4lunch.others.DefaultSchedulerProvider;
 import fr.feepin.go4lunch.others.SchedulerProvider;
 import retrofit2.Retrofit;
@@ -118,7 +118,7 @@ abstract public class AppModule {
     public abstract MapsRepository bindsMapsRepository(DefaultMapsRepository defaultMapsRepository);
 
     @Binds
-    public abstract PositionSharedRepository bindsPositionSharedRepository(DefaultPositionSharedRepository defaultPositionSharedRepository);
+    public abstract SharedNearPlacesRepository bindsSharedNearPlacesRepository(DefaultSharedNearPlacesRepository defaultSharedNearPlacesRepository);
 
     @Qualifier
     @Retention(RetentionPolicy.RUNTIME)

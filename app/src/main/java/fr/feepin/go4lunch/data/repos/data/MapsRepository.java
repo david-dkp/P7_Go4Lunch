@@ -1,4 +1,4 @@
-package fr.feepin.go4lunch.data;
+package fr.feepin.go4lunch.data.repos.data;
 
 import android.graphics.Bitmap;
 
@@ -16,9 +16,7 @@ import io.reactivex.rxjava3.core.Single;
 
 public interface MapsRepository {
 
-    Observable<List<NearPlace>> getNearPlacesObservable();
-
-    Completable refreshNearPlaces(String apiKey, LatLng location, int radius);
+    Single<List<NearPlace>> getNearPlaces(String apiKey, LatLng location, int radius);
 
     Single<Bitmap> getPlacePhoto(String placeId, NearPlace.Photo photo);
 
