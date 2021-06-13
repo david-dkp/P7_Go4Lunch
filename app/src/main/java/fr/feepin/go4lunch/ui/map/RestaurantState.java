@@ -20,24 +20,12 @@ public class RestaurantState {
         return position;
     }
 
-    public void setPosition(LatLng position) {
-        this.position = position;
-    }
-
     public boolean isJoined() {
         return joined;
     }
 
-    public void setJoined(boolean joined) {
-        this.joined = joined;
-    }
-
     public String getId() {
         return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     @Override

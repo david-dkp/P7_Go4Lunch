@@ -37,8 +37,10 @@ import fr.feepin.go4lunch.data.remote.caches.AutocompleteCache;
 import fr.feepin.go4lunch.data.remote.caches.NearbySearchCache;
 import fr.feepin.go4lunch.data.remote.caches.PlacesPhotoCache;
 import fr.feepin.go4lunch.utils.LatLngUtils;
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.subjects.PublishSubject;
 
 @Singleton
 public class DefaultMapsRepository implements MapsRepository {
@@ -53,6 +55,8 @@ public class DefaultMapsRepository implements MapsRepository {
 
     private final Mapper<NearbySearchResultDto, NearPlace> nearbySearchMapper;
     private final Mapper<AutocompletePrediction, PlacePrediction> autocompleteMapper;
+
+    private final PublishSubject<List<NearPlace>> nearPlacesObservable = PublishSubject.create();
 
     @Inject
     public DefaultMapsRepository(
@@ -75,7 +79,12 @@ public class DefaultMapsRepository implements MapsRepository {
     }
 
     @Override
-    public Single<List<NearPlace>> getNearPlaces(String apiKey, LatLng location, int radius) {
+    public Observable<List<NearPlace>> getNearPlacesObservable() {
+        return nearPlacesObservable;
+    }
+
+    @Override
+    public Completable refreshNearPlaces(String apiKey, LatLng location, int radius) {
 
         Single<NearbySearchDto> nearbySearchSingle;
 
@@ -88,11 +97,13 @@ public class DefaultMapsRepository implements MapsRepository {
                     .doOnSuccess(nearbySearch -> nearbySearchCache.cacheNearbySearch(location, nearbySearch));
         }
 
-            return nearbySearchSingle
-                    .flatMapObservable(nearbySearchDto -> Observable
-                            .fromIterable(nearbySearchDto.getResults())
-                            .map(nearbySearchMapper::toEntity))
-                    .toList();
+        return Completable.fromSingle(nearbySearchSingle
+                .flatMapObservable(nearbySearchDto -> Observable
+                        .fromIterable(nearbySearchDto.getResults())
+                        .map(nearbySearchMapper::toEntity))
+                .toList()
+                .doOnSuccess(nearPlacesObservable::onNext)
+        );
     }
 
     @Override

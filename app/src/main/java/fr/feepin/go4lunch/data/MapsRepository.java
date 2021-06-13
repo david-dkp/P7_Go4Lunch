@@ -10,11 +10,15 @@ import java.util.List;
 
 import fr.feepin.go4lunch.data.models.domain.NearPlace;
 import fr.feepin.go4lunch.data.models.domain.PlacePrediction;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 
 public interface MapsRepository {
 
-    Single<List<NearPlace>> getNearPlaces(String apiKey, LatLng location, int radius);
+    Observable<List<NearPlace>> getNearPlacesObservable();
+
+    Completable refreshNearPlaces(String apiKey, LatLng location, int radius);
 
     Single<Bitmap> getPlacePhoto(String placeId, NearPlace.Photo photo);
 
