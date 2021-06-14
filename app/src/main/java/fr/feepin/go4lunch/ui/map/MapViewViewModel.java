@@ -1,6 +1,7 @@
 package fr.feepin.go4lunch.ui.map;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -37,7 +38,7 @@ public class MapViewViewModel extends ViewModel {
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
 
-    private final MutableLiveData<List<RestaurantState>> restaurantStates = new MutableLiveData<>();
+    private final MediatorLiveData<List<RestaurantState>> restaurantStates = new MediatorLiveData<>();
     private final MutableLiveData<Resource<LatLng>> position = new MutableLiveData<>();
 
     @Inject
@@ -56,13 +57,7 @@ public class MapViewViewModel extends ViewModel {
     }
 
     private void wireRestaurantStates() {
-        Disposable disposable = sharedNearPlacesRepository
-                .getNearPlacesObservable()
-                .distinct()
-                .subscribeOn(schedulerProvider.io())
-                .subscribe(this::updateRestaurantStates);
-
-        compositeDisposable.add(disposable);
+        restaurantStates.addSource(sharedNearPlacesRepository.getNearPlaces(), this::updateRestaurantStates);
     }
 
     private void updateRestaurantStates(List<NearPlace> nearPlaces) {
@@ -139,25 +134,12 @@ public class MapViewViewModel extends ViewModel {
     }
 
     public void onPlaceReceive(Place place) {
-        ArrayList<NearPlace.Photo> photos = new ArrayList<>();
-
-        if (place.getPhotoMetadatas() != null) {
-            for (PhotoMetadata photoMetadata : place.getPhotoMetadatas()) {
-                NearPlace.Photo photo = new NearPlace.Photo(
-                        photoMetadata.getWidth(),
-                        photoMetadata.getHeight(),
-                        photoMetadata.zza()
-                );
-
-                photos.add(photo);
-            }
-        }
 
         NearPlace nearPlace = new NearPlace(
                 place.getId(),
                 place.getLatLng(),
                 place.getName(),
-                photos,
+                place.getPhotoMetadatas(),
                 place.getAddress(),
                 place.isOpen()
         );

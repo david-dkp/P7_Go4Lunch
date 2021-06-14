@@ -1,6 +1,10 @@
 package fr.feepin.go4lunch.data.repos.shared;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -13,38 +17,49 @@ import io.reactivex.rxjava3.subjects.PublishSubject;
 @Singleton
 public class DefaultSharedNearPlacesRepository implements SharedNearPlacesRepository {
 
-    private final PublishSubject<List<NearPlace>> nearPlacesPublishSubject = PublishSubject.create();
-    private final ArrayList<NearPlace> nearPlaces = new ArrayList<>();
+    private final MutableLiveData<List<NearPlace>> nearPlaces = new MutableLiveData(Collections.EMPTY_LIST);
 
     @Inject
-    public DefaultSharedNearPlacesRepository() {
-        nearPlacesPublishSubject.onNext(nearPlaces);
-    }
+    public DefaultSharedNearPlacesRepository() { }
 
     @Override
-    public Observable<List<NearPlace>> getNearPlacesObservable() {
-        return nearPlacesPublishSubject;
+    public LiveData<List<NearPlace>> getNearPlaces() {
+        return nearPlaces;
     }
 
     @Override
     public void addNearPlace(NearPlace nearPlace) {
-        boolean added = addNearPlaceIfNotExists(nearPlace);
+        ArrayList<NearPlace> nearPlaces = new ArrayList<>(this.nearPlaces.getValue());
+
+        boolean added = addNearPlaceIfNotExists(nearPlace, nearPlaces);
 
         if (added) {
-            nearPlacesPublishSubject.onNext(nearPlaces);
+            this.nearPlaces.setValue(nearPlaces);
         }
     }
 
     @Override
     public void addNearPlaces(List<NearPlace> nearPlaces) {
+
+        ArrayList<NearPlace> newPlaces = new ArrayList<>(this.nearPlaces.getValue());
+
+        boolean hasAdded = false;
+
         for (NearPlace nearPlace : nearPlaces) {
-            addNearPlaceIfNotExists(nearPlace);
+            boolean added = addNearPlaceIfNotExists(nearPlace, newPlaces);
+
+            if (added) {
+                hasAdded = true;
+            }
+
         }
 
-        nearPlacesPublishSubject.onNext(nearPlaces);
+        if (hasAdded) {
+            this.nearPlaces.setValue(newPlaces);
+        }
     }
 
-    private boolean addNearPlaceIfNotExists(NearPlace nearPlace) {
+    private boolean addNearPlaceIfNotExists(NearPlace nearPlace, ArrayList<NearPlace> nearPlaces) {
         if (!nearPlaces.contains(nearPlace)) {
             nearPlaces.add(nearPlace);
             return true;
