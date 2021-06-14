@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -63,21 +64,14 @@ public class MapViewViewModel extends ViewModel {
     private void updateRestaurantStates(List<NearPlace> nearPlaces) {
         Disposable disposable = userRepository
                 .getUsersInfo()
-                .map(userInfos -> {
-                    ArrayList<RestaurantState> restaurantStates = new ArrayList<>();
-                    for (NearPlace nearPlace : nearPlaces) {
-
-                        RestaurantState restaurantState = new RestaurantState(
+                .map(userInfos -> nearPlaces
+                        .stream()
+                        .map(nearPlace -> new RestaurantState(
                                 nearPlace.getPlaceId(),
                                 nearPlace.getLatLng(),
                                 hasOneUserJoiningRestaurant(nearPlace.getPlaceId(), userInfos)
-                        );
-
-                        restaurantStates.add(restaurantState);
-                    }
-
-                    return (List<RestaurantState>) restaurantStates;
-                })
+                        ))
+                .collect(Collectors.toList()))
                 .subscribeOn(schedulerProvider.io())
                 .observeOn(schedulerProvider.ui())
                 .subscribe((restaurantStates, throwable) -> {
