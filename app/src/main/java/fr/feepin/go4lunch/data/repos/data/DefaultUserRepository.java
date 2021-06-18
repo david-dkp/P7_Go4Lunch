@@ -60,6 +60,7 @@ public class DefaultUserRepository implements UserRepository {
                             .get()
             ).toObjects(UserInfo.class);
 
+            emitter.onSuccess(userInfos);
         });
     }
 
