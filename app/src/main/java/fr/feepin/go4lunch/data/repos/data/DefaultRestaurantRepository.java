@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import fr.feepin.go4lunch.data.models.domain.VisitedRestaurant;
@@ -18,6 +19,9 @@ public class DefaultRestaurantRepository implements RestaurantRepository {
 
     private final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
     private final FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
+
+    @Inject
+    public DefaultRestaurantRepository() { }
 
     @Override
     public Single<List<VisitedRestaurant>> getVisitedRestaurantsByRestaurantId(String restaurantId) {
@@ -67,7 +71,7 @@ public class DefaultRestaurantRepository implements RestaurantRepository {
                     firebaseFirestore
                     .collection("users")
                     .document(firebaseUser.getUid())
-                    .update("restaurant_choice_id", restaurantId)
+                    .update("restaurantChoiceId", restaurantId)
             );
             emitter.onComplete();
         });
@@ -80,7 +84,7 @@ public class DefaultRestaurantRepository implements RestaurantRepository {
                     firebaseFirestore
                     .collection("users")
                     .document(firebaseUser.getUid())
-                    .update("restaurant_choice_id", "")
+                    .update("restaurantChoiceId", "")
             );
             emitter.onComplete();
         });
