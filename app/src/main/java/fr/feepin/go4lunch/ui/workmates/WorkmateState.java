@@ -62,16 +62,4 @@ public class WorkmateState {
                 '}';
     }
 
-    public static final Comparator<WorkmateState> RESTAURANT_NOT_CHOSEN_COMPARATOR = new Comparator<WorkmateState>() {
-        @Override
-        public int compare(WorkmateState a, WorkmateState b) {
-            if (a.getRestaurantId().equals("") && !b.getRestaurantId().equals("")) {
-                return 1;
-            } else if (!a.getRestaurantId().equals("") && b.getRestaurantId().equals("")) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
-    };
 }

@@ -52,8 +52,11 @@ public class WorkmatesViewModel extends ViewModel {
         Disposable disposable = userRepository
                 .getUsersInfo()
                 .toObservable()
-                .flatMapIterable(userInfos -> userInfos)
-                .flatMap(userInfo -> getRestaurantNameObservable(userInfo)
+                .flatMapIterable(userInfos -> {
+                    Collections.sort(userInfos, UserInfo.RESTAURANT_CHOSEN_FIRST_COMPARATOR);
+                    return userInfos;
+                })
+                .concatMapEager(userInfo -> getRestaurantNameObservable(userInfo)
                         .map(name -> new WorkmateState(
                                 userInfo.getRestaurantChoiceId(),
                                 name,

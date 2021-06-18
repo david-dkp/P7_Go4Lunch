@@ -14,11 +14,13 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import dagger.hilt.android.AndroidEntryPoint;
 import fr.feepin.go4lunch.MainViewModel;
 import fr.feepin.go4lunch.R;
 import fr.feepin.go4lunch.databinding.FragmentWorkmatesBinding;
 import fr.feepin.go4lunch.ui.restaurant.RestaurantActivity;
 
+@AndroidEntryPoint
 public class WorkmatesFragment extends Fragment {
 
     public static final String TAG = "WORKMATES_TAG";
@@ -35,7 +37,7 @@ public class WorkmatesFragment extends Fragment {
         binding = FragmentWorkmatesBinding.inflate(inflater);
         setHasOptionsMenu(true);
 
-        viewModel = new ViewModelProvider(requireActivity()).get(WorkmatesViewModel.class);
+        viewModel = new ViewModelProvider(this).get(WorkmatesViewModel.class);
 
         setupAdapter();
         setupObservers();
