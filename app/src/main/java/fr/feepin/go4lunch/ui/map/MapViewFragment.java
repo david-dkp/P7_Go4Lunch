@@ -80,7 +80,7 @@ public class MapViewFragment extends Fragment {
         binding.mapView.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        viewModel = new ViewModelProvider(requireActivity()).get(MapViewViewModel.class);
+        viewModel = new ViewModelProvider(this).get(MapViewViewModel.class);
 
         setupLaunchers();
 
@@ -146,6 +146,8 @@ public class MapViewFragment extends Fragment {
             if (resource instanceof Resource.Success) {
                 binding.progressBar.hide();
                 toggleLocationError(true);
+                userLocationMarker.setVisible(true);
+                userLocationMarker.setPosition(resource.getData());
                 animateCameraToPosition(resource.getData(), Constants.MAPS_MY_LOCATION_ZOOM_LEVEL);
             } else if (resource instanceof Resource.Error) {
                 binding.progressBar.hide();
@@ -236,9 +238,6 @@ public class MapViewFragment extends Fragment {
     }
 
     private void animateCameraToPosition(LatLng latLng, float zoom) {
-        if (latLng == null) return;
-        userLocationMarker.setVisible(true);
-        userLocationMarker.setPosition(latLng);
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
 

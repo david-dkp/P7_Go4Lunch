@@ -1,6 +1,7 @@
 package fr.feepin.go4lunch.data.models.mappers;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
 
 import java.util.ArrayList;
 
@@ -19,22 +20,34 @@ public class NearbyPlaceMapper implements Mapper<NearbySearchResultDto, NearPlac
     @Override
     public NearPlace toEntity(NearbySearchResultDto nearbySearchResultDto) {
 
-        ArrayList<NearPlace.Photo> domainPhotos = new ArrayList<>();
+        ArrayList<PhotoMetadata> domainPhotos = new ArrayList<>();
 
-        for (NearbySearchResultDto.Photo photo : nearbySearchResultDto.getPhotos()) {
-            domainPhotos.add(new NearPlace.Photo(photo.getWidth(), photo.getHeight(), photo.getReference()));
+        if (nearbySearchResultDto.getPhotos() != null) {
+            for (NearbySearchResultDto.Photo photo : nearbySearchResultDto.getPhotos()) {
+                PhotoMetadata photoMetadata = PhotoMetadata.builder(photo.getReference())
+                        .setWidth(photo.getWidth())
+                        .setHeight(photo.getHeight())
+                        .build();
+                domainPhotos.add(photoMetadata);
+            }
+        }
+
+        Boolean openNow = null;
+
+        if (nearbySearchResultDto.getOpeningHours() != null) {
+            openNow = nearbySearchResultDto.getOpeningHours().isOpenNow();
         }
 
         return new NearPlace(
                 nearbySearchResultDto.getPlaceId(),
                 new LatLng(
                         nearbySearchResultDto.getGeometry().getLocation().getLat(),
-                        nearbySearchResultDto.getGeometry().getLocation().getLat()
+                        nearbySearchResultDto.getGeometry().getLocation().getLng()
                 ),
                 nearbySearchResultDto.getName(),
                 domainPhotos,
                 nearbySearchResultDto.getVicinity(),
-                nearbySearchResultDto.getOpeningHours().isOpenNow()
+                openNow
         );
     }
 

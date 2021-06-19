@@ -1,33 +1,35 @@
 package fr.feepin.go4lunch.ui.map;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.firebase.auth.FirebaseAuth;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import fr.feepin.go4lunch.BuildConfig;
 import fr.feepin.go4lunch.Constants;
 import fr.feepin.go4lunch.data.Resource;
-import fr.feepin.go4lunch.data.repos.data.MapsRepository;
-import fr.feepin.go4lunch.data.repos.data.UserRepository;
 import fr.feepin.go4lunch.data.models.domain.NearPlace;
 import fr.feepin.go4lunch.data.models.domain.UserInfo;
+import fr.feepin.go4lunch.data.repos.data.MapsRepository;
+import fr.feepin.go4lunch.data.repos.data.UserRepository;
 import fr.feepin.go4lunch.data.repos.shared.SharedNearPlacesRepository;
 import fr.feepin.go4lunch.others.SchedulerProvider;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 
+@HiltViewModel
 public class MapViewViewModel extends ViewModel {
 
     private final MapsRepository mapsRepository;
@@ -71,11 +73,12 @@ public class MapViewViewModel extends ViewModel {
                                 nearPlace.getLatLng(),
                                 hasOneUserJoiningRestaurant(nearPlace.getPlaceId(), userInfos)
                         ))
-                .collect(Collectors.toList()))
+                        .collect(Collectors.toList()))
                 .subscribeOn(schedulerProvider.io())
                 .observeOn(schedulerProvider.ui())
                 .subscribe((restaurantStates, throwable) -> {
-                    if (throwable != null){
+                    if (throwable != null) {
+                        Log.d("debug", throwable.getMessage());
                         throwable.printStackTrace();
                     } else {
                         this.restaurantStates.setValue(restaurantStates);
@@ -106,7 +109,7 @@ public class MapViewViewModel extends ViewModel {
                     if (throwable != null) {
                         //TODO: handle error
                     } else {
-                        position.setValue(new Resource<>(latLng, null));
+                        position.setValue(new Resource.Success<>(latLng, null));
                         askNearPlaces(latLng);
                     }
                 });
@@ -118,9 +121,9 @@ public class MapViewViewModel extends ViewModel {
         Disposable disposable = mapsRepository
                 .getNearPlaces(BuildConfig.MAPS_API_KEY, position, Constants.NEARBY_SEARCH_RADIUS)
                 .subscribeOn(schedulerProvider.io())
+                .observeOn(schedulerProvider.ui())
                 .subscribe((nearPlaces, throwable) -> {
                     if (throwable != null) throwable.printStackTrace();
-
                     sharedNearPlacesRepository.addNearPlaces(nearPlaces);
                 });
 

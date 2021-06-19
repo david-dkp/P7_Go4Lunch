@@ -1,0 +1,200 @@
+package fr.feepin.go4lunch.ui.list;
+
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
+
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
+import com.google.maps.android.SphericalUtil;
+
+import java.util.HashMap;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import dagger.hilt.android.lifecycle.HiltViewModel;
+import fr.feepin.go4lunch.data.Resource;
+import fr.feepin.go4lunch.data.models.domain.NearPlace;
+import fr.feepin.go4lunch.data.models.domain.PlacePrediction;
+import fr.feepin.go4lunch.data.models.domain.UserInfo;
+import fr.feepin.go4lunch.data.repos.data.MapsRepository;
+import fr.feepin.go4lunch.data.repos.data.RestaurantRepository;
+import fr.feepin.go4lunch.data.repos.data.UserRepository;
+import fr.feepin.go4lunch.data.repos.shared.SharedNearPlacesRepository;
+import fr.feepin.go4lunch.others.SchedulerProvider;
+import fr.feepin.go4lunch.utils.UserInfoUtils;
+import fr.feepin.go4lunch.utils.VisitedRestaurantUtils;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.core.Single;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
+
+@HiltViewModel
+public class ListViewViewModel extends ViewModel {
+
+    private final UserRepository userRepository;
+    private final RestaurantRepository restaurantRepository;
+    private final MapsRepository mapsRepository;
+    private final SharedNearPlacesRepository sharedNearPlacesRepository;
+
+    private final SchedulerProvider schedulerProvider;
+
+    private final CompositeDisposable compositeDisposable = new CompositeDisposable();
+
+    private final MediatorLiveData<Resource<ListViewState>> listViewState = new MediatorLiveData<>();
+
+    private final MutableLiveData<String> query = new MutableLiveData<>("");
+    private final MutableLiveData<ListItemStateSortMethod> sortMethod = new MutableLiveData<>(ListItemStateSortMethod.DISTANCE);
+
+    private AutocompleteSessionToken autocompleteSessionToken;
+
+    @Inject
+    public ListViewViewModel(
+            UserRepository userRepository,
+            RestaurantRepository restaurantRepository,
+            MapsRepository mapsRepository,
+            SchedulerProvider schedulerProvider,
+            SharedNearPlacesRepository sharedNearPlacesRepository
+    ) {
+        this.userRepository = userRepository;
+        this.restaurantRepository = restaurantRepository;
+        this.mapsRepository = mapsRepository;
+        this.schedulerProvider = schedulerProvider;
+        this.sharedNearPlacesRepository = sharedNearPlacesRepository;
+
+        wireListViewState();
+    }
+
+    private void wireListViewState() {
+        listViewState.addSource(sharedNearPlacesRepository.getNearPlaces(), nearPlaces -> {
+            updateListViewState(nearPlaces, query.getValue(), sortMethod.getValue());
+        });
+
+        listViewState.addSource(query, s -> {
+            if (autocompleteSessionToken == null) {
+                autocompleteSessionToken = AutocompleteSessionToken.newInstance();
+            }
+
+            updateListViewState(
+                    sharedNearPlacesRepository.getNearPlaces().getValue(),
+                    s,
+                    sortMethod.getValue());
+        });
+
+        listViewState.addSource(sortMethod, sortMethod -> {
+            updateListViewState(
+                    sharedNearPlacesRepository.getNearPlaces().getValue(),
+                    query.getValue(),
+                    sortMethod);
+        });
+    }
+
+    private void updateListViewState(List<NearPlace> nearPlaces, String query, ListItemStateSortMethod sortMethod) {
+        listViewState.setValue(new Resource.Loading<>(null, null));
+
+        Disposable disposable;
+
+        if (query == null || query.equals("")) {
+            updateListViewStateFromNearPlaces(nearPlaces, sortMethod);
+        } else {
+            //updateLIstViewStateFromQuery(nearPlaces, query, sortMethod);
+        }
+
+    }
+
+    private void updateListViewStateFromNearPlaces(List<NearPlace> nearPlaces, ListItemStateSortMethod sortMethod) {
+//        HashMap<ListViewState.ListItemState, PhotoMetadata> listItemWithPhotoMetadatas = new HashMap<>();
+//        LatLng position;
+//
+//        Single.zip(
+//                mapsRepository.getLocation(),
+//                userRepository.getUsersInfo(),
+//                (latLng, userInfos) -> {
+//                    position = latLng;
+//                    Observable
+//                            .fromIterable(nearPlaces)
+//                            .flatMap(nearPlace -> getListItemState(nearPlace, userInfos, latLng, listItemWithPhotoMetadatas))
+//                            .toList()
+//                            .observeOn(schedulerProvider.ui())
+//                            .flatMapObservable(listItemStates -> {
+//                                ListViewState listViewState = new ListViewState(
+//                                        listItemStates,
+//                                        true,
+//                                        true
+//                                );
+//
+//                                this.listViewState.setValue(new Resource.Success<>(listViewState, null));
+//
+//                                return Observable.fromIterable(listItemStates);
+//                            })
+//                            .flatMap(listItemState -> getUpdatedListItemStatePhoto(listItemState, listItemWithPhotoMetadatas.get(listItemState)));
+//                }
+//        );
+
+    }
+
+    private Observable<ListViewState.ListItemState> getUpdatedListItemStatePhoto(ListViewState.ListItemState listItemState, PhotoMetadata photoMetadata) {
+        return mapsRepository.getPlacePhoto(
+                listItemState.getId(),
+                photoMetadata
+        )
+                .map(bitmap -> {
+                    listItemState.setPhoto(bitmap);
+
+                    return listItemState;
+                })
+                .toObservable();
+    }
+
+    private Observable<ListViewState.ListItemState> getListItemState(NearPlace nearPlace, List<UserInfo> userInfos, LatLng latLng, HashMap<ListViewState.ListItemState, PhotoMetadata> mapToSavePhotoMetadataTo) {
+        return restaurantRepository.getVisitedRestaurantsByRestaurantId(nearPlace.getPlaceId())
+                .map(visitedRestaurants -> {
+                            ListViewState.ListItemState listViewState = new ListViewState.ListItemState(
+                                    nearPlace.getName(),
+                                    nearPlace.getAddress(),
+                                    nearPlace.isOpen(),
+                                    (int) SphericalUtil.computeDistanceBetween(latLng, nearPlace.getLatLng()),
+                                    UserInfoUtils.calculateUsersJoiningByRestaurantId(userInfos, nearPlace.getPlaceId()),
+                                    VisitedRestaurantUtils.calculateRating(visitedRestaurants),
+                                    null,
+                                    nearPlace.getPlaceId()
+                            );
+
+                            mapToSavePhotoMetadataTo.put(listViewState, nearPlace.getPhotoMetadatas().get(0));
+
+                            return listViewState;
+                        }
+                ).toObservable();
+    }
+
+    public AutocompleteSessionToken getSessionToken() {
+        return AutocompleteSessionToken.newInstance();
+    }
+
+    public void onQuery(String query) {
+        //Todo
+    }
+
+    public void askLocation() {
+        //Todo
+    }
+
+    public void destroyAutocompleteSession() {
+        //Todo
+    }
+
+    public LiveData<Resource<ListViewState>> getListViewState() {
+        return listViewState;
+    }
+
+    public LiveData<ListItemStateSortMethod> getSortMethod() {
+        return sortMethod;
+    }
+
+    public void setSortMethod(ListItemStateSortMethod sortMethod) {
+        this.sortMethod.setValue(sortMethod);
+    }
+}
