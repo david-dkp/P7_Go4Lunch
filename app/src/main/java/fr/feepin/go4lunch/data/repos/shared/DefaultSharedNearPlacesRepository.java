@@ -17,7 +17,7 @@ import io.reactivex.rxjava3.subjects.PublishSubject;
 @Singleton
 public class DefaultSharedNearPlacesRepository implements SharedNearPlacesRepository {
 
-    private final MutableLiveData<List<NearPlace>> nearPlaces = new MutableLiveData(Collections.EMPTY_LIST);
+    private final MutableLiveData<List<NearPlace>> nearPlaces = new MutableLiveData<>(Collections.EMPTY_LIST);
 
     @Inject
     public DefaultSharedNearPlacesRepository() { }

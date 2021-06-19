@@ -20,19 +20,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import dagger.hilt.android.AndroidEntryPoint;
 import fr.feepin.go4lunch.MainViewModel;
 import fr.feepin.go4lunch.R;
 import fr.feepin.go4lunch.data.Resource;
 import fr.feepin.go4lunch.databinding.FragmentListViewBinding;
 import fr.feepin.go4lunch.ui.restaurant.RestaurantActivity;
 
+@AndroidEntryPoint
 public class ListViewFragment extends Fragment {
 
     public static final String TAG = "LIST_VIEW_TAG";
 
     private FragmentListViewBinding binding;
 
-    private MainViewModel mainViewModel;
+    private ListViewViewModel viewModel;
 
     private ListItemAdapter listItemAdapter;
 
@@ -44,7 +46,7 @@ public class ListViewFragment extends Fragment {
         binding = FragmentListViewBinding.inflate(inflater);
         setHasOptionsMenu(true);
 
-        mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+        viewModel = new ViewModelProvider(this).get(ListViewViewModel.class);
         return binding.getRoot();
     }
 
@@ -53,15 +55,15 @@ public class ListViewFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         listItemAdapter = new ListItemAdapter(listItemState -> {
-            RestaurantActivity.navigate(getContext(), listItemState.getId(), mainViewModel.getSessionToken());
-            mainViewModel.destroyAutocompleteSession();
+            RestaurantActivity.navigate(getContext(), listItemState.getId(), viewModel.getSessionToken());
+            viewModel.destroyAutocompleteSession();
         });
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
         binding.rvRestaurants.setAdapter(listItemAdapter);
         binding.rvRestaurants.setLayoutManager(linearLayoutManager);
 
-        mainViewModel.getListViewState().observe(getViewLifecycleOwner(), listViewState -> {
+        viewModel.getListViewState().observe(getViewLifecycleOwner(), listViewState -> {
             if (listViewState instanceof Resource.Success) {
                 binding.swipeRefreshLayout.setRefreshing(false);
                 binding.progressBar.hide();
@@ -85,7 +87,7 @@ public class ListViewFragment extends Fragment {
 
         //Refreshing
         binding.swipeRefreshLayout.setOnRefreshListener(() -> {
-            mainViewModel.askLocation();
+            viewModel.askLocation();
         });
     }
 
@@ -105,7 +107,7 @@ public class ListViewFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                mainViewModel.autocompleteQuery(newText);
+                viewModel.onQuery(newText);
                 return true;
             }
         });
@@ -119,16 +121,16 @@ public class ListViewFragment extends Fragment {
         if (item.getItemId() == R.id.sort) {
             new MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.title_sort_by)
-                    .setSingleChoiceItems(R.array.array_sorting_methods, mainViewModel.getListItemStateSortMethod().getValue().getPosition(), (dialog, which) -> {
+                    .setSingleChoiceItems(R.array.array_sorting_methods, viewModel.getSortMethod().getValue().getPosition(), (dialog, which) -> {
                         switch (which) {
                             case 0:
-                                mainViewModel.setListItemStateSortMethod(ListItemStateSortMethod.DISTANCE);
+                                viewModel.setSortMethod(ListItemStateSortMethod.DISTANCE);
                                 break;
                             case 1:
-                                mainViewModel.setListItemStateSortMethod(ListItemStateSortMethod.RATING);
+                                viewModel.setSortMethod(ListItemStateSortMethod.RATING);
                                 break;
                             case 2:
-                                mainViewModel.setListItemStateSortMethod(ListItemStateSortMethod.WORKMATES);
+                                viewModel.setSortMethod(ListItemStateSortMethod.WORKMATES);
                                 break;
                         }
                         dialog.dismiss();

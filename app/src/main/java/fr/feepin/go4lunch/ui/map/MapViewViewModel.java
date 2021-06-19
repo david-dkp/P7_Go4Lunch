@@ -8,9 +8,11 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -132,11 +134,17 @@ public class MapViewViewModel extends ViewModel {
 
     public void onPlaceReceive(Place place) {
 
+        List<PhotoMetadata> photoMetadata = new ArrayList<>();
+
+        if (place.getPhotoMetadatas() != null) {
+            photoMetadata.addAll(place.getPhotoMetadatas());
+        }
+
         NearPlace nearPlace = new NearPlace(
                 place.getId(),
                 place.getLatLng(),
                 place.getName(),
-                place.getPhotoMetadatas(),
+                photoMetadata,
                 place.getAddress(),
                 place.isOpen()
         );

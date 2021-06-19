@@ -28,7 +28,7 @@ public class DefaultRestaurantRepository implements RestaurantRepository {
         return Single.create(emitter -> {
             List<VisitedRestaurant> visitedRestaurants = Tasks.await(firebaseFirestore
                     .collectionGroup("visited_restaurants")
-                    .whereEqualTo("restaurant_id", restaurantId)
+                    .whereEqualTo("restaurantId", restaurantId)
                     .get()
             ).toObjects(VisitedRestaurant.class);
 

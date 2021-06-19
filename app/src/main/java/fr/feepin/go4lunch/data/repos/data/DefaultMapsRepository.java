@@ -1,6 +1,7 @@
 package fr.feepin.go4lunch.data.repos.data;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.util.Pair;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -19,6 +20,7 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -92,21 +94,19 @@ public class DefaultMapsRepository implements MapsRepository {
                 .flatMapObservable(nearbySearchDto -> Observable
                         .fromIterable(nearbySearchDto.getResults())
                         .map(nearbySearchMapper::toEntity))
-                .toList();
+                .toList()
+                .doOnError(Throwable::printStackTrace)
+                .onErrorReturnItem(Collections.emptyList());
     }
 
     @Override
-    public Single<Bitmap> getPlacePhoto(String placeId, NearPlace.Photo photo) {
+    public Single<Bitmap> getPlacePhoto(String placeId, PhotoMetadata photoMetadata) {
 
         Bitmap cachedBitmap = placesPhotoCache.getPlacePhoto(placeId);
 
         if (cachedBitmap != null) return Single.just(cachedBitmap);
 
         return Single.create(emitter -> {
-            PhotoMetadata photoMetadata = PhotoMetadata.builder(photo.getReference())
-                    .setWidth(photo.getWidth())
-                    .setHeight(photo.getHeight())
-                    .build();
 
             FetchPhotoRequest fetchPhotoRequest = FetchPhotoRequest.builder(photoMetadata)
                     .build();

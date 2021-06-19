@@ -276,7 +276,14 @@ public class MapViewFragment extends Fragment {
         if (item.getItemId() == R.id.search) {
             Intent intent = new Autocomplete.IntentBuilder(
                     AutocompleteActivityMode.OVERLAY,
-                    Arrays.asList(Place.Field.ID, Place.Field.LAT_LNG)
+                    Arrays.asList(
+                            Place.Field.ID,
+                            Place.Field.LAT_LNG,
+                            Place.Field.NAME,
+                            Place.Field.ADDRESS,
+                            Place.Field.OPENING_HOURS,
+                            Place.Field.PHOTO_METADATAS
+                    )
             )
                     .setCountry("FR")
                     .setTypeFilter(TypeFilter.ESTABLISHMENT)
