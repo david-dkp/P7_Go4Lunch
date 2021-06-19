@@ -94,10 +94,10 @@ public class ListViewViewModel extends ViewModel {
         });
 
         listViewState.addSource(sortMethod, sortMethod -> {
-            updateListViewState(
-                    sharedNearPlacesRepository.getNearPlaces().getValue(),
-                    query.getValue(),
-                    sortMethod);
+            ListViewState listViewState = this.listViewState.getValue().getData();
+            this.listViewState.setValue(new Resource.Loading<>(listViewState, null));
+            Collections.sort(listViewState.getListItemStates(), sortMethod.getComparator());
+            this.listViewState.setValue(new Resource.Success<>(listViewState, null));
         });
     }
 
