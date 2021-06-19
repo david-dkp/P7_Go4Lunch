@@ -87,7 +87,7 @@ public class ListViewFragment extends Fragment {
 
         //Refreshing
         binding.swipeRefreshLayout.setOnRefreshListener(() -> {
-            viewModel.askLocation();
+            viewModel.onRefresh();
         });
     }
 

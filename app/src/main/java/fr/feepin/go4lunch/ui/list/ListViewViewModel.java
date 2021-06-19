@@ -223,11 +223,15 @@ public class ListViewViewModel extends ViewModel {
         return AutocompleteSessionToken.newInstance();
     }
 
-    public void onQuery(String query) {
-        //Todo
+    public void onRefresh() {
+        updateListViewState(
+                sharedNearPlacesRepository.getNearPlaces().getValue(),
+                query.getValue(),
+                sortMethod.getValue()
+        );
     }
 
-    public void askLocation() {
+    public void onQuery(String query) {
         //Todo
     }
 
