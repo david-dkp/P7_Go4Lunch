@@ -68,4 +68,8 @@ public class DefaultSharedNearPlacesRepository implements SharedNearPlacesReposi
         return false;
     }
 
+    @Override
+    public void setNearPlaces(List<NearPlace> nearPlaces) {
+        this.nearPlaces.setValue(nearPlaces);
+    }
 }

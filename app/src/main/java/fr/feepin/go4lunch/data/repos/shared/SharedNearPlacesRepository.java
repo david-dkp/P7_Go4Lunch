@@ -15,4 +15,6 @@ public interface SharedNearPlacesRepository {
 
     void addNearPlaces(List<NearPlace> nearPlaces);
 
+    void setNearPlaces(List<NearPlace> nearPlaces);
+
 }

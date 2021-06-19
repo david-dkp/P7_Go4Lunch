@@ -126,7 +126,7 @@ public class MapViewViewModel extends ViewModel {
                 .observeOn(schedulerProvider.ui())
                 .subscribe((nearPlaces, throwable) -> {
                     if (throwable != null) throwable.printStackTrace();
-                    sharedNearPlacesRepository.addNearPlaces(nearPlaces);
+                    sharedNearPlacesRepository.setNearPlaces(nearPlaces);
                 });
 
         compositeDisposable.add(disposable);
