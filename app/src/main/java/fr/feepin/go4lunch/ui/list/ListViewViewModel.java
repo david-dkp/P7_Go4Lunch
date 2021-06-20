@@ -1,5 +1,7 @@
 package fr.feepin.go4lunch.ui.list;
 
+import android.util.Log;
+
 import androidx.core.util.Pair;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
@@ -9,11 +11,16 @@ import androidx.lifecycle.ViewModel;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
 import com.google.android.libraries.places.api.model.PhotoMetadata;
+import com.google.android.libraries.places.api.model.Place;
 import com.google.maps.android.SphericalUtil;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -32,6 +39,7 @@ import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.subjects.PublishSubject;
 
 @HiltViewModel
 public class ListViewViewModel extends ViewModel {
@@ -44,6 +52,8 @@ public class ListViewViewModel extends ViewModel {
     private final SchedulerProvider schedulerProvider;
 
     private final CompositeDisposable compositeDisposable = new CompositeDisposable();
+
+    private final PublishSubject<String> publishSubject = PublishSubject.create();
 
     private final MediatorLiveData<Resource<ListViewState>> listViewState = new MediatorLiveData<>();
 
@@ -75,22 +85,20 @@ public class ListViewViewModel extends ViewModel {
         ));
 
         wireListViewState();
+        setupPublishSubject();
     }
 
     private void wireListViewState() {
         listViewState.addSource(sharedNearPlacesRepository.getNearPlaces(), nearPlaces -> {
-            updateListViewState(nearPlaces, query.getValue(), sortMethod.getValue());
+            publishSubject.onNext(query.getValue());
         });
 
         listViewState.addSource(query, s -> {
+
             if (autocompleteSessionToken == null) {
                 autocompleteSessionToken = AutocompleteSessionToken.newInstance();
             }
-
-            updateListViewState(
-                    sharedNearPlacesRepository.getNearPlaces().getValue(),
-                    s,
-                    sortMethod.getValue());
+            publishSubject.onNext(s);
         });
 
         listViewState.addSource(sortMethod, sortMethod -> {
@@ -101,34 +109,32 @@ public class ListViewViewModel extends ViewModel {
         });
     }
 
-    private void updateListViewState(List<NearPlace> nearPlaces, String query, ListItemStateSortMethod sortMethod) {
-        listViewState.setValue(
-                new Resource.Loading<>(
-                        new ListViewState(
-                                this.listViewState.getValue().getData().getListItemStates(),
-                                false,
-                                false
-                        ), null
-                )
-        );
+    private void setupPublishSubject() {
+        Disposable disposable = publishSubject
+                .doOnNext(s -> {
+                    this.listViewState.setValue(
+                            new Resource.Loading<>(this.listViewState.getValue().getData(), null)
+                    );
+                })
+                .debounce(400, TimeUnit.MILLISECONDS)
+                .switchMap(s -> {
+                    if (s.equals("")) {
+                        return getListViewStateFromNearPlaces(this.sharedNearPlacesRepository.getNearPlaces().getValue(), this.getSortMethod().getValue());
+                    } else {
+                        return getListViewStateFromQuery(s, this.sharedNearPlacesRepository.getNearPlaces().getValue(), this.getSortMethod().getValue());
+                    }
+                })
+                .subscribeOn(schedulerProvider.io())
+                .subscribe();
 
-        if (query == null || query.equals("")) {
-            updateListViewStateFromNearPlaces(nearPlaces, sortMethod);
-        } else {
-            //updateLIstViewStateFromQuery(nearPlaces, query, sortMethod);
-        }
+        compositeDisposable.add(disposable);
 
     }
 
-    private void updateListViewStateFromNearPlaces(List<NearPlace> nearPlaces, ListItemStateSortMethod sortMethod) {
+    private Observable getListViewStateFromNearPlaces(List<NearPlace> nearPlaces, ListItemStateSortMethod sortMethod) {
         HashMap<ListViewState.ListItemState, PhotoMetadata> listItemWithPhotoMetadatas = new HashMap<>();
 
-        Disposable disposable = Single
-                .zip(
-                        mapsRepository.getLocation(),
-                        userRepository.getUsersInfo(),
-                        Pair::new
-                )
+        return getPositionAndUserInfos()
                 .flatMap(pair -> getListItemStates(nearPlaces, pair.first, pair.second, listItemWithPhotoMetadatas))
                 .subscribeOn(schedulerProvider.io())
                 .observeOn(schedulerProvider.ui())
@@ -149,7 +155,7 @@ public class ListViewViewModel extends ViewModel {
                 .flatMap(listItemState -> getUpdatedListItemStatePhoto(listItemState, listItemWithPhotoMetadatas.get(listItemState)))
                 .doOnError(Throwable::printStackTrace)
                 .observeOn(schedulerProvider.ui())
-                .subscribe(listItemState -> {
+                .doOnNext(listItemState -> {
                     ListViewState listViewState = new ListViewState(
                             this.listViewState.getValue().getData().getListItemStates(),
                             true,
@@ -158,9 +164,94 @@ public class ListViewViewModel extends ViewModel {
 
                     this.listViewState.setValue(new Resource.Success<>(listViewState, null));
                 });
+    }
 
-        compositeDisposable.add(disposable);
+    private Observable getListViewStateFromQuery(String query, List<NearPlace> nearPlaces, ListItemStateSortMethod sortMethod) {
+        HashMap<ListViewState.ListItemState, PhotoMetadata> listItemWithPhotoMetadatas = new HashMap<>();
 
+        return getPositionAndUserInfos()
+                .flatMapObservable(positionAndUserInfos ->
+                        mapsRepository
+                                .getPlacePredictionsFromQuery(autocompleteSessionToken, query, positionAndUserInfos.first)
+                                .flatMapObservable(Observable::fromIterable)
+                                .flatMap(placePrediction -> {
+                                    NearPlace nearPlace = findNearPlaceById(placePrediction.getPlaceId(), nearPlaces);
+                                    if (nearPlace != null) {
+                                        return Observable.just(nearPlace);
+                                    }
+
+                                    return mapsRepository.getPlace(
+                                            placePrediction.getPlaceId(),
+                                            Arrays.asList(
+                                                    Place.Field.ID,
+                                                    Place.Field.LAT_LNG,
+                                                    Place.Field.NAME,
+                                                    Place.Field.ADDRESS,
+                                                    Place.Field.OPENING_HOURS,
+                                                    Place.Field.PHOTO_METADATAS
+                                            ),
+                                            autocompleteSessionToken
+                                    )
+                                            .map(place -> new NearPlace(
+                                                    place.getId(),
+                                                    place.getLatLng(),
+                                                    place.getName(),
+                                                    place.getPhotoMetadatas(),
+                                                    place.getAddress(),
+                                                    place.isOpen()
+                                            ))
+                                            .subscribeOn(schedulerProvider.io())
+                                            .toObservable();
+                                })
+                                .toList()
+                                .flatMap(nearPlaceList -> getListItemStates(nearPlaceList, positionAndUserInfos.first, positionAndUserInfos.second, listItemWithPhotoMetadatas))
+                                .subscribeOn(schedulerProvider.io())
+                                .observeOn(schedulerProvider.ui())
+                                .flatMapObservable(listItemStates -> {
+
+                                    Collections.sort(listItemStates, sortMethod.getComparator());
+
+                                    ListViewState listViewState = new ListViewState(
+                                            listItemStates,
+                                            true,
+                                            true
+                                    );
+
+                                    this.listViewState.setValue(new Resource.Success<>(listViewState, null));
+
+                                    return Observable.fromIterable(listItemStates);
+                                })
+                                .flatMap(listItemState -> getUpdatedListItemStatePhoto(listItemState, listItemWithPhotoMetadatas.get(listItemState)))
+                                .doOnError(Throwable::printStackTrace)
+                                .observeOn(schedulerProvider.ui())
+                                .doOnNext(listItemState -> {
+                                    ListViewState listViewState = new ListViewState(
+                                            this.listViewState.getValue().getData().getListItemStates(),
+                                            true,
+                                            false
+                                    );
+
+                                    this.listViewState.setValue(new Resource.Success<>(listViewState, null));
+                                }));
+    }
+
+    private NearPlace findNearPlaceById(String id, List<NearPlace> nearPlaces) {
+        for (NearPlace nearPlace : nearPlaces) {
+            if (nearPlace.getPlaceId() == id) {
+                return nearPlace;
+            }
+        }
+
+        return null;
+    }
+
+    private Single<Pair<LatLng, List<UserInfo>>> getPositionAndUserInfos() {
+        return Single
+                .zip(
+                        mapsRepository.getLocation(),
+                        userRepository.getUsersInfo(),
+                        Pair::new
+                );
     }
 
     private Single<List<ListViewState.ListItemState>> getListItemStates(
@@ -172,11 +263,17 @@ public class ListViewViewModel extends ViewModel {
 
         return Observable
                 .fromIterable(nearPlaces)
-                .flatMap(nearPlace -> getListItemState(nearPlace, userInfos, position, listItemWithPhotoMetadatas))
+                .flatMap(nearPlace -> getListItemState(nearPlace, userInfos, position, listItemWithPhotoMetadatas)
+                        .subscribeOn(schedulerProvider.io()))
                 .toList();
     }
 
-    private Observable<ListViewState.ListItemState> getListItemState(NearPlace nearPlace, List<UserInfo> userInfos, LatLng latLng, HashMap<ListViewState.ListItemState, PhotoMetadata> mapToSavePhotoMetadataTo) {
+    private Observable<ListViewState.ListItemState> getListItemState(
+            NearPlace nearPlace,
+            List<UserInfo> userInfos,
+            LatLng latLng,
+            HashMap<ListViewState.ListItemState, PhotoMetadata> mapToSavePhotoMetadataTo
+    ) {
         return restaurantRepository.getVisitedRestaurantsByRestaurantId(nearPlace.getPlaceId())
                 .map(visitedRestaurants -> {
                             ListViewState.ListItemState listViewState = new ListViewState.ListItemState(
@@ -190,7 +287,7 @@ public class ListViewViewModel extends ViewModel {
                                     nearPlace.getPlaceId()
                             );
 
-                            if (!nearPlace.getPhotoMetadatas().isEmpty()) {
+                            if (nearPlace.getPhotoMetadatas() != null) {
                                 mapToSavePhotoMetadataTo.put(listViewState, nearPlace.getPhotoMetadatas().get(0));
                             }
 
@@ -224,19 +321,15 @@ public class ListViewViewModel extends ViewModel {
     }
 
     public void onRefresh() {
-        updateListViewState(
-                sharedNearPlacesRepository.getNearPlaces().getValue(),
-                query.getValue(),
-                sortMethod.getValue()
-        );
+        publishSubject.onNext(this.query.getValue());
     }
 
     public void onQuery(String query) {
-        //Todo
+        this.query.setValue(query);
     }
 
     public void destroyAutocompleteSession() {
-        //Todo
+        autocompleteSessionToken = null;
     }
 
     public LiveData<Resource<ListViewState>> getListViewState() {
@@ -249,5 +342,11 @@ public class ListViewViewModel extends ViewModel {
 
     public void setSortMethod(ListItemStateSortMethod sortMethod) {
         this.sortMethod.setValue(sortMethod);
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        compositeDisposable.dispose();
     }
 }
