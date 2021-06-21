@@ -1,5 +1,8 @@
 package fr.feepin.go4lunch.ui.map;
 
+import android.Manifest;
+import android.content.Context;
+import android.location.LocationManager;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -19,6 +22,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import fr.feepin.go4lunch.BuildConfig;
 import fr.feepin.go4lunch.Constants;
 import fr.feepin.go4lunch.data.Resource;
@@ -28,11 +32,15 @@ import fr.feepin.go4lunch.data.repos.data.MapsRepository;
 import fr.feepin.go4lunch.data.repos.data.UserRepository;
 import fr.feepin.go4lunch.data.repos.shared.SharedNearPlacesRepository;
 import fr.feepin.go4lunch.others.SchedulerProvider;
+import fr.feepin.go4lunch.utils.LocationUtils;
+import fr.feepin.go4lunch.utils.PermissionUtils;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.disposables.Disposable;
 
 @HiltViewModel
 public class MapViewViewModel extends ViewModel {
+
+    private final Context context;
 
     private final MapsRepository mapsRepository;
     private final UserRepository userRepository;
@@ -48,11 +56,13 @@ public class MapViewViewModel extends ViewModel {
 
     @Inject
     public MapViewViewModel(
+            @ApplicationContext Context context,
             MapsRepository mapsRepository,
             UserRepository userRepository,
             SharedNearPlacesRepository sharedNearPlacesRepository,
             SchedulerProvider schedulerProvider
     ) {
+        this.context = context;
         this.mapsRepository = mapsRepository;
         this.userRepository = userRepository;
         this.sharedNearPlacesRepository = sharedNearPlacesRepository;
@@ -103,6 +113,12 @@ public class MapViewViewModel extends ViewModel {
     }
 
     public void askPosition() {
+
+        if (!PermissionUtils.isPermissionGranted(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            this.position.setValue(new Resource.Error<>(null, Constants.NO_LOCATION_PERMISSION_MESSAGE));
+            return;
+        }
+
         Disposable disposable = mapsRepository
                 .getLocation()
                 .subscribeOn(schedulerProvider.io())
@@ -111,7 +127,13 @@ public class MapViewViewModel extends ViewModel {
                     if (throwable != null) {
                         //TODO: handle error
                     } else {
-                        position.setValue(new Resource.Success<>(latLng, null));
+
+                        if (!LocationUtils.isLocationEnabled(context)) {
+                            this.position.setValue(new Resource.Error<>(latLng, Constants.LOCATION_DISABLED_MESSAGE));
+                        } else {
+                            this.position.setValue(new Resource.Success<>(latLng, null));
+                        }
+
                         askNearPlaces(latLng);
                     }
                 });
