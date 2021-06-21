@@ -14,11 +14,13 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import dagger.hilt.android.AndroidEntryPoint;
 import fr.feepin.go4lunch.MainViewModel;
 import fr.feepin.go4lunch.R;
 import fr.feepin.go4lunch.databinding.FragmentWorkmatesBinding;
 import fr.feepin.go4lunch.ui.restaurant.RestaurantActivity;
 
+@AndroidEntryPoint
 public class WorkmatesFragment extends Fragment {
 
     public static final String TAG = "WORKMATES_TAG";
@@ -27,7 +29,7 @@ public class WorkmatesFragment extends Fragment {
 
     private WorkmatesAdapter workmatesAdapter;
 
-    private MainViewModel mainViewModel;
+    private WorkmatesViewModel viewModel;
 
     @Nullable
     @Override
@@ -35,16 +37,12 @@ public class WorkmatesFragment extends Fragment {
         binding = FragmentWorkmatesBinding.inflate(inflater);
         setHasOptionsMenu(true);
 
-        mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+        viewModel = new ViewModelProvider(this).get(WorkmatesViewModel.class);
 
-        return binding.getRoot();
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
         setupAdapter();
         setupObservers();
+
+        return binding.getRoot();
     }
 
     private void setupAdapter() {
@@ -60,15 +58,15 @@ public class WorkmatesFragment extends Fragment {
         binding.rvWorkmates.setAdapter(workmatesAdapter);
         binding.rvWorkmates.setLayoutManager(linearLayoutManager);
 
-        int leftOffset = getContext().getResources().getDimensionPixelSize(R.dimen.item_workmate_height);
+        int leftOffset = requireContext().getResources().getDimensionPixelSize(R.dimen.item_workmate_height);
 
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(getContext(), linearLayoutManager.getOrientation());
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(requireContext(), linearLayoutManager.getOrientation());
         dividerItemDecoration.setDrawable(new InsetDrawable(dividerItemDecoration.getDrawable(), leftOffset, 0, 0, 0));
         binding.rvWorkmates.addItemDecoration(dividerItemDecoration);
     }
 
     private void setupObservers() {
-        mainViewModel.getWorkmateStates().observe(getViewLifecycleOwner(), states -> {
+        viewModel.getWorkmateStates().observe(getViewLifecycleOwner(), states -> {
             workmatesAdapter.submitList(states.getData());
         });
     }

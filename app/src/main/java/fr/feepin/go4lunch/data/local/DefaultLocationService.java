@@ -1,4 +1,4 @@
-package fr.feepin.go4lunch.data.maps;
+package fr.feepin.go4lunch.data.local;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -26,8 +26,6 @@ import io.reactivex.rxjava3.core.Single;
 @Singleton
 public class DefaultLocationService implements LocationService {
 
-    private final Context context;
-    private Location lastKnownLocation;
     private final RxDataStore<Preferences> rxDatastore;
 
     private final Preferences.Key<Double> LATEST_LATITUDE = PreferencesKeys.doubleKey("latest_latitude");
@@ -39,7 +37,6 @@ public class DefaultLocationService implements LocationService {
     @Inject
     public DefaultLocationService(@ApplicationContext Context context, RxDataStore<Preferences> rxDataStore) {
         this.rxDatastore = rxDataStore;
-        this.context = context;
         this.locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
         Criteria criteria = new Criteria();
@@ -50,17 +47,23 @@ public class DefaultLocationService implements LocationService {
         provider = locationManager.getBestProvider(criteria, true);
     }
 
-    @SuppressLint("MissingPermission")
     @Override
-    public Single<Location> getCurrentPosition() {
+    public Single<LatLng> getLocation() {
+        return getCurrentLocation()
+                .flatMap(latLng -> saveLocationInPrefs(latLng)
+                        .map(prefs -> latLng))
+                .onErrorResumeWith(getLatestPositionFromPrefs());
+    }
+
+    @SuppressLint("MissingPermission")
+    private Single<LatLng> getCurrentLocation() {
         return Single.create(e -> {
             LocationListener locationListener = new LocationListener() {
                 @Override
                 public void onLocationChanged(@NonNull Location location) {
+                    LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                     locationManager.removeUpdates(this);
-                    lastKnownLocation = location;
-                    saveLocationInPrefs(lastKnownLocation);
-                    e.onSuccess(location);
+                    e.onSuccess(latLng);
                 }
 
                 @Override
@@ -91,11 +94,11 @@ public class DefaultLocationService implements LocationService {
         });
     }
 
-    private void saveLocationInPrefs(Location location) {
-        rxDatastore.updateDataAsync(preferences -> {
+    private Single<Preferences> saveLocationInPrefs(LatLng location) {
+        return rxDatastore.updateDataAsync(preferences -> {
             MutablePreferences mutablePreferences = preferences.toMutablePreferences();
-            mutablePreferences.set(LATEST_LATITUDE, location.getLatitude());
-            mutablePreferences.set(LATEST_LONGITUDE, location.getLongitude());
+            mutablePreferences.set(LATEST_LATITUDE, location.latitude);
+            mutablePreferences.set(LATEST_LONGITUDE, location.longitude);
             return Single.just(mutablePreferences);
         });
     }
@@ -108,8 +111,4 @@ public class DefaultLocationService implements LocationService {
         }).firstOrError();
     }
 
-    @Override
-    public Location getLastKnownPosition() {
-        return lastKnownLocation;
-    }
 }

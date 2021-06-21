@@ -1,8 +1,9 @@
-package fr.feepin.go4lunch.data.maps.caches;
+package fr.feepin.go4lunch.data.remote.caches;
 
 import android.graphics.Bitmap;
 import android.util.LruCache;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -19,6 +20,7 @@ public class PlacesPhotoCache {
         lruCache = new LruCache<>(cacheSize);
     }
 
+    @Nullable
     public Bitmap getPlacePhoto(String placeId) {
         return lruCache.get(placeId);
     }

@@ -61,47 +61,17 @@ public class MapViewFragment extends Fragment {
 
     public static final String TAG = "MapViewFragment";
 
+    private MapViewViewModel viewModel;
+
     private FragmentMapViewBinding binding;
 
     private GoogleMap googleMap;
-
-    private MainViewModel mainViewModel;
-
     private ClusterManager<RestaurantItem> clusterManager;
-
     private Marker userLocationMarker;
 
-    private final ActivityResultLauncher<Intent> autocompleteActivityLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                if (result.getResultCode() != RESULT_OK) return;
-                Place place = Autocomplete.getPlaceFromIntent(result.getData());
-                mainViewModel.addRestaurant(place);
-                animateCameraToPosition(place.getLatLng(), Constants.MAPS_RESTAURANT_ZOOM_LEVEL);
-            }
-    );
-
-    private final ActivityResultLauncher<Intent> navigateToLocationSettingsLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                mainViewModel.askLocation();
-            }
-    );
-
-    private final ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(),
-            isGranted -> {
-                if (isGranted) {
-                    mainViewModel.askLocation();
-                } else {
-                    if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                        PermissionUtils.showRationalDialog(getActivity(), R.string.rational_location_permission, (dialog, which) -> {
-                            requestLocationPermission();
-                        });
-                    }
-                }
-            }
-    );
+    private ActivityResultLauncher<Intent> autocompleteActivityLauncher;
+    private ActivityResultLauncher<Intent> navigateToLocationSettingsLauncher;
+    private ActivityResultLauncher<String> requestPermissionLauncher;
 
     @Nullable
     @Override
@@ -110,7 +80,9 @@ public class MapViewFragment extends Fragment {
         binding.mapView.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+        viewModel = new ViewModelProvider(this).get(MapViewViewModel.class);
+
+        setupLaunchers();
 
         binding.mapView.getMapAsync(googleMap -> {
             this.googleMap = googleMap;
@@ -119,7 +91,7 @@ public class MapViewFragment extends Fragment {
         });
 
         binding.fabMyLocation.setOnClickListener(v -> {
-            mainViewModel.askLocation();
+            viewModel.askPosition();
         });
 
         binding.btnEnableLocation.setOnClickListener(v -> {
@@ -129,16 +101,53 @@ public class MapViewFragment extends Fragment {
         return binding.getRoot();
     }
 
+    private void setupLaunchers() {
+
+        autocompleteActivityLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() != RESULT_OK) return;
+                    Place place = Autocomplete.getPlaceFromIntent(result.getData());
+                    viewModel.onPlaceReceive(place);
+                    animateCameraToPosition(place.getLatLng(), Constants.MAPS_RESTAURANT_ZOOM_LEVEL);
+                }
+        );
+
+        navigateToLocationSettingsLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    viewModel.askPosition();
+                }
+        );
+
+        requestPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        viewModel.askPosition();
+                    } else {
+                        if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                            PermissionUtils.showRationalDialog(getActivity(), R.string.rational_location_permission, (dialog, which) -> {
+                                requestLocationPermission();
+                            });
+                        }
+                    }
+                }
+        );
+    }
+
     private void setupObservers() {
         setupPosition();
         setupRestaurantsState();
     }
 
     private void setupPosition() {
-        mainViewModel.getPosition().observe(getViewLifecycleOwner(), resource -> {
+        viewModel.getPosition().observe(getViewLifecycleOwner(), resource -> {
             if (resource instanceof Resource.Success) {
                 binding.progressBar.hide();
                 toggleLocationError(true);
+                userLocationMarker.setVisible(true);
+                userLocationMarker.setPosition(resource.getData());
                 animateCameraToPosition(resource.getData(), Constants.MAPS_MY_LOCATION_ZOOM_LEVEL);
             } else if (resource instanceof Resource.Error) {
                 binding.progressBar.hide();
@@ -159,16 +168,13 @@ public class MapViewFragment extends Fragment {
 
     private void setupRestaurantsState() {
 
-        mainViewModel.getRestaurantStates().observe(getViewLifecycleOwner(), statesResource -> {
+        viewModel.getRestaurantStates().observe(getViewLifecycleOwner(), restaurantStates -> {
             clusterManager.clearItems();
-            if (statesResource instanceof Resource.Error) {
-                Log.d("debug", "Error: " + statesResource.getMessage());
-                return;
-            }
 
-            for (RestaurantState restaurantState : statesResource.getData()) {
+            for (RestaurantState restaurantState : restaurantStates) {
                 clusterManager.addItem(new RestaurantItem(restaurantState.getPosition(), restaurantState.getId(), restaurantState.isJoined()));
             }
+
             clusterManager.cluster();
         });
     }
@@ -232,9 +238,6 @@ public class MapViewFragment extends Fragment {
     }
 
     private void animateCameraToPosition(LatLng latLng, float zoom) {
-        if (latLng == null) return;
-        userLocationMarker.setVisible(true);
-        userLocationMarker.setPosition(latLng);
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
 
@@ -273,12 +276,19 @@ public class MapViewFragment extends Fragment {
         if (item.getItemId() == R.id.search) {
             Intent intent = new Autocomplete.IntentBuilder(
                     AutocompleteActivityMode.OVERLAY,
-                    Arrays.asList(Place.Field.ID, Place.Field.LAT_LNG)
+                    Arrays.asList(
+                            Place.Field.ID,
+                            Place.Field.LAT_LNG,
+                            Place.Field.NAME,
+                            Place.Field.ADDRESS,
+                            Place.Field.OPENING_HOURS,
+                            Place.Field.PHOTO_METADATAS
+                    )
             )
                     .setCountry("FR")
                     .setTypeFilter(TypeFilter.ESTABLISHMENT)
                     .setLocationRestriction(RectangularBounds.newInstance(LatLngUtils.toBounds(
-                            mainViewModel.getPosition().getValue().getData(),
+                            viewModel.getPosition().getValue().getData(),
                             Constants.PREDICTION_SEARCH_RADIUS
                     )))
                     .build(getContext());

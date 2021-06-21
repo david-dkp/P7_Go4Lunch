@@ -21,9 +21,8 @@ import dagger.assisted.Assisted;
 import dagger.assisted.AssistedInject;
 import fr.feepin.go4lunch.Constants;
 import fr.feepin.go4lunch.R;
-import fr.feepin.go4lunch.data.maps.MapsRepository;
-import fr.feepin.go4lunch.data.user.UserRepository;
-import fr.feepin.go4lunch.data.user.models.UserInfo;
+import fr.feepin.go4lunch.data.repos.data.UserRepository;
+import fr.feepin.go4lunch.data.models.domain.UserInfo;
 import fr.feepin.go4lunch.utils.ConnectivityUtils;
 import io.reactivex.rxjava3.core.Observable;
 
@@ -36,7 +35,6 @@ import static fr.feepin.go4lunch.Constants.EAT_NOTIFICATION_ID;
 @HiltWorker
 public class NotifyWorker extends Worker {
 
-    private final MapsRepository mapsRepository;
     private final UserRepository userRepository;
     private final Context context;
 
@@ -44,12 +42,10 @@ public class NotifyWorker extends Worker {
     public NotifyWorker(
             @Assisted @NonNull @NotNull Context appContext,
             @Assisted @NonNull @NotNull WorkerParameters workerParams,
-            MapsRepository mapsRepository,
             UserRepository userRepository
     ) {
         super(appContext, workerParams);
         this.context = appContext;
-        this.mapsRepository = mapsRepository;
         this.userRepository = userRepository;
     }
 

@@ -16,16 +16,16 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import fr.feepin.go4lunch.R;
 import fr.feepin.go4lunch.databinding.ItemRestaurantBinding;
 
-public class ListItemAdapter extends ListAdapter<ListItemState, ListItemAdapter.ViewHolder> {
+public class ListItemAdapter extends ListAdapter<ListViewState.ListItemState, ListItemAdapter.ViewHolder> {
 
-    private static final DiffUtil.ItemCallback<ListItemState> DIFF_CALLBACK = new DiffUtil.ItemCallback<ListItemState>() {
+    private static final DiffUtil.ItemCallback<ListViewState.ListItemState> DIFF_CALLBACK = new DiffUtil.ItemCallback<ListViewState.ListItemState>() {
         @Override
-        public boolean areItemsTheSame(@NonNull ListItemState oldItem, @NonNull ListItemState newItem) {
+        public boolean areItemsTheSame(@NonNull ListViewState.ListItemState oldItem, @NonNull ListViewState.ListItemState newItem) {
             return oldItem.getId().equals(newItem.getId());
         }
 
         @Override
-        public boolean areContentsTheSame(@NonNull ListItemState oldItem, @NonNull ListItemState newItem) {
+        public boolean areContentsTheSame(@NonNull ListViewState.ListItemState oldItem, @NonNull ListViewState.ListItemState newItem) {
             return oldItem.equals(newItem);
         }
     };
@@ -63,7 +63,7 @@ public class ListItemAdapter extends ListAdapter<ListItemState, ListItemAdapter.
             });
         }
 
-        public void bind(ListItemState listItemState) {
+        public void bind(ListViewState.ListItemState listItemState) {
 
             LayoutInflater layoutInflater = LayoutInflater.from(itemView.getContext());
 
@@ -92,6 +92,6 @@ public class ListItemAdapter extends ListAdapter<ListItemState, ListItemAdapter.
     }
 
     public interface OnRestaurantClickListener {
-        void onClick(ListItemState listItemState);
+        void onClick(ListViewState.ListItemState listItemState);
     }
 }

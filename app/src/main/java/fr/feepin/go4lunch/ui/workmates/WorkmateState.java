@@ -24,24 +24,12 @@ public class WorkmateState {
         return photoUrl;
     }
 
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
-    }
-
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getRestaurantName() {
         return restaurantName;
-    }
-
-    public void setRestaurantName(String restaurantName) {
-        this.restaurantName = restaurantName;
     }
 
     public String getRestaurantId() {
@@ -74,16 +62,4 @@ public class WorkmateState {
                 '}';
     }
 
-    public static final Comparator<WorkmateState> RESTAURANT_NOT_CHOSEN_COMPARATOR = new Comparator<WorkmateState>() {
-        @Override
-        public int compare(WorkmateState a, WorkmateState b) {
-            if (a.getRestaurantId().equals("") && !b.getRestaurantId().equals("")) {
-                return 1;
-            } else if (!a.getRestaurantId().equals("") && b.getRestaurantId().equals("")) {
-                return -1;
-            } else {
-                return 0;
-            }
-        }
-    };
 }

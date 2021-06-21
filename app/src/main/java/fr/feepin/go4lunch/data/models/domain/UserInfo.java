@@ -1,8 +1,13 @@
-package fr.feepin.go4lunch.data.user.models;
+package fr.feepin.go4lunch.data.models.domain;
 
+import com.google.firebase.firestore.DocumentId;
+import java.util.Comparator;
 import java.util.Objects;
 
 public class UserInfo {
+
+    @DocumentId
+    private String id;
 
     private String name;
 
@@ -17,6 +22,14 @@ public class UserInfo {
     }
 
     public UserInfo() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -57,4 +70,14 @@ public class UserInfo {
     public int hashCode() {
         return Objects.hash(name, photoUrl, restaurantChoiceId);
     }
+
+    public static final Comparator<UserInfo> RESTAURANT_CHOSEN_FIRST_COMPARATOR = (a, b) -> {
+        if (a.getRestaurantChoiceId().equals("") && !b.getRestaurantChoiceId().equals("")) {
+            return 1;
+        } else if (!a.getRestaurantChoiceId().equals("") && b.getRestaurantChoiceId().equals("")) {
+            return -1;
+        } else {
+            return 0;
+        }
+    };
 }

@@ -38,8 +38,8 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import fr.feepin.go4lunch.MainActivity;
 import fr.feepin.go4lunch.R;
-import fr.feepin.go4lunch.data.user.UserRepository;
-import fr.feepin.go4lunch.data.user.models.UserInfo;
+import fr.feepin.go4lunch.data.repos.data.UserRepository;
+import fr.feepin.go4lunch.data.models.domain.UserInfo;
 import fr.feepin.go4lunch.databinding.ActivityLoginBinding;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.annotations.NonNull;
@@ -156,7 +156,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (authResult.getAdditionalUserInfo().isNewUser()) {
                     UserInfo userInfo = new UserInfo(name, photoUrl, "");
                     userRepository
-                            .registerUserInfo(userInfo)
+                            .addUserInfo(userInfo)
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(new CompletableObserver() {

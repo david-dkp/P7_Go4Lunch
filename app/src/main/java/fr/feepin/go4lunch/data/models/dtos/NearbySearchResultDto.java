@@ -1,11 +1,11 @@
-package fr.feepin.go4lunch.data.maps.models;
+package fr.feepin.go4lunch.data.models.dtos;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class PlaceResponse {
+public class NearbySearchResultDto {
 
     @SerializedName("place_id")
     @Expose
@@ -27,7 +27,7 @@ public class PlaceResponse {
     @Expose
     private OpeningHours openingHours;
 
-    public PlaceResponse(String placeId, Geometry geometry, String name, List<Photo> photos, String vicinity, OpeningHours openingHours) {
+    public NearbySearchResultDto(String placeId, Geometry geometry, String name, List<Photo> photos, String vicinity, OpeningHours openingHours) {
         this.placeId = placeId;
         this.geometry = geometry;
         this.name = name;
@@ -40,48 +40,24 @@ public class PlaceResponse {
         return placeId;
     }
 
-    public void setPlaceId(String placeId) {
-        this.placeId = placeId;
-    }
-
     public Geometry getGeometry() {
         return geometry;
-    }
-
-    public void setGeometry(Geometry geometry) {
-        this.geometry = geometry;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public List<Photo> getPhotos() {
         return photos;
-    }
-
-    public void setPhotos(List<Photo> photos) {
-        this.photos = photos;
     }
 
     public String getVicinity() {
         return vicinity;
     }
 
-    public void setVicinity(String vicinity) {
-        this.vicinity = vicinity;
-    }
-
     public OpeningHours getOpeningHours() {
         return openingHours;
-    }
-
-    public void setOpeningHours(OpeningHours openingHours) {
-        this.openingHours = openingHours;
     }
 
     public static class OpeningHours {
@@ -96,10 +72,6 @@ public class PlaceResponse {
 
         public boolean isOpenNow() {
             return openNow;
-        }
-
-        public void setOpenNow(boolean openNow) {
-            this.openNow = openNow;
         }
 
         @Override
@@ -123,10 +95,6 @@ public class PlaceResponse {
             return location;
         }
 
-        public void setLocation(LatLng location) {
-            this.location = location;
-        }
-
     }
 
     public static class LatLng {
@@ -146,25 +114,10 @@ public class PlaceResponse {
             return lat;
         }
 
-        public void setLat(double lat) {
-            this.lat = lat;
-        }
-
         public double getLng() {
             return lng;
         }
 
-        public void setLng(double lng) {
-            this.lng = lng;
-        }
-
-        public com.google.android.gms.maps.model.LatLng toMapsLatLng() {
-            return new com.google.android.gms.maps.model.LatLng(getLat(), getLng());
-        }
-
-        public static LatLng fromMapsLatLng(com.google.android.gms.maps.model.LatLng mapsLatLng) {
-            return new LatLng(mapsLatLng.latitude, mapsLatLng.longitude);
-        }
     }
 
     public class Photo {
@@ -189,24 +142,12 @@ public class PlaceResponse {
             return height;
         }
 
-        public void setHeight(int height) {
-            this.height = height;
-        }
-
         public int getWidth() {
             return width;
         }
 
-        public void setWidth(int width) {
-            this.width = width;
-        }
-
         public String getReference() {
             return reference;
-        }
-
-        public void setReference(String reference) {
-            this.reference = reference;
         }
     }
 
