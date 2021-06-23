@@ -44,6 +44,7 @@ This application simplifies the process of:
 * **Notify** the user every 12 AM on which restaurant he's going to eat today and which workmates are joining him
 * Show a list of the **workmates** with the name of the restaurant they've chosen (if exists)
 * A dark mode is implemented
+* A communication with a **back-end**
 
 ## Technologies
 * RxJava, RxAndroid
