@@ -2,11 +2,11 @@
 A collaborative application that help you choose a restaurant to eat at with your workmates for lunch. See the restaurants near your position, find out who eats in which restaurant...
 
 <img src="screenshots/mapview_light.png" alt="Map View Screen" width="350" /> <img src="screenshots/mapview_dark.png" alt="Map View Screen" width="350" />
-<img src="screenshots/listview_light.png" alt="Map View Screen" width="350" /> <img src="screenshots/listview_dark.png" alt="Map View Screen" width="350" />
-<img src="screenshots/workmates_light.png" alt="Map View Screen" width="350" /> <img src="screenshots/workmates_dark.png" alt="Map View Screen" width="350" />
-<img src="screenshots/detail_light.png" alt="Map View Screen" width="350" /> <img src="screenshots/detail_dark.png" alt="Map View Screen" width="350" />
-<img src="screenshots/drawer_light.png" alt="Map View Screen" width="350" /> <img src="screenshots/drawer_dark.png" alt="Map View Screen" width="350" />
-<img src="screenshots/login.png" alt="Map View Screen" width="350" /> 
+<img src="screenshots/listview_light.png" alt="List View Screen" width="350" /> <img src="screenshots/listview_dark.png" alt="List View Screen" width="350" />
+<img src="screenshots/workmates_light.png" alt="Workmates Screen" width="350" /> <img src="screenshots/workmates_dark.png" alt="Workmates Screen" width="350" />
+<img src="screenshots/detail_light.png" alt="Estate Detail Screen" width="350" /> <img src="screenshots/detail_dark.png" alt="Estate Detail Screen" width="350" />
+<img src="screenshots/drawer_light.png" alt="Drawer" width="350" /> <img src="screenshots/drawer_dark.png" alt="Drawer" width="350" />
+<img src="screenshots/login.png" alt="Login Screen" width="350" /> 
 
 ## What's the problem
 Have you ever struggled organizing your lunch time at work? Some of your workmates want to eat in this restaurant, some in that one and you're pretty new there so you don't know much about the restaurants around.  
